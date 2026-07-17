@@ -162,4 +162,18 @@ describe('scoreMove', () => {
     const move: Move = { type: 'exit', card: card('A'), marbleId: 'p0m0' }
     expect(scoreMove(state, move)).toBe(WEIGHTS.progress * 1 + WEIGHTS.capture + WEIGHTS.exit * 4)
   })
+
+  it('never touches Math.random, even when the simulated move triggers a reshuffle', () => {
+    let state = place(game(), 'p0m0', { zone: 'track', index: 3 })
+    state = setHand(state, 0, [card('5')])
+    state = { ...state, drawPile: [], discardPile: [card('2'), card('3')] }
+    const move: Move = { type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5 }
+    const realRandom = Math.random
+    Math.random = () => { throw new Error('Math.random must not be called') }
+    try {
+      expect(typeof scoreMove(state, move)).toBe('number')
+    } finally {
+      Math.random = realRandom
+    }
+  })
 })

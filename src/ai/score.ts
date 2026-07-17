@@ -68,7 +68,7 @@ export const exposureFor = (state: GameState, player: PlayerId): number => {
 // the resulting board.
 export const scoreMove = (state: GameState, move: Move): number => {
   const botId = state.currentPlayer
-  const after = applyMove(state, move)
+  const after = applyMove(state, move, () => 0)
   const beforeById = new Map(state.marbleList.map(marble => [marble.id, marble]))
 
   let advancementDelta = 0

@@ -22,18 +22,25 @@ describe('discard', () => {
   })
 })
 
-describe('redeal', () => {
-  it('deals fresh hands once every active hand is empty', () => {
+describe('continuous draw', () => {
+  it('refills the hand to five and removes one card from the draw pile each turn', () => {
     let state = game()
-    for (const seat of [0, 1, 2, 3] as const) {
-      state = setHand(state, seat, [card('9')]) // home marbles, 9 cannot exit -> discard
-    }
-    // four discards, one per player, empties all hands then redeals
-    state = applyMove(state, { type: 'discard', card: card('9') })
-    state = applyMove(state, { type: 'discard', card: card('9') })
-    state = applyMove(state, { type: 'discard', card: card('9') })
-    state = applyMove(state, { type: 'discard', card: card('9') })
-    expect(state.playerList[0]!.hand).toHaveLength(5)
-    expect(state.playerList[3]!.hand).toHaveLength(5)
+    state = setHand(state, 0, [card('9'), card('9'), card('9'), card('9'), card('9')])
+    const beforeDraw = state.drawPile.length
+    const next = applyMove(state, { type: 'discard', card: card('9') })
+    expect(next.playerList[0]!.hand).toHaveLength(5)
+    expect(next.drawPile).toHaveLength(beforeDraw - 1)
+    expect(next.discardPile).toContainEqual(card('9'))
+  })
+
+  it('reshuffles the discard pile (including the just-played card) into an empty draw pile', () => {
+    let state = game()
+    state = setHand(state, 0, [card('9'), card('9'), card('9'), card('9'), card('9')])
+    state = { ...state, drawPile: [], discardPile: [card('2'), card('3')] }
+    const next = applyMove(state, { type: 'discard', card: card('9') })
+    // discard [2,3] + the just-played 9 = 3 cards reshuffled into the draw pile, one drawn
+    expect(next.playerList[0]!.hand).toHaveLength(5)
+    expect(next.discardPile).toEqual([])
+    expect(next.drawPile).toHaveLength(2)
   })
 })

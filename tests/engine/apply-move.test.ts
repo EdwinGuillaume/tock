@@ -44,11 +44,13 @@ describe('applyMove: move + capture', () => {
 })
 
 describe('applyMove: bookkeeping', () => {
-  it('discards the played card and advances the turn', () => {
+  it('discards the played card, refills the hand, and advances the turn', () => {
     let state = fourPlayers()
     state = setHand(state, 0, [card('A'), card('K')])
     const next = applyMove(state, { type: 'exit', card: card('A'), marbleId: 'p0m0' })
-    expect(next.playerList[0]!.hand).toEqual([card('K')])
+    // played A goes to the discard; a replacement is drawn, so the hand size is preserved
+    expect(next.playerList[0]!.hand).toHaveLength(2)
+    expect(next.playerList[0]!.hand).toContainEqual(card('K'))
     expect(next.discardPile).toContainEqual(card('A'))
     expect(next.currentPlayer).toBe(1)
   })

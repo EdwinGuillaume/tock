@@ -93,7 +93,7 @@ src/engine/
 ├── types.ts    data model — Position, Card, Marble, the Move union, GameState (types only)
 ├── board.ts    ring geometry — startCell, laneMouth, ringDestinations, stepsToMouth
 ├── cards.ts    deck, shuffle, rank → steps mapping (moveSteps, canExit)
-├── state.ts    createGame, redealIfNeeded, colorOf / marbleId helpers
+├── state.ts    createGame, drawCard, colorOf / marbleId helpers
 ├── moves.ts    the rules — getLegalMoves, applyMove, nextPlayer (+ 7-split enumeration)
 └── index.ts    the single public API (re-exports the above)
 
@@ -108,8 +108,8 @@ spec's §4 sketch. `types.ts` (absent from the §4 sketch) holds the
 JSON-serializable data model.
 
 The engine's public surface (`src/engine/index.ts`) is the only thing UIs and AI
-import: `createGame` / `redealIfNeeded`, `getLegalMoves(state, playerId): Move[]`,
-`applyMove(state, move): GameState`, `nextPlayer`, the board helpers (`ringSize`,
+import: `createGame`, `getLegalMoves(state, playerId): Move[]`,
+`applyMove(state, move, random?): GameState`, `nextPlayer`, the board helpers (`ringSize`,
 `quadrantSize`, `playerCount`, `finishSize`, `startCell`, `laneMouth`), plus
 `handSize` / `colorOf` / `marbleId` and all domain types.
 

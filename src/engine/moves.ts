@@ -1,7 +1,7 @@
 import type { Card, GameState, Marble, MarbleId, Move, Player, PlayerId, Position } from './types'
 import { finishSize, ringDestinations, ringSize, startCell, stepsToMouth } from './board'
 import { canExit, moveSteps } from './cards'
-import { redealIfNeeded } from './state'
+import { drawCard } from './state'
 
 const playerById = (state: GameState, id: PlayerId): Player => {
   const found = state.playerList.find(player => player.id === id)
@@ -47,15 +47,28 @@ const relocate = (marbleList: Marble[], mover: Marble, to: Position): Marble[] =
     return marble
   })
 
-const withTurnDone = (state: GameState, actor: Player, move: Move, marbleList: Marble[]): GameState => ({
-  ...state,
-  marbleList,
-  playerList: state.playerList.map(player =>
-    player.id === actor.id ? { ...player, hand: removeCard(player.hand, move.card) } : player
-  ),
-  discardPile: [...state.discardPile, move.card],
-  currentPlayer: nextPlayer({ ...state, marbleList })
-})
+const withTurnDone = (
+  state: GameState,
+  actor: Player,
+  move: Move,
+  marbleList: Marble[],
+  random: () => number
+): GameState => {
+  const handAfterPlay = removeCard(actor.hand, move.card)
+  const discardWithPlayed = [...state.discardPile, move.card]
+  const drawn = drawCard(state.drawPile, discardWithPlayed, random)
+  const refilledHand = drawn.card ? [...handAfterPlay, drawn.card] : handAfterPlay
+  return {
+    ...state,
+    marbleList,
+    playerList: state.playerList.map(player =>
+      player.id === actor.id ? { ...player, hand: refilledHand } : player
+    ),
+    drawPile: drawn.drawPile,
+    discardPile: drawn.discardPile,
+    currentPlayer: nextPlayer({ ...state, marbleList })
+  }
+}
 
 const isProtected = (marble: Marble): boolean =>
   marble.position.zone === 'track' && marble.position.index === startCell(marble.owner)
@@ -124,30 +137,30 @@ const allInFinish = (state: GameState, player: PlayerId): boolean =>
     .filter(marble => marble.owner === player)
     .every(marble => marble.position.zone === 'finish')
 
-const applyMoveInner = (state: GameState, move: Move): GameState => {
+const applyMoveInner = (state: GameState, move: Move, random: () => number): GameState => {
   const actor = playerById(state, state.currentPlayer)
 
   if (move.type === 'discard') {
-    return withTurnDone(state, actor, move, state.marbleList)
+    return withTurnDone(state, actor, move, state.marbleList, random)
   }
 
   if (move.type === 'exit') {
     const mover = findMarble(state, move.marbleId)
     const to: Position = { zone: 'track', index: startCell(actor.id) }
-    return withTurnDone(state, actor, move, relocate(state.marbleList, mover, to))
+    return withTurnDone(state, actor, move, relocate(state.marbleList, mover, to), random)
   }
 
   if (move.type === 'move') {
     const mover = findMarble(state, move.marbleId)
     const to = resolveDestination(state, mover, move.steps, move.enterLane ?? false)
     if (!to) throw new Error('illegal move passed to applyMove')
-    const doneState = withTurnDone(state, actor, move, relocate(state.marbleList, mover, to))
+    const doneState = withTurnDone(state, actor, move, relocate(state.marbleList, mover, to), random)
     const winner = allInFinish(doneState, actor.id) ? actor.id : doneState.winner
     return { ...doneState, winner }
   }
 
   if (move.type === 'split7') {
-    return applySplit(state, actor, move)
+    return applySplit(state, actor, move, random)
   }
 
   if (move.type === 'swap') {
@@ -158,14 +171,14 @@ const applyMoveInner = (state: GameState, move: Move): GameState => {
       if (marble.id === enemy.id) return { ...marble, position: own.position }
       return marble
     })
-    return withTurnDone(state, actor, move, marbleList)
+    return withTurnDone(state, actor, move, marbleList, random)
   }
 
   throw new Error(`move type not supported yet: ${JSON.stringify(move)}`)
 }
 
-export const applyMove = (state: GameState, move: Move): GameState =>
-  redealIfNeeded(applyMoveInner(state, move))
+export const applyMove = (state: GameState, move: Move, random: () => number = Math.random): GameState =>
+  applyMoveInner(state, move, random)
 
 const ownMarbleList = (state: GameState, player: PlayerId): Marble[] =>
   state.marbleList.filter(marble => marble.owner === player)
@@ -309,7 +322,12 @@ const enumerateSplits = (state: GameState, player: PlayerId): SplitPart[][] => {
   return result
 }
 
-const applySplit = (state: GameState, actor: Player, move: Extract<Move, { type: 'split7' }>): GameState => {
+const applySplit = (
+  state: GameState,
+  actor: Player,
+  move: Extract<Move, { type: 'split7' }>,
+  random: () => number
+): GameState => {
   let working: GameState = state
   for (const part of move.partList) {
     const mover = findMarble(working, part.marbleId)
@@ -317,7 +335,7 @@ const applySplit = (state: GameState, actor: Player, move: Extract<Move, { type:
     if (!advanced) throw new Error('illegal split part passed to applyMove')
     working = advanced
   }
-  const doneState = withTurnDone(state, actor, move, working.marbleList)
+  const doneState = withTurnDone(state, actor, move, working.marbleList, random)
   const winner = allInFinish(doneState, actor.id) ? actor.id : doneState.winner
   return { ...doneState, winner }
 }

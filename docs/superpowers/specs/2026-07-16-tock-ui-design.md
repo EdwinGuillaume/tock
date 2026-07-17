@@ -114,7 +114,7 @@ Flow:
    Both the human's confirmed move **and** the bot's `pickMove` result go through
    it — the same single path the engine/AI design mandates. `applyMove` already
    advances `currentPlayer` (skipping inactive seats), handles captures, discards
-   the played card, refills hands (`redealIfNeeded`), and sets `winner`; the UI
+   the played card, draws the actor's replacement card, and sets `winner`; the UI
    never touches any of that.
 3. `useGameLoop` reacts to each new state:
    - `winner !== null` → `phase = 'gameover'`.
@@ -127,9 +127,10 @@ Flow:
 Because `pickMove` and `applyMove` fully encapsulate correctness, the loop is a
 thin state machine: **apply → re-render → maybe schedule the next bot move**.
 
-**Note on bot RNG:** `pickMove` (and the `applyMove` it calls internally) use
-`Math.random`. That is correct for interactive play; the seeded-determinism caveat
-from the AI spec §4 does not affect the UI.
+**Note on bot RNG:** `pickMove`'s tie-break and the UI's own `commitMove`
+(`applyMove`) use `Math.random` — correct for interactive play. `scoreMove`
+simulates candidates with a fixed RNG (`() => 0`) and never touches `Math.random`
+(AI spec §4), so scoring stays pure and the UI is unaffected.
 
 ## 6. The human turn — selection state machine (`useTurnInput`)
 

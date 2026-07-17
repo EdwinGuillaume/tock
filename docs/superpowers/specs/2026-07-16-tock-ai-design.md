@@ -71,21 +71,14 @@ export const pickRandomMove = (moveList: Move[], random: () => number = Math.ran
 - The RNG is **injected** with a `Math.random` default, mirroring the engine's
   `shuffle(list, random = Math.random)`. This keeps `pickMove` testable with a
   stub RNG.
-- **`scoreMove` value-purity, with one caveat.** `scoreMove`'s returned number is
-  deterministic and it never mutates its inputs. However, it calls the engine's
-  `applyMove`, and `applyMove(state, move)` takes **no** RNG — its internal
-  `redealIfNeeded` falls back to `Math.random` whenever a simulated move empties
-  every active hand at a short draw pile. So a `scoreMove` call *at a reshuffle
-  boundary* consumes a variable number of global `Math.random` draws (it scores
-  every candidate, each a simulated `applyMove`). This never affects the score
-  (the reshuffle only touches hands/piles, which `scoreMove` does not read), so
-  the heuristic stays value-deterministic; but `scoreMove` is **not**
-  side-effect-free with respect to the global RNG stream. This is benign for
-  local play. It only matters for a future **seeded-replay / networked** mode,
-  where the deal that lands in the real game would depend on how much entropy the
-  discarded scoring simulations burned first. The clean fix lives in the engine
-  (make `applyMove` RNG-injectable) and is tracked in §7. The self-play test
-  neutralizes this by seeding `Math.random` for the duration of the run.
+- **`scoreMove` value-purity.** `scoreMove`'s returned number is deterministic
+  and it never mutates its inputs. It calls the engine's `applyMove`, which now
+  draws a replacement card each turn; `scoreMove` passes a **fixed** RNG
+  (`applyMove(state, move, () => 0)`) for its throwaway simulations, so it never
+  reads the global `Math.random`. The drawn card is irrelevant to the score
+  (`scoreMove` reads marble positions only, never hands or piles), so the
+  heuristic is both value-deterministic and side-effect-free with respect to the
+  global RNG stream — safe for a future seeded-replay / networked mode.
 
 ## 5. The scoring function (transition / delta model)
 
@@ -173,16 +166,15 @@ implementation; the tests assert the **orderings**, not the raw numbers.
 
 Edge cases:
 - **Empty move list** — `pickMove` throws a clear error if asked to choose with
-  no legal moves (defensive). In **normal cadence this never happens**: active
-  hands deplete in lockstep (one card per turn, round-robin) and `applyMove`
-  runs `redealIfNeeded` in the same step, refilling **all** active hands the
-  moment they would all be empty. So at the start of every turn the current
-  player holds at least one card, and `getLegalMoves` returns at least a
+  no legal moves (defensive). In **normal cadence this never happens**: every
+  active hand stays at five because `applyMove` draws one replacement card in the
+  same step it plays one (continuous draw). So at the start of every turn the
+  current player holds five cards, and `getLegalMoves` returns at least a
   `discard` (`getLegalMoves` returns `[]` only for a genuinely empty hand). The
   empty case is therefore reachable only for a **non-normal** state — e.g. a
   deserialized mid-round game with uneven hands — and a robust game loop may
   guard against it by skipping such a player (advance `nextPlayer`) rather than
-  calling `pickMove`. The self-play integration test asserts this lockstep
+  calling `pickMove`. The self-play integration test asserts this
   invariant directly (`getLegalMoves(...).length > 0` on every turn), and the
   defensive throw is unit-tested in `bot.test.ts`.
 - **Forced discards** — when the hand is non-empty but nothing else is playable,
@@ -199,13 +191,6 @@ Edge cases:
   actually clear (blocked by protected start squares), rather than pure proximity.
 - **Opponent-hand modelling** — reason about which captures are actually
   reachable given the cards opponents could hold.
-- **RNG-injectable `applyMove` (engine follow-up)** — `applyMove` currently takes
-  no RNG, so its internal `redealIfNeeded` reshuffle uses `Math.random`, which
-  `scoreMove` transitively consumes while simulating candidates (see §4). Adding
-  an optional `random` parameter to `applyMove` (backward-compatible, defaulting
-  to `Math.random`, threaded into `redealIfNeeded`) would let `scoreMove` pass a
-  fixed RNG for its throwaway simulations and become genuinely side-effect-free —
-  a prerequisite for deterministic seeded replay / networked play.
 
 ## 8. Testing strategy
 

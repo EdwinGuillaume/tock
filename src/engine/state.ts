@@ -3,6 +3,25 @@ import { createDeck, shuffle } from './cards'
 
 export const handSize = 5
 
+// Draw the top card, reshuffling the discard pile into an empty draw pile first.
+// Returns the drawn card and the updated piles; card is null only when both
+// piles are empty.
+export const drawCard = (
+  drawPile: Card[],
+  discardPile: Card[],
+  random: () => number = Math.random
+): { card: Card | null, drawPile: Card[], discardPile: Card[] } => {
+  let draw = drawPile
+  let discard = discardPile
+  if (draw.length === 0) {
+    draw = shuffle(discard, random)
+    discard = []
+  }
+  const [top, ...rest] = draw
+  if (top === undefined) return { card: null, drawPile: draw, discardPile: discard }
+  return { card: top, drawPile: rest, discardPile: discard }
+}
+
 const playerOrder: PlayerId[] = [0, 1, 2, 3]
 const colorByPlayer: Record<PlayerId, Color> = { 0: 'red', 1: 'green', 2: 'yellow', 3: 'blue' }
 
@@ -38,28 +57,4 @@ export const createGame = (
     currentPlayer: firstActive?.id ?? 0,
     winner: null
   }
-}
-
-export const redealIfNeeded = (state: GameState, random: () => number = Math.random): GameState => {
-  const activeList = state.playerList.filter(player => player.kind !== 'inactive')
-  const allEmpty = activeList.every(player => player.hand.length === 0)
-  if (!allEmpty) return state
-
-  let drawPile = [...state.drawPile]
-  let discardPile = [...state.discardPile]
-  const playerList = state.playerList.map(player => {
-    if (player.kind === 'inactive') return player
-    const hand: Card[] = []
-    for (let slot = 0; slot < handSize; slot++) {
-      if (drawPile.length === 0) {
-        drawPile = shuffle(discardPile, random)
-        discardPile = []
-      }
-      const drawn = drawPile.shift()
-      if (drawn) hand.push(drawn)
-    }
-    return { ...player, hand }
-  })
-
-  return { ...state, playerList, drawPile, discardPile }
 }

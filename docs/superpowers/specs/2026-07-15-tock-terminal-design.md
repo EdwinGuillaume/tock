@@ -160,8 +160,10 @@ home stretch as soon as **its path crosses this mouth, in either direction**:
 
 **Flow**: a hand of **5 cards** per player. On their turn, a player plays **one**
 card and performs the move; if they have no legal move, they **discard** a card
-(without moving). Empty hands → redeal. Draw pile exhausted → reshuffle the
-discard pile.
+(without moving). Either way they then **draw one card**, so the hand always
+stays at five (continuous draw — no round-based redeal). The played card enters
+the discard pile **before** the draw; when the draw pile is empty it is
+reshuffled from the discard pile (the just-played card included) before drawing.
 
 ### 6.2 Move format — the central contract
 
@@ -183,9 +185,10 @@ outcome**, so that the player/AI decides.
 - `getLegalMoves(state, playerId): Move[]` — enumerates **all** legal moves,
   including **every** split combination of the 7 and both home-stretch-entry
   outcomes when they apply.
-- `applyMove(state, move): GameState` — applies the move, handles **captures** (a
-  marble landing on an opponent's marble → sent back to the nest), returns a
-  **new** immutable state.
+- `applyMove(state, move, random = Math.random): GameState` — applies the move,
+  handles **captures** (a marble landing on an opponent's marble → sent back to
+  the nest), draws the actor's replacement card (reshuffling the discard pile
+  into an empty draw pile via `random`), and returns a **new** immutable state.
 
 ## 7. Detailed rules
 
