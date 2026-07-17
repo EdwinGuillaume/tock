@@ -15,19 +15,19 @@ describe('start-square protection', () => {
   })
 
   it('cannot pass over a protected marble', () => {
-    let state = setHand(game(), 0, [card('5')])
+    let state = setHand(game(), 0, [card('6')])
     state = place(state, 'p0m0', { zone: 'track', index: 9 })
-    state = place(state, 'p1m0', { zone: 'track', index: 12 }) // sits between 9 and 14
+    state = place(state, 'p1m0', { zone: 'track', index: 12 }) // sits between 9 and 15
     const moveList = getLegalMoves(state, 0)
     expect(moveList.some(move => move.type === 'move' && move.marbleId === 'p0m0')).toBe(false)
   })
 
   it('is not protected once off its own start cell', () => {
-    let state = setHand(game(), 0, [card('5')])
+    let state = setHand(game(), 0, [card('6')])
     state = place(state, 'p0m0', { zone: 'track', index: 9 })
     state = place(state, 'p1m0', { zone: 'track', index: 13 }) // off its start (12) -> not protected
     const moveList = getLegalMoves(state, 0)
-    // p0m0 + 5 -> lands on 14, passing over 13 (unprotected) is allowed
+    // p0m0 + 6 -> lands on 15, passing over 13 (unprotected) is allowed
     expect(moveList.some(move => move.type === 'move' && move.marbleId === 'p0m0')).toBe(true)
   })
 

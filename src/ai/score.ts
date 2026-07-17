@@ -6,7 +6,8 @@ export const WEIGHTS = {
   finish: 60,
   capture: 50,
   exit: 5,
-  exposure: 3
+  exposure: 3,
+  opponentProgress: 1.5
 } as const
 
 // One monotonic scalar per marble: higher means closer to winning. Home is 0, a
@@ -88,6 +89,18 @@ export const scoreMove = (state: GameState, move: Move): number => {
     }
   }
 
+  let opponentProgressDelta = 0
+  if (move.type === 'push') {
+    for (const afterMarble of after.marbleList) {
+      if (afterMarble.owner === botId) continue
+      const beforeMarble = beforeById.get(afterMarble.id)
+      if (!beforeMarble) continue
+      // a captured opponent is already rewarded by the capture term; skip it here
+      if (afterMarble.position.zone === 'home' && beforeMarble.position.zone !== 'home') continue
+      opponentProgressDelta += advancement(afterMarble, state.ringSize) - advancement(beforeMarble, state.ringSize)
+    }
+  }
+
   const exitUrgency = move.type === 'exit'
     ? state.marbleList.filter(marble => marble.owner === botId && marble.position.zone === 'home').length
     : 0
@@ -97,4 +110,5 @@ export const scoreMove = (state: GameState, move: Move): number => {
     + WEIGHTS.capture * captured
     + WEIGHTS.exit * exitUrgency
     - WEIGHTS.exposure * exposureFor(after, botId)
+    - WEIGHTS.opponentProgress * opponentProgressDelta
 }

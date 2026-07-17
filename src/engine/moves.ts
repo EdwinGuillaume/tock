@@ -3,6 +3,8 @@ import { finishSize, ringDestinations, startCell, stepsToMouth } from './board'
 import { canExit, moveSteps } from './cards'
 import { drawCard } from './state'
 
+const PUSH_STEPS = 5
+
 const playerById = (state: GameState, id: PlayerId): Player => {
   const found = state.playerList.find(player => player.id === id)
   if (!found) throw new Error(`player ${id} not found`)
@@ -159,6 +161,15 @@ const applyMoveInner = (state: GameState, move: Move, random: () => number): Gam
     return { ...doneState, winner }
   }
 
+  if (move.type === 'push') {
+    const forced = findMarble(state, move.marbleId)
+    const to = resolveDestination(state, forced, move.steps, false)
+    if (!to) throw new Error('illegal push passed to applyMove')
+    // relocate captures relative to the pushed marble's owner, so a marble on the
+    // landing cell (a third player, or even the actor's own) is sent home.
+    return withTurnDone(state, actor, move, relocate(state.marbleList, forced, to), random)
+  }
+
   if (move.type === 'split7') {
     return applySplit(state, actor, move, random)
   }
@@ -254,6 +265,20 @@ export const getLegalMoves = (state: GameState, player: PlayerId): Move[] => {
         for (const enemy of enemyRingList) {
           result.push({ type: 'swap', card: playedCard, marbleId: own.id, targetMarbleId: enemy.id })
         }
+      }
+    }
+
+    if (rank === '5') {
+      // The 5 pushes one opponent marble forward 5 on the ring. Ring-only:
+      // resolveDestination with enterLane=false never returns a finish cell, so
+      // a pushed marble crossing its own mouth overshoots and stays on the ring.
+      for (const opponent of state.marbleList) {
+        if (opponent.owner === player) continue
+        if (opponent.position.zone !== 'track') continue
+        if (isProtected(opponent, state.ringSize)) continue
+        const to = resolveDestination(state, opponent, PUSH_STEPS, false)
+        if (!to) continue
+        result.push({ type: 'push', card: playedCard, marbleId: opponent.id, steps: PUSH_STEPS })
       }
     }
   }

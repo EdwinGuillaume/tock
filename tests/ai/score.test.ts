@@ -9,9 +9,9 @@ const game = (): GameState => createGame(['bot', 'bot', 'bot', 'bot'], 48, () =>
 
 describe('scoreMove', () => {
   it('scores a capturing move above the same move without a capture', () => {
-    const base = setHand(place(game(), 'p0m0', { zone: 'track', index: 0 }), 0, [card('5')])
-    const move: Move = { type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5 }
-    const withCapture = place(base, 'p1m0', { zone: 'track', index: 5 })
+    const base = setHand(place(game(), 'p0m0', { zone: 'track', index: 0 }), 0, [card('6')])
+    const move: Move = { type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6 }
+    const withCapture = place(base, 'p1m0', { zone: 'track', index: 6 })
     const noCapture = place(base, 'p1m0', { zone: 'track', index: 20 })
     expect(scoreMove(withCapture, move)).toBeGreaterThan(scoreMove(noCapture, move))
   })
@@ -130,28 +130,28 @@ describe('scoreMove', () => {
   })
 
   it('capturing a threatening opponent beats an equivalent move that leaves it on the board', () => {
-    // p0m1 sits at 20; an opponent behind it threatens it. p0m0 (at 10, card 5)
-    // lands on 15. Capturing the opponent (at 15) removes the threat AND earns the
-    // capture bonus; the no-capture arm (opponent at 16) keeps p0m1 exposed.
+    // p0m1 sits at 20; an opponent behind it threatens it. p0m0 (at 10, card 6)
+    // lands on 16. Capturing the opponent (at 16) removes the threat AND earns the
+    // capture bonus; the no-capture arm (opponent at 17) keeps p0m1 exposed.
     const captureState = setHand(
-      place(
-        place(place(game(), 'p0m0', { zone: 'track', index: 10 }), 'p0m1', { zone: 'track', index: 20 }),
-        'p1m0',
-        { zone: 'track', index: 15 }
-      ),
-      0,
-      [card('5')]
-    )
-    const noCaptureState = setHand(
       place(
         place(place(game(), 'p0m0', { zone: 'track', index: 10 }), 'p0m1', { zone: 'track', index: 20 }),
         'p1m0',
         { zone: 'track', index: 16 }
       ),
       0,
-      [card('5')]
+      [card('6')]
     )
-    const move: Move = { type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5 }
+    const noCaptureState = setHand(
+      place(
+        place(place(game(), 'p0m0', { zone: 'track', index: 10 }), 'p0m1', { zone: 'track', index: 20 }),
+        'p1m0',
+        { zone: 'track', index: 17 }
+      ),
+      0,
+      [card('6')]
+    )
+    const move: Move = { type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6 }
     expect(scoreMove(captureState, move)).toBeGreaterThan(scoreMove(noCaptureState, move))
   })
 
@@ -163,11 +163,41 @@ describe('scoreMove', () => {
     expect(scoreMove(state, move)).toBe(WEIGHTS.progress * 1 + WEIGHTS.capture + WEIGHTS.exit * 4)
   })
 
+  it('scores a push that merely advances an opponent below a discard', () => {
+    // bot 0 has no marbles on the ring (no exposure); pushing p1m0 forward 5
+    // only helps the opponent -> negative score, below a do-nothing discard.
+    const state = setHand(place(game(), 'p1m0', { zone: 'track', index: 20 }), 0, [card('5')])
+    const push: Move = { type: 'push', card: card('5'), marbleId: 'p1m0', steps: 5 }
+    const discard: Move = { type: 'discard', card: card('5') }
+    expect(scoreMove(state, push)).toBeLessThan(scoreMove(state, discard))
+  })
+
+  it('scores a push that captures a third player above a discard', () => {
+    // pushing p1m0 (20 -> 25) lands on p2m0 (25): capture bonus dominates.
+    const state = setHand(
+      place(place(game(), 'p1m0', { zone: 'track', index: 20 }), 'p2m0', { zone: 'track', index: 25 }),
+      0,
+      [card('5')]
+    )
+    const push: Move = { type: 'push', card: card('5'), marbleId: 'p1m0', steps: 5 }
+    const discard: Move = { type: 'discard', card: card('5') }
+    expect(scoreMove(state, push)).toBeGreaterThan(scoreMove(state, discard))
+  })
+
+  it('scores a push that forces an opponent past its own mouth above a discard', () => {
+    // p1m0 at 8 is near its mouth (11) / start (12): advancement ~45. Pushing it
+    // to 13 drops advancement to ~2 (a wrap-past-start overshoot) -> big bonus.
+    const state = setHand(place(game(), 'p1m0', { zone: 'track', index: 8 }), 0, [card('5')])
+    const push: Move = { type: 'push', card: card('5'), marbleId: 'p1m0', steps: 5 }
+    const discard: Move = { type: 'discard', card: card('5') }
+    expect(scoreMove(state, push)).toBeGreaterThan(scoreMove(state, discard))
+  })
+
   it('never touches Math.random, even when the simulated move triggers a reshuffle', () => {
     let state = place(game(), 'p0m0', { zone: 'track', index: 3 })
-    state = setHand(state, 0, [card('5')])
+    state = setHand(state, 0, [card('6')])
     state = { ...state, drawPile: [], discardPile: [card('2'), card('3')] }
-    const move: Move = { type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5 }
+    const move: Move = { type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6 }
     const realRandom = Math.random
     Math.random = () => { throw new Error('Math.random must not be called') }
     try {

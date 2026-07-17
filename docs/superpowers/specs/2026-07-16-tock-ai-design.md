@@ -88,11 +88,12 @@ of `enterLane`, `split7`, and `swap` moves cannot be read from the `Move` object
 alone.
 
 ```
-score =  W_PROGRESS  · ownAdvancementDelta        // general forward progress (per cell)
-       + W_FINISH    · ownMarblesEnteringFinish    // +++ parking in the home stretch
-       + W_CAPTURE   · opponentsCapturedThisMove    // ++
-       + W_EXIT      · exitUrgency                  // +  (exit moves only)
-       − W_EXPOSURE  · exposureAfter                // −  danger of the resulting own positions
+score =  W_PROGRESS      · ownAdvancementDelta        // general forward progress (per cell)
+       + W_FINISH        · ownMarblesEnteringFinish    // +++ parking in the home stretch
+       + W_CAPTURE       · opponentsCapturedThisMove    // ++
+       + W_EXIT          · exitUrgency                  // +  (exit moves only)
+       − W_EXPOSURE      · exposureAfter                // −  danger of the resulting own positions
+       − W_OPP_PROGRESS  · opponentProgressDelta         // − (push moves only) helping/overshooting an opponent
 ```
 
 ### 5.1 Advancement scalar
@@ -109,7 +110,10 @@ the delta is meaningful. For a marble owned by player `owner` at `position`:
   any track cell, and a deeper slot beats a shallower one.
 
 All terms use **integer** arithmetic, so equal moves tie **exactly** — no
-floating-point epsilon is required for the tie-break.
+floating-point epsilon is required for the tie-break. (The one exception is the
+`opponentProgress` term below, whose weight `1.5` can yield half-integer scores
+on `push` moves (only when `opponentProgressDelta` is odd); `0.5` multiples are
+exact in IEEE-754, so the exact-equality tie-break is unaffected.)
 
 ### 5.2 Terms
 
@@ -137,6 +141,13 @@ floating-point epsilon is required for the tie-break.
   ahead-threat, so an adjacent opponent (distance 1) contributes the most. Per
   marble, only the single strongest threat is counted. Path-clearance is **ignored** — a deliberate
   heuristic approximation, honest about the fact that opponents' hands are hidden.
+- `opponentProgressDelta` (**push moves only**) = Σ over opponent marbles the
+  push did **not** capture of `advancement(after) − advancement(before)`,
+  subtracted with weight `opponentProgress = 1.5`. Pushing an opponent forward
+  raises its advancement (a penalty, so the bot won't help an opponent for free);
+  pushing it **past its own mouth** wraps its distance back near zero (a large
+  negative delta ⇒ a bonus, rewarding forced overshoots). The term is gated on
+  `push` so swaps and every other move keep their existing scores.
 
 ### 5.3 Weights
 
@@ -152,8 +163,9 @@ EXPOSURE (−) sized so a clearly dangerous landing outweighs a small advance
 
 Starting defaults (to be refined against the comparative tests):
 `PROGRESS = 1`, `FINISH = 60`, `CAPTURE = 50`, `EXIT = 5` (× urgency),
-`EXPOSURE = 3` (× threat closeness). The exact constants may move during
-implementation; the tests assert the **orderings**, not the raw numbers.
+`EXPOSURE = 3` (× threat closeness), `opponentProgress = 1.5` (push moves only).
+The exact constants may move during implementation; the tests assert the
+**orderings**, not the raw numbers.
 
 ## 6. Selection & edge cases
 
@@ -161,7 +173,9 @@ implementation; the tests assert the **orderings**, not the raw numbers.
 1. `moveList = getLegalMoves(state, state.currentPlayer)`.
 2. Score every move with `scoreMove`.
 3. Take the maximum score; collect **all** moves tied at that maximum (exact
-   integer equality).
+   equality — scores are compared with `===` on identically-computed values,
+   and since the only non-integer term is `opponentProgress` at weight `1.5`,
+   ties stay exact because `0.5` multiples are exact in IEEE-754).
 4. Return one of the tied moves via `pickRandomMove(tiedList, random)`.
 
 Edge cases:

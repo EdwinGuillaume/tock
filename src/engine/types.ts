@@ -17,6 +17,7 @@ export type Marble = { id: MarbleId, owner: PlayerId, position: Position }
 export type Move =
   | { type: 'exit', card: Card, marbleId: MarbleId }
   | { type: 'move', card: Card, marbleId: MarbleId, steps: number, enterLane?: boolean }
+  | { type: 'push', card: Card, marbleId: MarbleId, steps: number }
   | { type: 'split7', card: Card, partList: { marbleId: MarbleId, steps: number, enterLane?: boolean }[] }
   | { type: 'swap', card: Card, marbleId: MarbleId, targetMarbleId: MarbleId }
   | { type: 'discard', card: Card }

@@ -160,7 +160,8 @@ home stretch as soon as **its path crosses this mouth moving forward**:
 | King | Bring a marble out of the nest **or** move 13 |
 | Queen | Move 12 |
 | Jack | **Swap** one of your marbles with an opponent's marble |
-| 10, 9, 8, 6, 5, 3, 2 | Move by the value |
+| 10, 9, 8, 6, 3, 2 | Move by the value |
+| 5 | **Push** one opponent marble forward 5 (opponent-only; ring-only) |
 | 7 | Move 7, **splittable** across several marbles (total = 7) |
 | 4 | Move **backward** 4 |
 
@@ -177,6 +178,7 @@ reshuffled from the discard pile (the just-played card included) before drawing.
 type Move =
   | { type: 'exit', card, marbleId }                            // leave the nest (Ace/King)
   | { type: 'move', card, marbleId, steps }                     // move forward / backward
+  | { type: 'push', card, marbleId, steps }                     // 5: push an opponent forward
   | { type: 'split7', card, partList: { marbleId, steps }[] }   // split 7 (Σ = 7)
   | { type: 'swap', card, marbleId, targetMarbleId }            // Jack
   | { type: 'discard', card }                                   // no move possible
@@ -231,6 +233,16 @@ outcome**, so that the player/AI decides.
   swap source (protection is defensive only, see §7 Start-square protection).
 - **4 backward**: moves back 4 on the ring (can capture while moving backward).
   It **stays on the ring** — a backward 4 never enters the home stretch (see §5.2).
+- **Push (5)**: moves **one opponent** marble forward **exactly 5** on the ring —
+  it never advances your own marbles. Only opponent marbles **on the ring** and
+  **not protected** on their own start cell are eligible. The pushed marble **stays
+  on the ring even when it crosses its own lane mouth** (it overshoots and never
+  enters its finish — this is how you deny an opponent its home entry). Normal
+  path/landing rules apply to the pushed marble: it cannot pass over or land on a
+  protected marble, and landing on any other marble **captures** it (including a
+  third player's, or even the acting player's **own** non-protected marble —
+  legal but self-harming, so the bot never chooses it). With no eligible target
+  the 5 is playable only as a discard.
 
 **End of game:** the **first** player to park their **4 marbles** in their home
 stretch wins; the game ends.

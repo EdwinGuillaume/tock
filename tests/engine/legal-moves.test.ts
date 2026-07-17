@@ -22,10 +22,10 @@ describe('getLegalMoves: exits', () => {
 
 describe('getLegalMoves: linear moves', () => {
   it('offers a forward move for a marble on the ring', () => {
-    let state = setHand(game(), 0, [card('5')])
+    let state = setHand(game(), 0, [card('6')])
     state = place(state, 'p0m0', { zone: 'track', index: 10 })
     const moveList = getLegalMoves(state, 0)
-    expect(moveList).toContainEqual({ type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5 })
+    expect(moveList).toContainEqual({ type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6 })
   })
 
   it('rejects a move that lands on an own marble', () => {
@@ -34,5 +34,15 @@ describe('getLegalMoves: linear moves', () => {
     state = place(state, 'p0m1', { zone: 'track', index: 12 })
     const moveList = getLegalMoves(state, 0)
     expect(moveList.some(move => move.type === 'move' && move.marbleId === 'p0m0')).toBe(false)
+  })
+
+  it('does not offer a self forward move for a 5 (it is a push card)', () => {
+    // own marble on the ring, all opponents still home -> a 5 can neither
+    // self-move nor push, so nothing playable but a discard
+    let state = setHand(game(), 0, [card('5')])
+    state = place(state, 'p0m0', { zone: 'track', index: 10 })
+    const moveList = getLegalMoves(state, 0)
+    expect(moveList.some(move => move.type === 'move')).toBe(false)
+    expect(moveList.every(move => move.type === 'discard')).toBe(true)
   })
 })

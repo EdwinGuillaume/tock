@@ -17,9 +17,9 @@ describe('cards', () => {
     expect(moveSteps('10')).toBe(10)
     expect(moveSteps('J')).toBeNull()
     expect(moveSteps('7')).toBeNull()
+    expect(moveSteps('5')).toBeNull() // 5 is the "push an opponent" card, no self-move
     expect(moveSteps('2')).toBe(2)
     expect(moveSteps('3')).toBe(3)
-    expect(moveSteps('5')).toBe(5)
     expect(moveSteps('6')).toBe(6)
     expect(moveSteps('8')).toBe(8)
     expect(moveSteps('9')).toBe(9)

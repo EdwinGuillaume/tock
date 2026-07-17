@@ -66,8 +66,14 @@ const samePosition = (a: Position, b: Position): boolean =>
 // result of `move` — used to highlight the candidate landing(s). Reads the
 // resulting state via the engine's immutable applyMove (positions only).
 export const movePreviewCells = (state: GameState, move: Move): Cell[] => {
-  const actor = state.currentPlayer
   const after = applyMove(state, move)
+  // A push moves an opponent marble, not the actor's; preview that marble.
+  if (move.type === 'push') {
+    const pushed = after.marbleList.find(candidate => candidate.id === move.marbleId)
+    const cell = pushed ? cellOf(pushed.owner, pushed.position, state.ringSize) : null
+    return cell ? [cell] : []
+  }
+  const actor = state.currentPlayer
   const cellList: Cell[] = []
   for (const marble of after.marbleList) {
     if (marble.owner !== actor) continue

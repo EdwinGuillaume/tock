@@ -42,7 +42,7 @@ export const playableCard = (card: Card, ctx: TurnContext): boolean =>
 export const marbleChoices = (card: Card, ctx: TurnContext): MarbleId[] => {
   const idList: MarbleId[] = []
   for (const move of movesForCard(card, ctx)) {
-    if (move.type === 'exit' || move.type === 'move' || move.type === 'swap') {
+    if (move.type === 'exit' || move.type === 'move' || move.type === 'swap' || move.type === 'push') {
       if (!idList.includes(move.marbleId)) idList.push(move.marbleId)
     }
   }
@@ -51,7 +51,7 @@ export const marbleChoices = (card: Card, ctx: TurnContext): MarbleId[] => {
 
 export const optionMoves = (card: Card, marbleId: MarbleId, ctx: TurnContext): Move[] =>
   movesForCard(card, ctx).filter(move =>
-    (move.type === 'exit' || move.type === 'move' || move.type === 'swap') && move.marbleId === marbleId
+    (move.type === 'exit' || move.type === 'move' || move.type === 'swap' || move.type === 'push') && move.marbleId === marbleId
   )
 
 const splitPartLists = (card: Card, ctx: TurnContext): SplitPart[][] =>

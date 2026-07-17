@@ -26,17 +26,17 @@ describe('pickRandomMove', () => {
 
 describe('pickMove', () => {
   it('returns the highest-scoring legal move', () => {
-    // p0m0 can capture p1m0 with a 5; p0m1 can only advance -> capture wins
+    // p0m0 can capture p1m0 with a 6; p0m1 can only advance -> capture wins
     const state = setHand(
       place(
         place(place(game(), 'p0m0', { zone: 'track', index: 0 }), 'p0m1', { zone: 'track', index: 30 }),
         'p1m0',
-        { zone: 'track', index: 5 }
+        { zone: 'track', index: 6 }
       ),
       0,
-      [card('5')]
+      [card('6')]
     )
-    expect(pickMove(state, () => 0)).toMatchObject({ type: 'move', marbleId: 'p0m0', steps: 5 })
+    expect(pickMove(state, () => 0)).toMatchObject({ type: 'move', marbleId: 'p0m0', steps: 6 })
   })
 
   it('breaks ties using the RNG, always choosing a top-scored move', () => {
@@ -57,5 +57,18 @@ describe('pickMove', () => {
   it('throws when the current player has no legal move (empty hand)', () => {
     const state = setHand(game(), 0, [])
     expect(() => pickMove(state, () => 0)).toThrow()
+  })
+
+  it('prefers an overshoot push over a push that only advances an opponent', () => {
+    // hand is only a 5, bot has no other options. p1m0 at 8 -> pushed past player
+    // 1's mouth (11)/start (12) to 13, a big overshoot (good). p2m0 at 30 (player 2
+    // start 24, mouth 23) -> pushed to 35, a pointless advance (bad). p2m0 must be
+    // well clear of its own mouth so its push is NOT also an overshoot.
+    const state = setHand(
+      place(place(game(), 'p1m0', { zone: 'track', index: 8 }), 'p2m0', { zone: 'track', index: 30 }),
+      0,
+      [card('5')]
+    )
+    expect(pickMove(state, () => 0)).toMatchObject({ type: 'push', marbleId: 'p1m0' })
   })
 })

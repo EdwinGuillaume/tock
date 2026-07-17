@@ -27,16 +27,16 @@ describe('selection — card and marble picking', () => {
   test('picking a numbered card then its only marble commits the move', () => {
     let state = createGame(['human', 'bot'])
     state = place(state, 'p0m0', { zone: 'track', index: 0 })
-    state = setHand(state, 0, [card('5')])
+    state = setHand(state, 0, [card('6')])
     const { commit } = run(state, [{ kind: 'confirm' }, { kind: 'confirm' }])
-    expect(commit).toEqual({ type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5 })
+    expect(commit).toEqual({ type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6 })
   })
 
   test('a card with two landing outcomes opens a destination choice', () => {
     // A marble near the lane mouth: a step count that can enter the lane OR stay.
     let state = createGame(['human', 'bot'])
     state = place(state, 'p0m0', { zone: 'track', index: 44 })
-    state = setHand(state, 0, [card('5')])
+    state = setHand(state, 0, [card('6')])
     const ctx = contextFor(state)
     const moves = ctx.legalMoves.filter(move => move.type === 'move')
     // Precondition: the engine really offers two outcomes here (ring + lane).
@@ -55,7 +55,7 @@ describe('selection — card and marble picking', () => {
   test('esc from pickMarble returns to pickCard', () => {
     let state = createGame(['human', 'bot'])
     state = place(state, 'p0m0', { zone: 'track', index: 0 })
-    state = setHand(state, 0, [card('5')])
+    state = setHand(state, 0, [card('6')])
     const ctx = contextFor(state)
     let selection = initialSelection()
     selection = reduce(selection, { kind: 'confirm' }, ctx).selection
@@ -95,5 +95,18 @@ describe('selection — forced discard', () => {
     expect(ctx.legalMoves.every(move => move.type === 'discard')).toBe(true)
     const { commit } = run(state, [{ kind: 'confirm' }])
     expect(commit).toEqual({ type: 'discard', card: card('5') })
+  })
+})
+
+describe('selection — push (the 5)', () => {
+  test('picking a 5 then an opponent marble commits a push', () => {
+    let state = createGame(['human', 'bot'])
+    state = place(state, 'p1m0', { zone: 'track', index: 20 })
+    state = setHand(state, 0, [card('5')])
+    const ctx = contextFor(state)
+    // Precondition: a push is legal.
+    expect(ctx.legalMoves.some(move => move.type === 'push')).toBe(true)
+    const { commit } = run(state, [{ kind: 'confirm' }, { kind: 'confirm' }])
+    expect(commit).toEqual({ type: 'push', card: card('5'), marbleId: 'p1m0', steps: 5 })
   })
 })

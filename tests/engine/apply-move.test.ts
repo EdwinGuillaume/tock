@@ -26,10 +26,10 @@ describe('applyMove: exit', () => {
 describe('applyMove: move + capture', () => {
   it('advances a marble along the ring', () => {
     let state = fourPlayers()
-    state = setHand(state, 0, [card('5')])
+    state = setHand(state, 0, [card('6')])
     state = place(state, 'p0m0', { zone: 'track', index: 3 })
-    const next = applyMove(state, { type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5 })
-    expect(findMarble(next, 'p0m0').position).toEqual({ zone: 'track', index: 8 })
+    const next = applyMove(state, { type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6 })
+    expect(findMarble(next, 'p0m0').position).toEqual({ zone: 'track', index: 9 })
   })
 
   it('sends an opponent marble home when landing on it', () => {

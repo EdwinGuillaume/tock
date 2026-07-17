@@ -25,6 +25,20 @@ export const moveLabel = (before: GameState, after: GameState, move: Move): stri
     return positionLabel(position)
   }
 
+  if (move.type === 'push') {
+    const pushed = after.marbleList.find(marble => marble.id === move.marbleId)
+    const start = positionOf(before, move.marbleId)
+    const targetColor = pushed ? colorOf(pushed.owner) : ''
+    const destination = pushed ? formatDestination(pushed.position) : ''
+    const origin = start ? positionLabel(start) : ''
+    const captured = after.marbleList.some(marble => {
+      if (marble.id === move.marbleId || marble.position.zone !== 'home') return false
+      const from = positionOf(before, marble.id)
+      return from !== null && from.zone !== 'home'
+    })
+    return `${color} plays ${rank} — pushes ${targetColor} ${origin}→${destination}${captured ? ', captured!' : ''}`
+  }
+
   const changeList: string[] = []
   for (const marble of after.marbleList) {
     if (marble.owner !== actor) continue

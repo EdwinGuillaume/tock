@@ -145,8 +145,9 @@ in `tests/support.ts`.
   §5.2 — implemented in `board.ts` (`ringDestinations` gates lane entry on
   `direction === 1`; also `laneMouth`, `stepsToMouth`).
 - **The `Move` union is the central contract** (spec §6.2, defined in `types.ts`):
-  `exit`, `move` (with optional `enterLane`), `split7` (the 7 split across marbles,
-  Σ=7), `swap` (Jack), `discard`. When several legal outcomes exist for one
+  `exit`, `move` (with optional `enterLane`), `push` (the 5 — move an opponent
+  forward 5, ring-only), `split7` (the 7 split across marbles, Σ=7), `swap`
+  (Jack), `discard`. When several legal outcomes exist for one
   displacement (e.g. enter the lane *or* stay on the ring), the generator emits
   **one distinct `Move` per outcome** so the human/AI decides. `getLegalMoves`
   enumerates *all* combinations, including every valid 7-split partition

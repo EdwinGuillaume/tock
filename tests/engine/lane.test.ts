@@ -7,17 +7,17 @@ const game = () => createGame(['human', 'bot', 'bot', 'bot'], 48, () => 0)
 
 describe('lane entry choice', () => {
   it('offers both stay-on-ring and enter-lane for a crossing displacement', () => {
-    let state = setHand(game(), 0, [card('5')])
-    state = place(state, 'p0m0', { zone: 'track', index: 45 }) // player 0 mouth = 47
+    let state = setHand(game(), 0, [card('6')])
+    state = place(state, 'p0m0', { zone: 'track', index: 44 }) // player 0 mouth = 47
     const moveList = getLegalMoves(state, 0).filter(move => move.type === 'move' && move.marbleId === 'p0m0')
-    expect(moveList).toContainEqual({ type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5 })
-    expect(moveList).toContainEqual({ type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5, enterLane: true })
+    expect(moveList).toContainEqual({ type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6 })
+    expect(moveList).toContainEqual({ type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6, enterLane: true })
   })
 
   it('applies the enter-lane choice into the finish', () => {
-    let state = setHand(game(), 0, [card('5')])
-    state = place(state, 'p0m0', { zone: 'track', index: 45 })
-    const next = applyMove(state, { type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5, enterLane: true })
+    let state = setHand(game(), 0, [card('6')])
+    state = place(state, 'p0m0', { zone: 'track', index: 44 })
+    const next = applyMove(state, { type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6, enterLane: true })
     expect(findMarble(next, 'p0m0').position).toEqual({ zone: 'finish', index: 2 })
   })
 
@@ -73,11 +73,11 @@ describe('lane entry on a 72-cell ring', () => {
   const bigGame = () => createGame(['human', 'bot', 'bot', 'bot'], 72, () => 0)
 
   it('enters the finish across the mouth at index 71', () => {
-    // player 0 mouth = 71. From 69 a 5 crosses the mouth at step 2, remaining
+    // player 0 mouth = 71. From 68 a 6 crosses the mouth at step 3, remaining
     // 3 -> finish index 2 (an index that only exists on the 72-cell ring).
-    let state = setHand(bigGame(), 0, [card('5')])
-    state = place(state, 'p0m0', { zone: 'track', index: 69 })
-    const next = applyMove(state, { type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5, enterLane: true })
+    let state = setHand(bigGame(), 0, [card('6')])
+    state = place(state, 'p0m0', { zone: 'track', index: 68 })
+    const next = applyMove(state, { type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6, enterLane: true })
     expect(findMarble(next, 'p0m0').position).toEqual({ zone: 'finish', index: 2 })
   })
 

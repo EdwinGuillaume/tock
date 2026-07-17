@@ -12,6 +12,7 @@ export const moveSteps = (rank: Rank): number | null => {
     case '4': return -4
     case 'J': return null
     case '7': return null
+    case '5': return null // the 5 pushes an opponent; it has no self-move value
     default: return Number(rank)
   }
 }

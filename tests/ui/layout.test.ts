@@ -102,18 +102,27 @@ describe('layout — cellOf & preview', () => {
   test('movePreviewCells returns the moved marble destination on a 48-cell board', () => {
     let state = createGame(['human', 'bot'])
     state = place(state, 'p0m0', { zone: 'track', index: 0 })
-    state = setHand(state, 0, [card('5')])
-    const move = { type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5 } as const
+    state = setHand(state, 0, [card('6')])
+    const move = { type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6 } as const
     const cells = movePreviewCells(state, move)
-    expect(cells).toContainEqual(ringCoord(5, 48))
+    expect(cells).toContainEqual(ringCoord(6, 48))
   })
 
   test('movePreviewCells maps onto the 72-cell grid when the game uses one', () => {
     let state = createGame(['human', 'bot'], 72)
     state = place(state, 'p0m0', { zone: 'track', index: 0 })
-    state = setHand(state, 0, [card('5')])
-    const move = { type: 'move', card: card('5'), marbleId: 'p0m0', steps: 5 } as const
+    state = setHand(state, 0, [card('6')])
+    const move = { type: 'move', card: card('6'), marbleId: 'p0m0', steps: 6 } as const
     const cells = movePreviewCells(state, move)
-    expect(cells).toContainEqual(ringCoord(5, 72))
+    expect(cells).toContainEqual(ringCoord(6, 72))
+  })
+
+  test('movePreviewCells previews the pushed opponent marble landing', () => {
+    let state = createGame(['human', 'bot'])
+    state = place(state, 'p1m0', { zone: 'track', index: 20 })
+    state = setHand(state, 0, [card('5')])
+    const move = { type: 'push', card: card('5'), marbleId: 'p1m0', steps: 5 } as const
+    const cells = movePreviewCells(state, move)
+    expect(cells).toContainEqual(ringCoord(25, 48))
   })
 })
