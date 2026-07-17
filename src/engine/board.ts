@@ -33,8 +33,10 @@ export const ringDestinations = (player: PlayerId, fromIndex: number, steps: num
   const ringIndex = (((fromIndex + direction * distance) % ringSize) + ringSize) % ringSize
   const ring = { zone: 'track', index: ringIndex } as const
 
+  // A marble only enters its home stretch moving forward: crossing the mouth
+  // backward (the "4 trick") is not allowed — a backward move stays on the ring.
   const laneIndex = distance - stepsToMouth(player, fromIndex, steps) - 1
-  const lane = laneIndex >= 0 && laneIndex < finishSize
+  const lane = direction === 1 && laneIndex >= 0 && laneIndex < finishSize
     ? ({ zone: 'finish', index: laneIndex } as const)
     : null
 

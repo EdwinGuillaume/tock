@@ -21,11 +21,16 @@ describe('lane entry choice', () => {
     expect(findMarble(next, 'p0m0').position).toEqual({ zone: 'finish', index: 2 })
   })
 
-  it('enters the lane directly with the backward-4 trick', () => {
+  it('never offers a lane entry for a backward 4 — only the ring move', () => {
     let state = setHand(game(), 0, [card('4')])
     state = place(state, 'p0m0', { zone: 'track', index: 0 }) // on its start cell
     const moveList = getLegalMoves(state, 0)
-    expect(moveList).toContainEqual({ type: 'move', card: card('4'), marbleId: 'p0m0', steps: -4, enterLane: true })
+    // the marble only steps back on the ring (0 - 4 -> index 44); a marble
+    // cannot enter its home going backward, so no enter-lane move is generated
+    expect(moveList).toContainEqual({ type: 'move', card: card('4'), marbleId: 'p0m0', steps: -4 })
+    expect(moveList.some(move =>
+      move.type === 'move' && move.marbleId === 'p0m0' && move.enterLane === true
+    )).toBe(false)
   })
 
   it('moves a marble deeper inside the finish with exact count', () => {

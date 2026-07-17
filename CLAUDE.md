@@ -133,10 +133,12 @@ in `tests/support.ts`.
 
 - **Lane mouth (`bouche`)** — the finish-lane entrance is a **fixed position on
   the ring, just *behind* the start square** (`start - 1`). A marble enters its
-  lane whenever its path *crosses that mouth, in either direction*. The engine
-  does **not** track a "has completed a lap" flag; the backward-4 entering the
-  lane directly falls out of this geometry naturally. See spec §5.2 — implemented
-  in `board.ts` (`laneMouth`, `ringDestinations`, `stepsToMouth`).
+  lane whenever its path *crosses that mouth moving **forward***. The engine does
+  **not** track a "has completed a lap" flag; forward crossing of the fixed mouth
+  is all it needs. A **backward 4 never enters the lane** — a marble cannot come
+  home going backward, so it stays on the ring (there is no "4 trick"). See spec
+  §5.2 — implemented in `board.ts` (`ringDestinations` gates lane entry on
+  `direction === 1`; also `laneMouth`, `stepsToMouth`).
 - **The `Move` union is the central contract** (spec §6.2, defined in `types.ts`):
   `exit`, `move` (with optional `enterLane`), `split7` (the 7 split across marbles,
   Σ=7), `swap` (Jack), `discard`. When several legal outcomes exist for one

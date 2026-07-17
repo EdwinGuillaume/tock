@@ -32,12 +32,13 @@ describe('board geometry', () => {
     expect(reach.lane).toEqual({ zone: 'finish', index: 2 })
   })
 
-  it('enters the lane on a backward 4 from the start cell (the 4-trick)', () => {
-    // player 0 on its start (0), backward 4: crosses mouth 47 after 1 step,
-    // remaining 3 -> finish index 2. Ring-stay lands on 44.
+  it('keeps a backward 4 on the ring — a marble never enters its home going backward', () => {
+    // player 0 on its start (0), backward 4: even though the path crosses the
+    // mouth (47), a backward move never diverts into the finish lane. It stays
+    // on the ring at index 44.
     const reach = ringDestinations(0, 0, -4)
     expect(reach.ring).toEqual({ zone: 'track', index: 44 })
-    expect(reach.lane).toEqual({ zone: 'finish', index: 2 })
+    expect(reach.lane).toBeNull()
   })
 
   it('rejects overshooting the lane', () => {

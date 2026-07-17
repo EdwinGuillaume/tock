@@ -121,19 +121,20 @@ type Position =
 
 The mouth of the home stretch is a **fixed position on the ring, just *behind* the
 start cell** (at `start - 1` in the direction of travel). A marble diverts into its
-home stretch as soon as **its path crosses this mouth, in either direction**:
+home stretch as soon as **its path crosses this mouth moving forward**:
 
-- **From the front** (normal travel): from its start cell, the marble moves away
-  from the mouth and must travel almost all the way around the ring to reach it
-  from the other side → the classic "full loop".
-- **From behind** (the 4 trick): the mouth is right behind the start cell; a
-  backward 4 crosses it and threads the remaining steps into the home stretch →
-  the marble comes home almost directly, **without having looped the ring**.
+- **Forward travel only**: from its start cell, the marble moves away from the
+  mouth and must travel almost all the way around the ring to reach it from the
+  other side → the classic "full loop".
+- **A marble cannot enter its home going backward.** The mouth sits right behind
+  the start cell, so a backward 4 does cross it geometrically — but a backward
+  move **never diverts into the home stretch**; it stays on the ring. (There is no
+  "4 trick" that comes home directly.)
 
 > Consequence: the engine does **not** track a "has looped" flag. It only knows the
-> fixed position of the mouth, and any movement (forward or backward) that crosses
-> it diverts into the home stretch. The scenario "leave home, then play a 4 to come
-> home directly" falls out of this model naturally.
+> fixed position of the mouth, and only **forward** movement that crosses it
+> diverts into the home stretch. A backward 4 that crosses the mouth simply lands
+> on the ring behind it.
 
 ### 5.3 Game state
 
@@ -205,8 +206,8 @@ outcome**, so that the player/AI decides.
   (voluntarily giving up the protection).
 
 **Home stretch:**
-- Entry is governed by the geometry of the **mouth** (§5.2), crossable in both
-  directions.
+- Entry is governed by the geometry of the **mouth** (§5.2), crossable **forward
+  only** — a marble never enters its home going backward.
 - **Player's choice to enter**: when a path can enter the home stretch *and* an
   equivalent path on the ring remains legal, the generator offers **both** moves;
   the human/AI decides. (A marble may decline to enter and loop again: legal but
@@ -223,8 +224,8 @@ outcome**, so that the player/AI decides.
   the ring** (neither nest nor home stretch); an **opponent** marble protected on
   its start cell cannot be swapped, but your **own** start-cell marble is a valid
   swap source (protection is defensive only, see §7 Start-square protection).
-- **4 backward**: moves back 4 on the ring (can capture while moving backward, can
-  enter the home stretch via the mouth, see §5.2).
+- **4 backward**: moves back 4 on the ring (can capture while moving backward).
+  It **stays on the ring** — a backward 4 never enters the home stretch (see §5.2).
 
 **End of game:** the **first** player to park their **4 marbles** in their home
 stretch wins; the game ends.
