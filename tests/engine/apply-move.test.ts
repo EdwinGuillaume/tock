@@ -3,7 +3,7 @@ import { createGame } from '../../src/engine/state'
 import { applyMove, nextPlayer } from '../../src/engine/moves'
 import { place, setHand, findMarble, card } from '../../tests/support'
 
-const fourPlayers = () => createGame(['human', 'bot', 'bot', 'bot'], () => 0)
+const fourPlayers = () => createGame(['human', 'bot', 'bot', 'bot'], 48, () => 0)
 
 describe('applyMove: exit', () => {
   it('moves a home marble onto its start cell', () => {
@@ -56,7 +56,7 @@ describe('applyMove: bookkeeping', () => {
   })
 
   it('nextPlayer skips inactive seats', () => {
-    const state = createGame(['human', 'inactive', 'bot', 'inactive'], () => 0)
+    const state = createGame(['human', 'inactive', 'bot', 'inactive'], 48, () => 0)
     expect(nextPlayer({ ...state, currentPlayer: 0 })).toBe(2)
     expect(nextPlayer({ ...state, currentPlayer: 2 })).toBe(0)
   })

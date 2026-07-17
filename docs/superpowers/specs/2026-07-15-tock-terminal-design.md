@@ -104,9 +104,14 @@ Three zones per player:
   (`ringSize / 4` apart).
 - **Home stretch (`finish`)**: 4 private cells `0..3`, inaccessible to opponents.
 
-**Ring size**: `ringSize = 48` (**12 cells per side**). A single constant, chosen
-for a comfortable render in an ~80×24 terminal. Changeable with no impact on the
-logic.
+**Ring size**: selectable at setup — **48** (12 cells per side, the classic
+board, comfortable in ~80×24) or **72** (18 cells per side, a larger, sparser
+board that renders ~21×82). The choice is stored on `GameState.ringSize` and
+threaded through every geometry helper (`startCell`, `laneMouth`, `stepsToMouth`,
+`ringDestinations`, and the UI's `ringCoord`/`finishCoord`/`cellOf`/`gridSize`)
+as an explicit argument — there is no module-level ring constant. `quadrantSize`
+is `ringSize / 4` and `finishSize` stays 4 regardless of ring size. Adding
+another size is just extending `RING_SIZE_OPTIONS`; the logic is size-agnostic.
 
 **A marble's position** — a union of three cases:
 

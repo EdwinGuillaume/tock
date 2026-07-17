@@ -31,6 +31,16 @@ test('renders 13 rows', () => {
   expect(strip(lastFrame()).split('\n').length).toBeGreaterThanOrEqual(13)
 })
 
+test('renders a 19x19 board with a centre marker for a 72-cell game', () => {
+  let state = createGame(['human', 'bot', 'bot', 'bot'], 72)
+  state = place(state, 'p0m0', { zone: 'track', index: 0 }) // red start at bottom-mid
+  const { lastFrame } = render(<Board state={state} />)
+  const text = strip(lastFrame())
+  expect(text.split('\n').length).toBeGreaterThanOrEqual(19)
+  expect(text).toContain('✦') // centre marker still drawn on the bigger grid
+  expect(text).toContain('●') // the placed marble
+})
+
 test('renders active-seat nests with home counts and omits inactive seats', () => {
   // human (seat 0/red) + one bot (seat 1/green); seats 2/3 inactive.
   let state = createGame(['human', 'bot'])

@@ -1,5 +1,6 @@
 import type { Card, Color, GameState, Marble, MarbleId, Player, PlayerId, PlayerKind } from './types'
 import { createDeck, shuffle } from './cards'
+import { DEFAULT_RING_SIZE } from './board'
 
 export const handSize = 5
 
@@ -31,6 +32,7 @@ export const marbleId = (player: PlayerId, index: number): MarbleId => `p${playe
 
 export const createGame = (
   kindList: PlayerKind[],
+  ringSize: number = DEFAULT_RING_SIZE,
   random: () => number = Math.random
 ): GameState => {
   const drawPile = shuffle(createDeck(), random)
@@ -55,6 +57,7 @@ export const createGame = (
     drawPile,
     discardPile: [],
     currentPlayer: firstActive?.id ?? 0,
-    winner: null
+    winner: null,
+    ringSize
   }
 }

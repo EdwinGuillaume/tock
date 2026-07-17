@@ -4,4 +4,7 @@ export type {
 } from './types'
 export { createGame, handSize, colorOf, marbleId } from './state'
 export { getLegalMoves, applyMove, nextPlayer } from './moves'
-export { ringSize, quadrantSize, playerCount, finishSize, startCell, laneMouth } from './board'
+export {
+  quadrantSize, playerCount, finishSize, startCell, laneMouth,
+  DEFAULT_RING_SIZE, RING_SIZE_OPTIONS
+} from './board'

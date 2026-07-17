@@ -44,7 +44,7 @@ export const highlightFor = (selection: Selection, ctx: TurnContext): Highlight[
     const marble = ctx.state.marbleList.find(candidate => candidate.id === id)
     if (!marble) return []
     const landings = landingsOf(optionMoves(selection.card, marble.id, ctx), ctx)
-    const cell = cellOf(marble.owner, marble.position)
+    const cell = cellOf(marble.owner, marble.position, ctx.state.ringSize)
     // A home marble (exit) has no grid cell of its own; only its landing shows.
     return cell ? [{ cell, kind: 'selected' }, ...landings] : landings
   }
@@ -60,7 +60,7 @@ export const highlightFor = (selection: Selection, ctx: TurnContext): Highlight[
     }
     // Draft is 0 (skip) or no projection yet: mark the focused marble in place.
     const marble = ctx.state.marbleList.find(candidate => candidate.id === focusId)
-    const cell = marble ? cellOf(marble.owner, marble.position) : null
+    const cell = marble ? cellOf(marble.owner, marble.position, ctx.state.ringSize) : null
     return cell ? [{ cell, kind: 'selected' }] : []
   }
   if (selection.step === 'pickDestination') {

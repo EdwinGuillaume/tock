@@ -1,7 +1,9 @@
 import type { GameState, MarbleId, Move, PlayerId, Position } from '../engine'
-import { applyMove, ringSize } from '../engine'
+import { applyMove } from '../engine'
 
-export const gridSize = 13
+// The board is a square whose border holds the ring: `ringSize / 4` cells per
+// side, so the grid spans one more cell than a quadrant in each dimension.
+export const gridSize = (ringSize: number): number => ringSize / 4 + 1
 
 export type Cell = { row: number, col: number }
 export type Side = 'bottom' | 'left' | 'top' | 'right'
@@ -21,34 +23,39 @@ export const sideOf: Record<PlayerId, Side> = {
   3: 'right'
 }
 
-// Ring index -> grid cell on the 13x13 border. Index 0 (red's start) is
-// bottom-middle; travel runs counterclockwise (bottom -> left -> top -> right),
-// matching startCell(seat) = seat*12 landing each start at a side midpoint.
-export const ringCoord = (index: number): Cell => {
+// Ring index -> grid cell on the border of a (ringSize/4 + 1) square. Index 0
+// (red's start) is bottom-middle; travel runs counterclockwise (bottom -> left
+// -> top -> right), matching startCell(seat) landing each start at a side
+// midpoint. `g` is the last row/col index, `mid` the side midpoint.
+export const ringCoord = (index: number, ringSize: number): Cell => {
+  const g = ringSize / 4
+  const mid = g / 2
   const i = ((index % ringSize) + ringSize) % ringSize
-  if (i <= 6) return { row: 12, col: 6 - i }
-  if (i <= 18) return { row: 12 - (i - 6), col: 0 }
-  if (i <= 30) return { row: 0, col: i - 18 }
-  if (i <= 42) return { row: i - 30, col: 12 }
-  return { row: 12, col: 12 - (i - 42) }
+  if (i <= mid) return { row: g, col: mid - i }
+  if (i <= mid + g) return { row: g - (i - mid), col: 0 }
+  if (i <= mid + 2 * g) return { row: 0, col: i - (mid + g) }
+  if (i <= mid + 3 * g) return { row: i - (mid + 2 * g), col: g }
+  return { row: g, col: g - (i - (mid + 3 * g)) }
 }
 
 // Finish-lane cell for `owner`'s slot `index` (0 nearest the ring, 3 deepest),
 // threading inward from that side's midpoint toward the centre.
-export const finishCoord = (owner: PlayerId, index: number): Cell => {
+export const finishCoord = (owner: PlayerId, index: number, ringSize: number): Cell => {
+  const g = ringSize / 4
+  const mid = g / 2
   const step = index + 1
   switch (sideOf[owner]) {
-    case 'bottom': return { row: 12 - step, col: 6 }
-    case 'top': return { row: step, col: 6 }
-    case 'left': return { row: 6, col: step }
-    case 'right': return { row: 6, col: 12 - step }
+    case 'bottom': return { row: g - step, col: mid }
+    case 'top': return { row: step, col: mid }
+    case 'left': return { row: mid, col: step }
+    case 'right': return { row: mid, col: g - step }
   }
 }
 
 // A marble position -> its grid cell, or null when off the grid (home nest).
-export const cellOf = (owner: PlayerId, position: Position): Cell | null => {
-  if (position.zone === 'track') return ringCoord(position.index)
-  if (position.zone === 'finish') return finishCoord(owner, position.index)
+export const cellOf = (owner: PlayerId, position: Position, ringSize: number): Cell | null => {
+  if (position.zone === 'track') return ringCoord(position.index, ringSize)
+  if (position.zone === 'finish') return finishCoord(owner, position.index, ringSize)
   return null
 }
 
@@ -67,7 +74,7 @@ export const movePreviewCells = (state: GameState, move: Move): Cell[] => {
     const before = state.marbleList.find(candidate => candidate.id === marble.id)
     if (!before) continue
     if (samePosition(before.position, marble.position)) continue
-    const cell = cellOf(actor, marble.position)
+    const cell = cellOf(actor, marble.position, state.ringSize)
     if (cell) cellList.push(cell)
   }
   return cellList
@@ -82,7 +89,7 @@ export const marbleCellsAfter = (state: GameState, move: Move, idList: MarbleId[
   for (const id of idList) {
     const marble = after.marbleList.find(candidate => candidate.id === id)
     if (!marble) continue
-    const cell = cellOf(marble.owner, marble.position)
+    const cell = cellOf(marble.owner, marble.position, after.ringSize)
     if (cell) cellList.push(cell)
   }
   return cellList

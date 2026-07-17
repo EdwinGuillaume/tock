@@ -3,7 +3,7 @@ import { createGame } from '../../src/engine/state'
 import { getLegalMoves, applyMove } from '../../src/engine/moves'
 import { place, setHand, findMarble, card } from '../../tests/support'
 
-const game = () => createGame(['human', 'bot', 'bot', 'bot'], () => 0)
+const game = () => createGame(['human', 'bot', 'bot', 'bot'], 48, () => 0)
 
 describe('jack swap', () => {
   it('offers a swap between own and opponent ring marbles', () => {

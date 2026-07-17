@@ -20,8 +20,8 @@ const buildGrid = (state: GameState, highlight: Highlight[]): Map<string, CellVi
   const grid = new Map<string, CellView>()
 
   // Empty ring border.
-  for (let index = 0; index < 48; index++) {
-    const cell = ringCoord(index)
+  for (let index = 0; index < state.ringSize; index++) {
+    const cell = ringCoord(index, state.ringSize)
     grid.set(key(cell.row, cell.col), { char: glyph.emptyRing })
   }
 
@@ -29,17 +29,18 @@ const buildGrid = (state: GameState, highlight: Highlight[]): Map<string, CellVi
   for (const owner of [0, 1, 2, 3] as PlayerId[]) {
     if (!state.playerList.some(player => player.id === owner && player.kind !== 'inactive')) continue
     for (let slot = 0; slot < finishSize; slot++) {
-      const cell = finishCoord(owner, slot)
+      const cell = finishCoord(owner, slot, state.ringSize)
       grid.set(key(cell.row, cell.col), { char: glyph.emptyFinish, color: inkColor[colorOf(owner)] })
     }
   }
 
-  // Centre marker.
-  grid.set(key(6, 6), { char: glyph.center })
+  // Centre marker (the grid midpoint: ringSize/4 cells per side, halved).
+  const center = state.ringSize / 8
+  grid.set(key(center, center), { char: glyph.center })
 
   // Marbles.
   for (const marble of state.marbleList) {
-    const cell = cellOf(marble.owner, marble.position)
+    const cell = cellOf(marble.owner, marble.position, state.ringSize)
     if (!cell) continue
     const isFinish = marble.position.zone === 'finish'
     grid.set(key(cell.row, cell.col), {
@@ -82,8 +83,9 @@ type BoardProps = { state: GameState, highlight?: Highlight[] }
 
 export const Board = ({ state, highlight = [] }: BoardProps) => {
   const grid = buildGrid(state, highlight)
-  const rowList = Array.from({ length: gridSize }, (unused, row) => row)
-  const colList = Array.from({ length: gridSize }, (unused, col) => col)
+  const side = gridSize(state.ringSize)
+  const rowList = Array.from({ length: side }, (unused, row) => row)
+  const colList = Array.from({ length: side }, (unused, col) => col)
   // Nests sit in the margins around the grid: seat 2 (yellow) top, seat 1
   // (green) left, seat 3 (blue) right, seat 0 (red, human) bottom — matching
   // layout.sideOf. Only active seats show marbles; inactive seats are blank.

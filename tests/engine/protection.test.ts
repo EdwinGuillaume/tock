@@ -3,7 +3,7 @@ import { createGame } from '../../src/engine/state'
 import { getLegalMoves } from '../../src/engine/moves'
 import { place, setHand, card } from '../../tests/support'
 
-const game = () => createGame(['human', 'bot', 'bot', 'bot'], () => 0)
+const game = () => createGame(['human', 'bot', 'bot', 'bot'], 48, () => 0)
 
 describe('start-square protection', () => {
   it('cannot land on an opponent protected on its start cell', () => {

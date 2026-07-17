@@ -1,5 +1,5 @@
 import type { GameState, Marble, Move, PlayerId } from '../engine'
-import { applyMove, ringSize, startCell } from '../engine'
+import { applyMove, startCell } from '../engine'
 
 export const WEIGHTS = {
   progress: 1,
@@ -11,12 +11,12 @@ export const WEIGHTS = {
 
 // One monotonic scalar per marble: higher means closer to winning. Home is 0, a
 // marble just out of the nest is 1, distance travelled from the owner's start
-// grows up to 48, and any finish slot (49..52) beats every ring cell.
-export const advancement = (marble: Marble): number => {
+// grows up to `ringSize`, and any finish slot (ringSize+1..) beats every ring cell.
+export const advancement = (marble: Marble, ringSize: number): number => {
   const position = marble.position
   if (position.zone === 'home') return 0
   if (position.zone === 'finish') return ringSize + 1 + position.index
-  const distance = (position.index - startCell(marble.owner) + ringSize) % ringSize
+  const distance = (position.index - startCell(marble.owner, ringSize) + ringSize) % ringSize
   return 1 + distance
 }
 
@@ -27,7 +27,7 @@ const maxBackwardReach = 4
 // an opponent up to 13 cells behind could reach it with a forward card, or up
 // to 4 cells ahead with the backward 4. Closer threats weigh more. Path
 // clearance is deliberately ignored (heuristic approximation).
-const threatAgainst = (targetIndex: number, opponentIndexList: number[]): number => {
+const threatAgainst = (targetIndex: number, opponentIndexList: number[], ringSize: number): number => {
   let strongest = 0
   for (const opponentIndex of opponentIndexList) {
     const behind = (targetIndex - opponentIndex + ringSize) % ringSize
@@ -45,7 +45,7 @@ const threatAgainst = (targetIndex: number, opponentIndexList: number[]): number
 // Total danger to `player`'s marbles in `state`: sum over own track marbles
 // (excluding one protected on its own start) of the strongest threat.
 export const exposureFor = (state: GameState, player: PlayerId): number => {
-  const ownStart = startCell(player)
+  const ownStart = startCell(player, state.ringSize)
   const opponentIndexList: number[] = []
   for (const marble of state.marbleList) {
     if (marble.owner !== player && marble.position.zone === 'track') {
@@ -57,7 +57,7 @@ export const exposureFor = (state: GameState, player: PlayerId): number => {
     if (marble.owner !== player) continue
     if (marble.position.zone !== 'track') continue
     if (marble.position.index === ownStart) continue
-    total += threatAgainst(marble.position.index, opponentIndexList)
+    total += threatAgainst(marble.position.index, opponentIndexList, state.ringSize)
   }
   return total
 }
@@ -79,7 +79,7 @@ export const scoreMove = (state: GameState, move: Move): number => {
     const beforeMarble = beforeById.get(afterMarble.id)
     if (!beforeMarble) continue
     if (afterMarble.owner === botId) {
-      advancementDelta += advancement(afterMarble) - advancement(beforeMarble)
+      advancementDelta += advancement(afterMarble, state.ringSize) - advancement(beforeMarble, state.ringSize)
       if (afterMarble.position.zone === 'finish' && beforeMarble.position.zone !== 'finish') {
         enteringFinish += 1
       }

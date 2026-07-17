@@ -4,7 +4,7 @@ import { createGame } from '../../src/engine'
 import { place } from '../../tests/support'
 import type { GameState, MarbleId, Position } from '../../src/engine'
 
-const game = (): GameState => createGame(['bot', 'bot', 'bot', 'bot'], () => 0)
+const game = (): GameState => createGame(['bot', 'bot', 'bot', 'bot'], 48, () => 0)
 
 const withMarbles = (entryList: [MarbleId, Position][]): GameState =>
   entryList.reduce((state, [id, position]) => place(state, id, position), game())

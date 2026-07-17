@@ -4,7 +4,7 @@ import { createGame } from '../../src/engine'
 import { place, setHand, card } from '../../tests/support'
 import type { GameState, Move } from '../../src/engine'
 
-const game = (): GameState => createGame(['bot', 'bot', 'bot', 'bot'], () => 0)
+const game = (): GameState => createGame(['bot', 'bot', 'bot', 'bot'], 48, () => 0)
 // game().currentPlayer is 0 (first active seat), so scoreMove evaluates for player 0.
 
 describe('scoreMove', () => {

@@ -37,4 +37,5 @@ export type GameState = {
   discardPile: Card[]
   currentPlayer: PlayerId
   winner: PlayerId | null
+  ringSize: number
 }

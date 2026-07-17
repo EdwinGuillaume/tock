@@ -37,9 +37,9 @@ export const App = () => {
   const [logList, setLogList] = useState<string[]>([])
   const [lastMoveCellList, setLastMoveCellList] = useState<Cell[]>([])
 
-  const handleStart = (botCount: number) => {
+  const handleStart = (botCount: number, ringSize: number) => {
     const kindList: PlayerKind[] = ['human', ...Array.from({ length: botCount }, () => 'bot' as const)]
-    setState(createGame(kindList))
+    setState(createGame(kindList, ringSize))
     setLogList([])
     setLastMoveCellList([])
   }

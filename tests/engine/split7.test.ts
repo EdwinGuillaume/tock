@@ -4,7 +4,7 @@ import { createGame } from '../../src/engine/state'
 import { getLegalMoves, applyMove } from '../../src/engine/moves'
 import { place, setHand, findMarble, card } from '../../tests/support'
 
-const game = () => createGame(['human', 'bot', 'bot', 'bot'], () => 0)
+const game = () => createGame(['human', 'bot', 'bot', 'bot'], 48, () => 0)
 const isSplit = (move: Move): move is Extract<Move, { type: 'split7' }> => move.type === 'split7'
 
 describe('split 7', () => {

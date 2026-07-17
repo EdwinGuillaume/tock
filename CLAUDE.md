@@ -108,10 +108,15 @@ spec's §4 sketch. `types.ts` (absent from the §4 sketch) holds the
 JSON-serializable data model.
 
 The engine's public surface (`src/engine/index.ts`) is the only thing UIs and AI
-import: `createGame`, `getLegalMoves(state, playerId): Move[]`,
-`applyMove(state, move, random?): GameState`, `nextPlayer`, the board helpers (`ringSize`,
-`quadrantSize`, `playerCount`, `finishSize`, `startCell`, `laneMouth`), plus
-`handSize` / `colorOf` / `marbleId` and all domain types.
+import: `createGame(kindList, ringSize?, random?)`, `getLegalMoves(state, playerId): Move[]`,
+`applyMove(state, move, random?): GameState`, `nextPlayer`, the board helpers
+(`quadrantSize(ringSize)`, `playerCount`, `finishSize`, `startCell(player, ringSize)`,
+`laneMouth(player, ringSize)`, `DEFAULT_RING_SIZE`, `RING_SIZE_OPTIONS`), plus
+`handSize` / `colorOf` / `marbleId` and all domain types. **The ring size is a
+runtime choice, not a constant**: it lives on `GameState.ringSize` (48 or 72,
+chosen at setup) and every geometry helper takes it as an explicit trailing
+argument — there is no exported `ringSize` constant. `getLegalMoves` / `applyMove`
+/ `scoreMove` keep their signatures because they read `state.ringSize` internally.
 
 The bot's public surface (`src/ai/index.ts`) is the only thing a UI imports to
 drive a seat: `pickMove` / `pickRandomMove` (selection) and `scoreMove` /

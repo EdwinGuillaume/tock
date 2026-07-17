@@ -5,7 +5,7 @@ import { createGame, getLegalMoves } from '../../src/engine'
 import { place, setHand, card } from '../../tests/support'
 import type { GameState, Move } from '../../src/engine'
 
-const game = (): GameState => createGame(['bot', 'bot', 'bot', 'bot'], () => 0)
+const game = (): GameState => createGame(['bot', 'bot', 'bot', 'bot'], 48, () => 0)
 
 describe('pickRandomMove', () => {
   const moveList: Move[] = [

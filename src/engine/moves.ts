@@ -1,5 +1,5 @@
 import type { Card, GameState, Marble, MarbleId, Move, Player, PlayerId, Position } from './types'
-import { finishSize, ringDestinations, ringSize, startCell, stepsToMouth } from './board'
+import { finishSize, ringDestinations, startCell, stepsToMouth } from './board'
 import { canExit, moveSteps } from './cards'
 import { drawCard } from './state'
 
@@ -70,8 +70,8 @@ const withTurnDone = (
   }
 }
 
-const isProtected = (marble: Marble): boolean =>
-  marble.position.zone === 'track' && marble.position.index === startCell(marble.owner)
+const isProtected = (marble: Marble, ringSize: number): boolean =>
+  marble.position.zone === 'track' && marble.position.index === startCell(marble.owner, ringSize)
 
 // Ring cells strictly between origin and the point where the marble leaves the
 // ring (`ringSteps` steps away) must hold no protected marble.
@@ -79,11 +79,11 @@ const pathClear = (state: GameState, mover: Marble, steps: number, ringSteps: nu
   if (mover.position.zone !== 'track') return true
   const direction = steps >= 0 ? 1 : -1
   for (let step = 1; step < ringSteps; step++) {
-    const index = (((mover.position.index + direction * step) % ringSize) + ringSize) % ringSize
+    const index = (((mover.position.index + direction * step) % state.ringSize) + state.ringSize) % state.ringSize
     const occupant = state.marbleList.find(
       marble => marble.position.zone === 'track' && marble.position.index === index
     )
-    if (occupant && isProtected(occupant)) return false
+    if (occupant && isProtected(occupant, state.ringSize)) return false
   }
   return true
 }
@@ -97,11 +97,11 @@ const resolveDestination = (
   enterLane: boolean
 ): Position | null => {
   if (mover.position.zone === 'track') {
-    const reach = ringDestinations(mover.owner, mover.position.index, steps)
+    const reach = ringDestinations(mover.owner, mover.position.index, steps, state.ringSize)
     const wanted = enterLane ? reach.lane : reach.ring
     if (!wanted) return null
     const ringStepCount = wanted.zone === 'finish'
-      ? stepsToMouth(mover.owner, mover.position.index, steps)
+      ? stepsToMouth(mover.owner, mover.position.index, steps, state.ringSize)
       : Math.abs(steps)
     if (!pathClear(state, mover, steps, ringStepCount)) return null
     if (wanted.zone === 'finish' && !finishPathClear(state, mover, wanted.index)) return null
@@ -146,7 +146,7 @@ const applyMoveInner = (state: GameState, move: Move, random: () => number): Gam
 
   if (move.type === 'exit') {
     const mover = findMarble(state, move.marbleId)
-    const to: Position = { zone: 'track', index: startCell(actor.id) }
+    const to: Position = { zone: 'track', index: startCell(actor.id, state.ringSize) }
     return withTurnDone(state, actor, move, relocate(state.marbleList, mover, to), random)
   }
 
@@ -194,7 +194,7 @@ const canLandOn = (state: GameState, mover: Marble, to: Position): boolean => {
   )
   if (!occupant) return true
   if (occupant.owner === mover.owner) return false
-  return !isProtected(occupant)
+  return !isProtected(occupant, state.ringSize)
 }
 
 export const getLegalMoves = (state: GameState, player: PlayerId): Move[] => {
@@ -206,7 +206,7 @@ export const getLegalMoves = (state: GameState, player: PlayerId): Move[] => {
     const { rank } = playedCard
 
     if (canExit(rank)) {
-      const startIndex = startCell(player)
+      const startIndex = startCell(player, state.ringSize)
       const startBlockedByOwn = marbleList.some(
         marble => marble.position.zone === 'track' && marble.position.index === startIndex
       )
@@ -248,7 +248,7 @@ export const getLegalMoves = (state: GameState, player: PlayerId): Move[] => {
       // marble cannot be swap-stolen.
       const ownRingList = marbleList.filter(marble => marble.position.zone === 'track')
       const enemyRingList = state.marbleList.filter(
-        marble => marble.owner !== player && marble.position.zone === 'track' && !isProtected(marble)
+        marble => marble.owner !== player && marble.position.zone === 'track' && !isProtected(marble, state.ringSize)
       )
       for (const own of ownRingList) {
         for (const enemy of enemyRingList) {

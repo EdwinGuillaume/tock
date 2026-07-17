@@ -16,7 +16,7 @@ const makeRandom = (seed: number): (() => number) => {
 
 const playGame = (seed: number) => {
   const random = makeRandom(seed)
-  let state = createGame(['bot', 'bot', 'bot', 'bot'], random)
+  let state = createGame(['bot', 'bot', 'bot', 'bot'], 48, random)
   const moveLog: string[] = []
   let iterations = 0
   const maxIterations = 20000

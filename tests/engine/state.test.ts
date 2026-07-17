@@ -27,4 +27,12 @@ describe('createGame', () => {
     // 52 - (4 players * 5 cards) = 32
     expect(state.drawPile).toHaveLength(32)
   })
+
+  it('defaults to a 48-cell ring', () => {
+    expect(createGame(['human', 'bot']).ringSize).toBe(48)
+  })
+
+  it('stores the chosen ring size on the state', () => {
+    expect(createGame(['human', 'bot'], 72).ringSize).toBe(72)
+  })
 })

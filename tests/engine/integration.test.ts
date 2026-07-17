@@ -4,7 +4,7 @@ import { createGame, getLegalMoves, applyMove } from '../../src/engine'
 describe('engine integration', () => {
   it('plays legal moves without throwing and always offers at least one move', () => {
     // fixed rng for the initial deal; bots always take the first legal move
-    let state = createGame(['bot', 'bot', 'bot', 'bot'], () => 0)
+    let state = createGame(['bot', 'bot', 'bot', 'bot'], 48, () => 0)
     for (let ply = 0; ply < 2000 && state.winner === null; ply++) {
       const moveList = getLegalMoves(state, state.currentPlayer)
       expect(moveList.length).toBeGreaterThan(0) // at worst a discard is available
