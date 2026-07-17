@@ -41,15 +41,19 @@ test('renders a 19x19 board with a centre marker for a 72-cell game', () => {
   expect(text).toContain('●') // the placed marble
 })
 
-test('renders active-seat nests with home counts and omits inactive seats', () => {
+const countChar = (text: string, char: string): number => text.split(char).length - 1
+
+test('renders active-seat nests in the corners and omits inactive seats', () => {
   // human (seat 0/red) + one bot (seat 1/green); seats 2/3 inactive.
   let state = createGame(['human', 'bot'])
   state = place(state, 'p0m0', { zone: 'track', index: 0 }) // red: 3 home, 1 out
   const { lastFrame } = render(<Board state={state} />)
   const text = strip(lastFrame())
-  expect(text).toContain('red')          // human nest labelled
-  expect(text).toContain('green')        // active bot nest labelled
-  expect(text).not.toContain('yellow')   // inactive seat: no nest
-  expect(text).not.toContain('blue')     // inactive seat: no nest
-  expect(text).toContain('○')            // red has one marble out -> an empty nest slot
+  // Red has one marble out -> exactly one empty nest slot.
+  expect(countChar(text, '○')).toBe(1)
+  // 3 red home + 4 green home + 1 red on track = 8 filled dots; inactive seats add none.
+  expect(countChar(text, '●')).toBe(8)
+  // No margin colour labels any more.
+  expect(text).not.toContain('red')
+  expect(text).not.toContain('green')
 })

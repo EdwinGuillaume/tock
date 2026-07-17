@@ -1,8 +1,8 @@
 import type { GameState, MarbleId, Move, PlayerId, Position } from '../engine'
 import { applyMove } from '../engine'
 
-// The board is a square whose border holds the ring: `ringSize / 4` cells per
-// side, so the grid spans one more cell than a quadrant in each dimension.
+// The grid is a square of `ringSize / 4 + 1` cells per side; the ring is drawn
+// as a plus/cross inside it (see ringCoord) and finish lanes thread up each arm.
 export const gridSize = (ringSize: number): number => ringSize / 4 + 1
 
 export type Cell = { row: number, col: number }
@@ -23,19 +23,66 @@ export const sideOf: Record<PlayerId, Side> = {
   3: 'right'
 }
 
-// Ring index -> grid cell on the border of a (ringSize/4 + 1) square. Index 0
-// (red's start) is bottom-middle; travel runs counterclockwise (bottom -> left
-// -> top -> right), matching startCell(seat) landing each start at a side
-// midpoint. `g` is the last row/col index, `mid` the side midpoint.
+// The ring traces the plus/cross perimeter: the two outer lanes of each arm, the
+// arm tips, and one rounded cell at each inner corner. Built once per ring size
+// and cached, then indexed. The walk starts at red's start square (bottom arm,
+// left outer lane) and runs bottom -> left -> top -> right, so seat k lands at
+// index k * ringSize / 4 — matching startCell.
+const ringCache = new Map<number, Cell[]>()
+
+const STEP = [[1, 0], [-1, 0], [0, 1], [0, -1]] as const
+
+const isPlus = (row: number, col: number, mid: number): boolean =>
+  Math.abs(col - mid) <= 1 || Math.abs(row - mid) <= 1
+
+const buildRing = (ringSize: number): Cell[] => {
+  const side = gridSize(ringSize)
+  const mid = (side - 1) / 2
+  const arm = (side - 3) / 2
+  const inGrid = (row: number, col: number): boolean =>
+    row >= 0 && row < side && col >= 0 && col < side
+  const onRing = (row: number, col: number): boolean => {
+    // isPlus only compares against mid, with no grid bounds, so a cell must be
+    // confirmed in-grid first or the walk can escape past an arm tip.
+    if (!inGrid(row, col)) return false
+    // The rounded inner-corner cells sit diagonally outside the base cross
+    // shape (isPlus is false there), so this check must run before the
+    // isPlus guard or the corners are unreachable and the walk stalls.
+    const isCorner =
+      (row === arm - 1 || row === side - arm) && (col === arm - 1 || col === side - arm)
+    if (isCorner) return true
+    if (!isPlus(row, col, mid)) return false
+    return STEP.some(([dr, dc]) => !inGrid(row + dr, col + dc) || !isPlus(row + dr, col + dc, mid))
+  }
+  const neighbours = (cell: Cell): Cell[] =>
+    STEP.map(([dr, dc]) => ({ row: cell.row + dr, col: cell.col + dc })).filter(next =>
+      onRing(next.row, next.col)
+    )
+  const same = (a: Cell, b: Cell): boolean => a.row === b.row && a.col === b.col
+  const start: Cell = { row: side - 1, col: mid - 1 }
+  const order: Cell[] = [start]
+  let prev = start
+  let cur: Cell = { row: side - 2, col: mid - 1 }
+  while (!same(cur, start)) {
+    order.push(cur)
+    // Defensive cap: a valid ring never exceeds ringSize cells, so this breaks
+    // out instead of hanging the UI if a future geometry change never cycles back.
+    if (order.length > ringSize) break
+    const next = neighbours(cur).find(candidate => !same(candidate, prev))
+    if (!next) break
+    prev = cur
+    cur = next
+  }
+  return order
+}
+
+// Ring index -> grid cell on the plus perimeter. Index is normalised mod ringSize
+// (wraps), matching the abstract loop.
 export const ringCoord = (index: number, ringSize: number): Cell => {
-  const g = ringSize / 4
-  const mid = g / 2
+  const ring = ringCache.get(ringSize) ?? buildRing(ringSize)
+  ringCache.set(ringSize, ring)
   const i = ((index % ringSize) + ringSize) % ringSize
-  if (i <= mid) return { row: g, col: mid - i }
-  if (i <= mid + g) return { row: g - (i - mid), col: 0 }
-  if (i <= mid + 2 * g) return { row: 0, col: i - (mid + g) }
-  if (i <= mid + 3 * g) return { row: i - (mid + 2 * g), col: g }
-  return { row: g, col: g - (i - (mid + 3 * g)) }
+  return ring[i] ?? { row: 0, col: 0 }
 }
 
 // Finish-lane cell for `owner`'s slot `index` (0 nearest the ring, 3 deepest),

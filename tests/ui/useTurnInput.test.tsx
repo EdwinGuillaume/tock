@@ -55,9 +55,9 @@ test('pickMarble previews the landing cell, keeping the source marble emphasized
   const selection: Selection = { step: 'pickMarble', card: { rank: '6', suit: 'hearts' }, marbleCursor: 0 }
   const highlight = highlightFor(selection, ctx)
   // Source marble stays emphasized at its current ring cell (track index 0).
-  expect(highlight).toContainEqual({ cell: { row: 12, col: 6 }, kind: 'selected' })
+  expect(highlight).toContainEqual({ cell: { row: 12, col: 5 }, kind: 'selected' })
   // The '6' lands it six steps on (track index 6) — previewed as a landing square.
-  expect(highlight).toContainEqual({ cell: { row: 12, col: 0 }, kind: 'landing' })
+  expect(highlight).toContainEqual({ cell: { row: 7, col: 4 }, kind: 'landing' })
 })
 
 test('pickMarble on a 5 emphasizes the opponent marble and previews its push landing', () => {

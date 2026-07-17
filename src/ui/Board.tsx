@@ -1,7 +1,7 @@
 import { Box, Text } from 'ink'
 import type { GameState, PlayerId } from '../engine'
 import { colorOf, finishSize } from '../engine'
-import type { Highlight } from './layout'
+import type { Cell, Highlight } from './layout'
 import { cellOf, finishCoord, gridSize, ringCoord } from './layout'
 import { glyph, inkColor } from './theme'
 
@@ -19,7 +19,7 @@ const isActive = (state: GameState, owner: PlayerId): boolean =>
 const buildGrid = (state: GameState, highlight: Highlight[]): Map<string, CellView> => {
   const grid = new Map<string, CellView>()
 
-  // Empty ring border.
+  // Empty ring cells (the plus/cross perimeter).
   for (let index = 0; index < state.ringSize; index++) {
     const cell = ringCoord(index, state.ringSize)
     grid.set(key(cell.row, cell.col), { char: glyph.emptyRing })
@@ -61,22 +61,30 @@ const buildGrid = (state: GameState, highlight: Highlight[]): Map<string, CellVi
     grid.set(key(cell.row, cell.col), { char: existing?.char ?? glyph.emptyRing, color: existing?.color, inverse: true })
   }
 
+  // Nests: each active seat's 4 marbles as a 2x2 block in the corner by its arm.
+  // Filled dot = marble still home, empty circle = marble out. Inactive seats
+  // leave their corner blank.
+  const side = gridSize(state.ringSize)
+  const nestAnchor: Record<PlayerId, Cell> = {
+    0: { row: side - 3, col: 1 },        // red   bottom-left
+    1: { row: 0, col: 1 },               // green top-left
+    2: { row: 0, col: side - 3 },        // yellow top-right
+    3: { row: side - 3, col: side - 3 }  // blue  bottom-right
+  }
+  for (const owner of [0, 1, 2, 3] as PlayerId[]) {
+    if (!isActive(state, owner)) continue
+    const home = homeCount(state, owner)
+    const anchor = nestAnchor[owner]
+    for (let slot = 0; slot < 4; slot++) {
+      const cell = { row: anchor.row + Math.floor(slot / 2), col: anchor.col + (slot % 2) }
+      grid.set(key(cell.row, cell.col), {
+        char: slot < home ? glyph.filledNest : glyph.emptyNest,
+        color: inkColor[colorOf(owner)]
+      })
+    }
+  }
+
   return grid
-}
-
-type NestProps = { state: GameState, owner: PlayerId }
-
-// One seat's nest: a labelled line of 4 slots — filled (owner colour) for
-// marbles still home, empty for those out. Inactive seats render a blank line so
-// the surrounding board layout stays aligned.
-const Nest = ({ state, owner }: NestProps) => {
-  if (!isActive(state, owner)) return <Text> </Text>
-  const home = homeCount(state, owner)
-  const color = colorOf(owner)
-  const slotList = Array.from({ length: 4 }, (unused, index) => (index < home ? glyph.filledNest : glyph.emptyNest))
-  return (
-    <Text color={inkColor[color]}>{color} {slotList.join(' ')}</Text>
-  )
 }
 
 type BoardProps = { state: GameState, highlight?: Highlight[] }
@@ -86,33 +94,20 @@ export const Board = ({ state, highlight = [] }: BoardProps) => {
   const side = gridSize(state.ringSize)
   const rowList = Array.from({ length: side }, (unused, row) => row)
   const colList = Array.from({ length: side }, (unused, col) => col)
-  // Nests sit in the margins around the grid: seat 2 (yellow) top, seat 1
-  // (green) left, seat 3 (blue) right, seat 0 (red, human) bottom — matching
-  // layout.sideOf. Only active seats show marbles; inactive seats are blank.
   return (
     <Box flexDirection="column" alignItems="center">
-      <Nest state={state} owner={2} />
-      <Box alignItems="center">
-        <Box marginRight={1}>
-          <Nest state={state} owner={1} />
+      {rowList.map(row => (
+        <Box key={row}>
+          {colList.map(col => {
+            const view = grid.get(key(row, col)) ?? { char: ' ' }
+            return (
+              <Text key={col} color={view.color} inverse={view.inverse}>
+                {view.char}{' '}
+              </Text>
+            )
+          })}
         </Box>
-        <Box flexDirection="column">
-          {rowList.map(row => (
-            <Box key={row}>
-              {colList.map(col => {
-                const view = grid.get(key(row, col)) ?? { char: ' ' }
-                return (
-                  <Text key={col} color={view.color} inverse={view.inverse}>
-                    {view.char}{' '}
-                  </Text>
-                )
-              })}
-            </Box>
-          ))}
-        </Box>
-        <Nest state={state} owner={3} />
-      </Box>
-      <Nest state={state} owner={0} />
+      ))}
     </Box>
   )
 }
