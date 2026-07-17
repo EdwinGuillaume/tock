@@ -17,5 +17,6 @@ export const glyph = {
   filledFinish: '◆',
   emptyNest: '○',
   filledNest: '●',
-  center: '✦'
+  center: '✦',
+  landing: '□'
 } as const

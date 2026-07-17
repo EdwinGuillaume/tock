@@ -18,7 +18,7 @@ import type { Selection, TurnContext } from './selection'
 import { playableCard } from './selection'
 
 const HUMAN = 0
-const BOT_DELAY_MS = 700
+const BOT_DELAY_MS = 1000
 
 const promptFor = (selectionStep: Selection['step']): string => {
   switch (selectionStep) {
@@ -99,9 +99,13 @@ export const App = () => {
     : null
   const playableList = humanContext ? humanHand.map(entry => playableCard(entry, humanContext)) : undefined
 
-  // While the human is choosing, preview their selection; otherwise keep the
-  // last move's cells lit so the human can see what a bot just did.
-  const boardHighlight = highlight.length > 0 ? highlight : lastMoveCellList
+  // While the human is choosing, preview their selection (landing squares +
+  // the picked marble); otherwise keep the last move's cells lit — emphasized
+  // in place, since those marbles have really landed — so the human can see
+  // what a bot just did.
+  const boardHighlight = highlight.length > 0
+    ? highlight
+    : lastMoveCellList.map(cell => ({ cell, kind: 'selected' as const }))
 
   return (
     <Box flexDirection="column">

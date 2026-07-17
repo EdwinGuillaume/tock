@@ -31,10 +31,18 @@ describe('jack swap', () => {
     expect(findMarble(next, 'p1m0').position).toEqual({ zone: 'track', index: 5 })
   })
 
-  it('does not offer an own marble protected on its start cell as a swap source', () => {
+  it('offers an own marble on its start cell as a swap source (protection is defensive only)', () => {
     let state = setHand(game(), 0, [card('J')])
-    state = place(state, 'p0m0', { zone: 'track', index: 0 })  // own marble on its own start (protected)
+    state = place(state, 'p0m0', { zone: 'track', index: 0 })  // own marble on its own start
     state = place(state, 'p1m0', { zone: 'track', index: 20 }) // unprotected enemy on the ring
+    const moveList = getLegalMoves(state, 0)
+    expect(moveList).toContainEqual({ type: 'swap', card: card('J'), marbleId: 'p0m0', targetMarbleId: 'p1m0' })
+  })
+
+  it('still refuses to swap an opponent marble protected on its start cell', () => {
+    let state = setHand(game(), 0, [card('J')])
+    state = place(state, 'p0m0', { zone: 'track', index: 5 })  // own unprotected marble
+    state = place(state, 'p1m0', { zone: 'track', index: 12 }) // enemy on its own start (protected)
     const moveList = getLegalMoves(state, 0)
     expect(moveList.some(move => move.type === 'swap')).toBe(false)
   })

@@ -243,7 +243,10 @@ export const getLegalMoves = (state: GameState, player: PlayerId): Move[] => {
     }
 
     if (rank === 'J') {
-      const ownRingList = marbleList.filter(marble => marble.position.zone === 'track' && !isProtected(marble))
+      // Protection is defensive only: you may swap away your own marble even on
+      // its start cell (you give up its protection), but a protected opponent
+      // marble cannot be swap-stolen.
+      const ownRingList = marbleList.filter(marble => marble.position.zone === 'track')
       const enemyRingList = state.marbleList.filter(
         marble => marble.owner !== player && marble.position.zone === 'track' && !isProtected(marble)
       )

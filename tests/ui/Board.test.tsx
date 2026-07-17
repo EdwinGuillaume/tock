@@ -16,6 +16,15 @@ test('renders a marble on the ring at its start cell', () => {
   expect(text).toContain('●')
 })
 
+test('renders a white square at a landing-preview cell', () => {
+  let state = createGame(['human', 'bot'])
+  state = place(state, 'p0m0', { zone: 'track', index: 0 })
+  const { lastFrame } = render(
+    <Board state={state} highlight={[{ cell: { row: 12, col: 1 }, kind: 'landing' }]} />
+  )
+  expect(strip(lastFrame())).toContain('□')
+})
+
 test('renders 13 rows', () => {
   const state = createGame(['human', 'bot', 'bot', 'bot'])
   const { lastFrame } = render(<Board state={state} />)

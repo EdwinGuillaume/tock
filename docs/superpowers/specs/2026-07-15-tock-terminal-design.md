@@ -199,7 +199,10 @@ outcome**, so that the player/AI decides.
 
 **Start-square protection:**
 - A marble sitting on **its own start cell** is **protected**: it can be neither
-  captured, nor passed over, nor swapped (Jack) until it has moved.
+  captured, nor passed over, nor swap-stolen by an opponent's Jack until it has
+  moved. Protection is **defensive only** — it shields the marble from other
+  players' actions. Its own owner may still choose to swap it away with a Jack
+  (voluntarily giving up the protection).
 
 **Home stretch:**
 - Entry is governed by the geometry of the **mouth** (§5.2), crossable in both
@@ -217,8 +220,9 @@ outcome**, so that the player/AI decides.
   marbles; each sub-move must be legal on its own (captures included). If no
   distribution consumes the full 7, the card is only playable as a discard.
 - **Jack (swap)**: swap one of your marbles with an opponent's marble, **only on
-  the ring** (neither nest nor home stretch); a marble protected on its start cell
-  cannot be swapped.
+  the ring** (neither nest nor home stretch); an **opponent** marble protected on
+  its start cell cannot be swapped, but your **own** start-cell marble is a valid
+  swap source (protection is defensive only, see §7 Start-square protection).
 - **4 backward**: moves back 4 on the ring (can capture while moving backward, can
   enter the home stretch via the mouth, see §5.2).
 

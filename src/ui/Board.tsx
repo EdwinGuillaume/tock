@@ -1,7 +1,7 @@
 import { Box, Text } from 'ink'
 import type { GameState, PlayerId } from '../engine'
 import { colorOf, finishSize } from '../engine'
-import type { Cell } from './layout'
+import type { Highlight } from './layout'
 import { cellOf, finishCoord, gridSize, ringCoord } from './layout'
 import { glyph, inkColor } from './theme'
 
@@ -16,7 +16,7 @@ const homeCount = (state: GameState, owner: PlayerId): number =>
 const isActive = (state: GameState, owner: PlayerId): boolean =>
   state.playerList.some(player => player.id === owner && player.kind !== 'inactive')
 
-const buildGrid = (state: GameState, highlight: Cell[]): Map<string, CellView> => {
+const buildGrid = (state: GameState, highlight: Highlight[]): Map<string, CellView> => {
   const grid = new Map<string, CellView>()
 
   // Empty ring border.
@@ -48,8 +48,14 @@ const buildGrid = (state: GameState, highlight: Cell[]): Map<string, CellView> =
     })
   }
 
-  // Highlight overlay (selection targets).
-  for (const cell of highlight) {
+  // Highlight overlay. `landing` draws a white square where a marble would go
+  // (drawn on top, so it marks empty cells and capture targets alike);
+  // `selected` emphasizes a real marble in place, keeping its glyph and colour.
+  for (const { cell, kind } of highlight) {
+    if (kind === 'landing') {
+      grid.set(key(cell.row, cell.col), { char: glyph.landing, color: 'whiteBright' })
+      continue
+    }
     const existing = grid.get(key(cell.row, cell.col))
     grid.set(key(cell.row, cell.col), { char: existing?.char ?? glyph.emptyRing, color: existing?.color, inverse: true })
   }
@@ -72,7 +78,7 @@ const Nest = ({ state, owner }: NestProps) => {
   )
 }
 
-type BoardProps = { state: GameState, highlight?: Cell[] }
+type BoardProps = { state: GameState, highlight?: Highlight[] }
 
 export const Board = ({ state, highlight = [] }: BoardProps) => {
   const grid = buildGrid(state, highlight)

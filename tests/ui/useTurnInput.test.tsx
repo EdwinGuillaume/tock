@@ -1,9 +1,10 @@
 import { Text } from 'ink'
 import { render } from 'ink-testing-library'
 import { expect, test, vi } from 'vitest'
-import { createGame } from '../../src/engine'
+import { createGame, getLegalMoves } from '../../src/engine'
 import type { GameState, Move } from '../../src/engine'
-import { useTurnInput } from '../../src/ui/hooks/useTurnInput'
+import { highlightFor, useTurnInput } from '../../src/ui/hooks/useTurnInput'
+import type { Selection, TurnContext } from '../../src/ui/selection'
 import { place, setHand } from '../support'
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 30))
@@ -43,4 +44,17 @@ test('previews the exit destination when selecting a marble still in the nest', 
   await tick()
   // The home marble has no cell of its own; the exit destination is previewed.
   expect(lastFrame()).toContain('pickMarble:1')
+})
+
+test('pickMarble previews the landing cell, keeping the source marble emphasized', () => {
+  let state = createGame(['human', 'bot'])
+  state = place(state, 'p0m0', { zone: 'track', index: 0 })
+  state = setHand(state, 0, [{ rank: '5', suit: 'hearts' }])
+  const ctx: TurnContext = { state, legalMoves: getLegalMoves(state, 0), human: 0 }
+  const selection: Selection = { step: 'pickMarble', card: { rank: '5', suit: 'hearts' }, marbleCursor: 0 }
+  const highlight = highlightFor(selection, ctx)
+  // Source marble stays emphasized at its current ring cell (track index 0).
+  expect(highlight).toContainEqual({ cell: { row: 12, col: 6 }, kind: 'selected' })
+  // The '5' lands it five steps on (track index 5) — previewed as a landing square.
+  expect(highlight).toContainEqual({ cell: { row: 12, col: 1 }, kind: 'landing' })
 })

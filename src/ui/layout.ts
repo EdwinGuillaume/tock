@@ -6,6 +6,13 @@ export const gridSize = 13
 export type Cell = { row: number, col: number }
 export type Side = 'bottom' | 'left' | 'top' | 'right'
 
+// A highlighted cell. `selected` emphasizes a real marble (the one under the
+// cursor, or a cell a completed move landed on) — the glyph stays, drawn
+// inverse. `landing` previews a destination a marble *would* reach if chosen —
+// drawn as a white square, since nothing sits there yet.
+export type HighlightKind = 'selected' | 'landing'
+export type Highlight = { cell: Cell, kind: HighlightKind }
+
 // Seat -> board side. Human is always seat 0 and sits at the bottom (spec §7).
 export const sideOf: Record<PlayerId, Side> = {
   0: 'bottom',
