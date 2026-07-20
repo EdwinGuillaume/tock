@@ -1,6 +1,6 @@
 import type { GameState, Move } from '../engine'
 import { getLegalMoves } from '../engine'
-import { scoreMove } from './score'
+import { scoreMove, cardKeepValue } from './score'
 
 // Pick one move uniformly at random from a non-empty list, using an injected RNG
 // so callers stay deterministic under test.
@@ -20,5 +20,17 @@ export const pickMove = (state: GameState, random: () => number = Math.random): 
   const scoredList = moveList.map(move => ({ move, score: scoreMove(state, move) }))
   const bestScore = Math.max(...scoredList.map(entry => entry.score))
   const topList = scoredList.filter(entry => entry.score === bestScore).map(entry => entry.move)
+  // Forced-discard turn: getLegalMoves offers `discard` moves only when nothing
+  // else is playable, so if every top move is a discard, keep the strong cards
+  // and throw the weakest. The lowest keep-value is unique (distinct per rank,
+  // and discards are de-duplicated by rank), so this is deterministic; the RNG
+  // path is kept for uniformity and as a defensive fallback.
+  const discardTopList = topList.filter(move => move.type === 'discard')
+  if (discardTopList.length === topList.length && discardTopList.length > 0) {
+    const keepList = discardTopList.map(move => ({ move, keep: cardKeepValue(move.card.rank) }))
+    const minKeep = Math.min(...keepList.map(entry => entry.keep))
+    const weakestList = keepList.filter(entry => entry.keep === minKeep).map(entry => entry.move)
+    return pickRandomMove(weakestList, random)
+  }
   return pickRandomMove(topList, random)
 }

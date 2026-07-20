@@ -1,4 +1,4 @@
-import type { GameState, Marble, Move, PlayerId } from '../engine'
+import type { GameState, Marble, Move, PlayerId, Rank } from '../engine'
 import { applyMove, startCell } from '../engine'
 
 export const WEIGHTS = {
@@ -9,6 +9,31 @@ export const WEIGHTS = {
   exposure: 3,
   opponentProgress: 1.5
 } as const
+
+// How much the bot wants to keep each card when it is forced to discard: higher
+// means held longer, so the lowest-valued offered card is thrown first. The 4
+// tops the list — played right after an exit it sends a marble to start - 4,
+// three cells behind its own lane mouth, saving almost a full lap. Then the
+// flexible / high-impact specials (7, J, A, K), the offensive 5, and finally the
+// plain forward cards by descending reach (the 2 is dumped first). Every rank
+// gets a distinct value, so the forced-discard choice is deterministic.
+const KEEP_VALUE: Record<Rank, number> = {
+  '4': 13,
+  '7': 12,
+  J: 11,
+  A: 10,
+  K: 9,
+  '5': 8,
+  Q: 7,
+  '10': 6,
+  '9': 5,
+  '8': 4,
+  '6': 3,
+  '3': 2,
+  '2': 1
+}
+
+export const cardKeepValue = (rank: Rank): number => KEEP_VALUE[rank]
 
 // One monotonic scalar per marble: higher means closer to winning. Home is 0, a
 // marble just out of the nest is 1, distance travelled from the owner's start

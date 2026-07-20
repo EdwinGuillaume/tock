@@ -71,4 +71,24 @@ describe('pickMove', () => {
     )
     expect(pickMove(state, () => 0)).toMatchObject({ type: 'push', marbleId: 'p1m0' })
   })
+
+  it('discards the weakest card and keeps the strong ones when forced', () => {
+    // all four own marbles are home and the hand has no A/K, so nothing is
+    // playable -> getLegalMoves offers only discards for {2, 4, 7}. Smart discard
+    // throws the 2 (lowest keep-value) and keeps the 4 and 7.
+    const state = setHand(game(), 0, [card('2'), card('4'), card('7')])
+    expect(pickMove(state, () => 0)).toEqual({ type: 'discard', card: card('2') })
+  })
+
+  it('discards the lowest-value filler', () => {
+    const state = setHand(game(), 0, [card('6'), card('3'), card('2')])
+    expect(pickMove(state, () => 0)).toEqual({ type: 'discard', card: card('2') })
+  })
+
+  it('picks the same forced discard whatever the RNG (deterministic)', () => {
+    const state = setHand(game(), 0, [card('2'), card('4'), card('7')])
+    for (const value of [0, 0.5, 0.99]) {
+      expect(pickMove(state, () => value)).toEqual({ type: 'discard', card: card('2') })
+    }
+  })
 })

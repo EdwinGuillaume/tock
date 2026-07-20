@@ -30,7 +30,6 @@ In scope:
 
 Out of scope (deferred, §7):
 - Multi-ply / "Hard" bot.
-- Smart discard selection (keeping high-value cards).
 - Path-clearance inside the exposure estimate.
 - Modelling opponents' hidden hands.
 
@@ -191,16 +190,23 @@ Edge cases:
   calling `pickMove`. The self-play integration test asserts this
   invariant directly (`getLegalMoves(...).length > 0` on every turn), and the
   defensive throw is unit-tested in `bot.test.ts`.
-- **Forced discards** — when the hand is non-empty but nothing else is playable,
-  `getLegalMoves` offers `discard` moves; they all score ≈ 0 (no progress, no
-  capture, no exposure change on already-safe boards), so the random tie-break
-  picks among them. (Smart discard is deferred, §7.)
+- **Forced discards (smart discard)** — when the hand is non-empty but nothing
+  else is playable, `getLegalMoves` offers `discard` moves; they all score ≈ 0
+  (no progress, no capture, no exposure change on already-safe boards), so they
+  form the tied top set. Rather than pick at random, `pickMove` throws the card
+  with the lowest **keep-value** and holds the rest, via the pure helper
+  `cardKeepValue(rank)` (in `score.ts`). Keep-value ranking (kept longest ⟶
+  discarded first): `4 > 7 > J > A > K > 5 > Q > 10 > 9 > 8 > 6 > 3 > 2` — the 4
+  leads because, played just after an exit, it lands a marble at `start - 4`, a
+  few cells behind its own lane mouth, saving almost a full lap. Each rank has a
+  distinct value and discards are de-duplicated by rank, so the choice is
+  deterministic (RNG-independent). `scoreMove` is unchanged; smart discard lives
+  in the selector. See `docs/superpowers/specs/2026-07-20-tock-ai-smart-discard-design.md`.
 
 ## 7. Deferred / future work
 
 - **"Hard" bot** — multi-turn lookahead (minimax / expectimax over the hidden
   deck). Would reuse `getLegalMoves`/`applyMove` and a state-evaluation variant.
-- **Smart discard** — prefer dumping filler over 7 / Jack / Ace / King.
 - **Path-clearance in exposure** — check whether an opponent's capturing path is
   actually clear (blocked by protected start squares), rather than pure proximity.
 - **Opponent-hand modelling** — reason about which captures are actually

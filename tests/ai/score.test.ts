@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { scoreMove, WEIGHTS } from '../../src/ai/score'
+import { scoreMove, WEIGHTS, cardKeepValue } from '../../src/ai/score'
 import { createGame } from '../../src/engine'
 import { place, setHand, card } from '../../tests/support'
-import type { GameState, Move } from '../../src/engine'
+import type { GameState, Move, Rank } from '../../src/engine'
 
 const game = (): GameState => createGame(['bot', 'bot', 'bot', 'bot'], 48, () => 0)
 // game().currentPlayer is 0 (first active seat), so scoreMove evaluates for player 0.
@@ -205,5 +205,22 @@ describe('scoreMove', () => {
     } finally {
       Math.random = realRandom
     }
+  })
+})
+
+describe('cardKeepValue', () => {
+  it('ranks the cards from most to least worth keeping, all distinct', () => {
+    const orderedFromKeep: Rank[] = ['4', '7', 'J', 'A', 'K', '5', 'Q', '10', '9', '8', '6', '3', '2']
+    const valueList = orderedFromKeep.map(cardKeepValue)
+    const descending = [...valueList].sort((left, right) => right - left)
+    expect(valueList).toEqual(descending)
+    expect(new Set(valueList).size).toBe(valueList.length)
+  })
+
+  it('makes the 4 the most valuable and the 2 the least', () => {
+    const allRank: Rank[] = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
+    const valueList = allRank.map(cardKeepValue)
+    expect(cardKeepValue('4')).toBe(Math.max(...valueList))
+    expect(cardKeepValue('2')).toBe(Math.min(...valueList))
   })
 })

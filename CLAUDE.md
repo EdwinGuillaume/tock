@@ -98,9 +98,9 @@ src/engine/
 └── index.ts    the single public API (re-exports the above)
 
 src/ai/
-├── score.ts    scoreMove (before→after delta via applyMove) + WEIGHTS, advancement, exposureFor — all pure
-├── bot.ts      pickMove (greedy 1-ply, best-score set, random tie-break) + pickRandomMove
-└── index.ts    the AI public API (re-exports scoreMove, WEIGHTS, pickMove, pickRandomMove)
+├── score.ts    scoreMove (before→after delta via applyMove) + WEIGHTS, advancement, exposureFor, cardKeepValue (smart-discard ranking) — all pure
+├── bot.ts      pickMove (greedy 1-ply, best-score set, random tie-break; smart forced-discard) + pickRandomMove
+└── index.ts    the AI public API (re-exports scoreMove, WEIGHTS, cardKeepValue, pickMove, pickRandomMove)
 ```
 
 Note: there is **no `rules.ts`** — the rules live in `moves.ts`, superseding the
@@ -120,7 +120,7 @@ argument — there is no exported `ringSize` constant. `getLegalMoves` / `applyM
 
 The bot's public surface (`src/ai/index.ts`) is the only thing a UI imports to
 drive a seat: `pickMove` / `pickRandomMove` (selection) and `scoreMove` /
-`WEIGHTS` (the pure heuristic). Both `pick*` functions take an **optional injected
+`WEIGHTS` / `cardKeepValue` (the pure heuristic). Both `pick*` functions take an **optional injected
 RNG** (`random: () => number`, defaulting to `Math.random`) so bot play is
 deterministic under test — pass a seeded RNG rather than relying on `Math.random`.
 
