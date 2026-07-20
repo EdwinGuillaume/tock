@@ -4,11 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project state
 
-**The engine and the "Normal" bot are built, tested, and merged** (`src/engine/`
-+ `src/ai/`, 87 passing tests, `tsc --noEmit` clean). Toolchain in place:
-TypeScript + Vitest + pnpm. **Not yet built: `src/ui/` (the Ink TUI) — that is the
-next milestone**, along with the tooling it needs (`tsx`, React + Ink; see
-Toolchain below).
+**The engine, the "Normal" bot, and the Ink terminal UI are all built, tested,
+and merged** (`src/engine/` + `src/ai/` + `src/ui/`, 191 passing tests across 35
+files, `tsc --noEmit` clean). The game is **playable end-to-end** — `pnpm dev`
+launches it. Toolchain in place: TypeScript + Vitest + pnpm + tsx + React + Ink.
+
+Features shipped on top of the base rules: continuous draw (constant 5-card
+hand), the 5 pushes an opponent, selectable board size (48 or 72), the board
+rendered as a cross, and smart forced-discard in the bot.
 
 **The authoritative specs are `docs/superpowers/specs/2026-07-15-tock-terminal-design.md`**
 (the game, English) **and `docs/superpowers/specs/2026-07-16-tock-ai-design.md`**
@@ -17,7 +20,9 @@ Toolchain below).
 `docs/superpowers/plans/2026-07-16-tock-ai.md`. Read the spec before extending
 behaviour — it defines the data model, the move contract, and the rules of the
 game in detail, and the sections below only summarize the parts that shape
-architecture.
+architecture. Every feature added since (UI, continuous draw, cross-board,
+push-5, smart discard) has its own paired spec + plan under
+`docs/superpowers/specs/` and `docs/superpowers/plans/`.
 
 Code identifiers and comments are **English** (see Code Style below). Tock's domain
 terms are French in origin; this glossary maps them so we share the vocabulary, but
@@ -34,23 +39,22 @@ lookahead).
 
 ## Commands
 
+- `pnpm dev` — launch the game (`tsx src/index.tsx`); needs a real TTY
+- `pnpm dev:watch` — same, with reload on change (`tsx watch src/index.tsx`)
 - `pnpm test` — run the full Vitest suite once (`vitest run`)
 - `pnpm test <path>` — run a single file, e.g. `pnpm test tests/engine/split7.test.ts`
 - `pnpm test:watch` — Vitest in watch mode
 - `pnpm typecheck` — `tsc --noEmit`
 
-There is **no `dev`/build script yet**: nothing is runnable until the Ink UI
-(`src/index.tsx`) exists.
-
 ## Toolchain (spec §10)
 
-Set up now:
+Set up:
 - **TypeScript** (^5.5, strict), package manager **pnpm** (`pnpm-lock.yaml` committed)
-- **Vitest** (^2.0, Jest-style API) — engine tests in `tests/engine/`
+- **Vitest** (^2.0, Jest-style API) — tests in `tests/engine/`, `tests/ai/`, `tests/ui/`
+- **tsx** — runs the UI in dev without a build (`pnpm dev` / `pnpm dev:watch`)
+- **React 19 + Ink 7** — the terminal UI; `ink-testing-library` for UI tests
 
-Not set up yet (add when the matching milestone starts):
-- **tsx** — run the UI in dev without a build (`tsx watch src/index.tsx`)
-- **React + Ink** — the terminal UI
+Not set up yet:
 - **ESLint + Prettier** — optional; until a linter is wired up, the Code Style
   rules below (including max warnings 0) are enforced by convention and review,
   not tooling.
@@ -84,9 +88,13 @@ This exists so a future web UI can reuse the same engine.
 Because both players choose only from `getLegalMoves`, illegal moves are
 structurally impossible, and the engine is fully testable without the UI.
 
-### Module layout
+**Continuous draw**: there is no separate draw phase. Playing (or discarding) a
+card sends it to the discard pile and `applyMove` immediately refills the hand
+with one fresh card, so an active hand is always 5 cards (`handSize`) until the
+piles run dry. The draw pile reshuffles the discard pile back in when empty
+(`drawCard` in `state.ts`).
 
-Built:
+### Module layout
 
 ```
 src/engine/
@@ -124,15 +132,25 @@ drive a seat: `pickMove` / `pickRandomMove` (selection) and `scoreMove` /
 RNG** (`random: () => number`, defaulting to `Math.random`) so bot play is
 deterministic under test — pass a seeded RNG rather than relying on `Math.random`.
 
-Not built yet:
+The UI (React + Ink) reuses that surface unchanged and adds nothing to the rules:
 
 ```
-src/ui/       App.tsx · Board.tsx · Hand.tsx · Status.tsx · hooks/   (Ink)
-src/index.tsx (launches the Ink app)
+src/ui/
+├── App.tsx         top-level: Setup → game loop → GameOver
+├── Setup.tsx       opponent count + board-size choice
+├── Board.tsx       renders the ring/lanes/homes as a cross
+├── Hand.tsx        the human's cards, unplayable ones dimmed
+├── Status.tsx      whose turn, piles, per-seat progress
+├── SplitPanel.tsx  interactive 7-split entry
+├── GameLog.tsx     scrolling move history
+├── GameOver.tsx    winner screen
+├── format.ts · layout.ts · selection.ts · theme.ts   presentation helpers (pure)
+└── hooks/          useGameLoop (drives bots + turn advance), useTurnInput (keyboard)
+src/index.tsx       renders <App /> into the terminal
 ```
 
-Engine tests live in `tests/engine/` (one file per feature) with shared helpers
-in `tests/support.ts`.
+Tests live in `tests/engine/`, `tests/ai/`, and `tests/ui/` (one file per feature)
+with shared helpers in `tests/support.ts`.
 
 ## Two modeling decisions that are easy to get wrong
 
@@ -162,8 +180,10 @@ protection, exact-count lane entry + entry choice) and `applyMove`
 (immutability, captures, win condition). AI tests target `scoreMove` and its
 parts (`advancement`, `exposureFor`) plus `pickMove` / `pickRandomMove` selection
 via an injected seeded RNG for determinism, with a lockstep self-play integration
-test (two seeded bots must stay in sync). UI is mostly manual in v1
-(`ink-testing-library` optional).
+test (two seeded bots must stay in sync). The UI is covered by `tests/ui/` using
+`ink-testing-library` (rendering, keyboard input, selection, layout, theme) —
+render assertions rely on `FORCE_COLOR=1` (set in `vitest.config.ts`) so styled
+output keeps its ANSI codes off a TTY.
 
 ## Code Style
 
