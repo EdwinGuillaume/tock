@@ -1,16 +1,34 @@
 # Tock
 
-> A Ludo-style, card-driven race game that runs entirely in your terminal.
+> A Ludo-style, card-driven race game — playable in your terminal, and as a
+> shareable mobile web link.
 > One human against up to three bots, played out on a colourful cross-shaped board.
 
-Tock is played in a full-screen, coloured TUI. You drive your four marbles out of
-their nest, all the way around a shared ring, and home into your finish lane — but
-instead of rolling dice, **you play cards**. Get all four marbles home first and you win.
+You drive your four marbles out of their nest, all the way around a shared ring,
+and home into your finish lane — but instead of rolling dice, **you play cards**.
+Get all four marbles home first and you win.
 
-- **Pure, headless game engine** — TypeScript, zero Node dependencies, 100% JSON-serialisable state
-- **A "Normal" bot** — greedy 1-ply heuristic that captures, races, and discards intelligently
-- **A React + Ink terminal UI** — setup screen, live board, hand, move log, guided 7-splits
-- **191 passing tests** across engine, AI, and UI; `tsc --noEmit` clean
+Tock ships as a **pnpm workspace** with one shared rules engine and two
+front-ends:
+
+- **[`@tock/core`](./packages/core)** — the pure, headless game engine and bot.
+  Zero Node dependencies, 100% JSON-serialisable state, runs unchanged in a
+  browser or on a server.
+- **[`@tock/terminal`](./apps/terminal)** — a React + Ink full-screen coloured
+  TUI. The original front-end.
+- **[`@tock/web`](./apps/web)** — a Vite + React 19 mobile web app: an SVG
+  wood-themed cross board, touch-first ghost-destination interaction, and a
+  **shareable link** — open it on a phone, no install, no backend. The
+  portfolio piece.
+
+Both front-ends talk to `@tock/core` through the exact same contract
+(`getLegalMoves` → chosen `Move` → `applyMove`) and add nothing to the rules
+themselves — see [Architecture](#architecture) below. `@tock/core` also ships
+**a "Normal" bot** (greedy 1-ply heuristic that captures, races, and discards
+intelligently), reused unchanged by both UIs.
+
+**246 passing tests** across the engine, AI, terminal UI, and web UI; `tsc --noEmit`
+clean workspace-wide.
 
 ```
                   yellow
@@ -43,21 +61,42 @@ Marbles live in one of three zones: `home` (the nest, waiting to come out), `tra
 
 ## Quick start
 
-**Requirements:** Node (the repo pins **v24** via `.nvmrc`) and **pnpm**. The UI needs
-a real terminal with raw-mode keyboard support (a normal TTY — not a piped/redirected
-shell).
+**Requirements:** Node (the repo pins **v24** via `.nvmrc`) and **pnpm**.
 
 ```bash
-pnpm install     # install dependencies
-pnpm dev         # launch the game
+pnpm install     # install dependencies, once, from the repo root
 ```
 
-`pnpm dev` runs the Ink app through `tsx` with no build step. Use `pnpm dev:watch`
-to reload on file changes while hacking on the UI.
+### Play in the terminal
+
+```bash
+pnpm dev:terminal   # pnpm --filter @tock/terminal dev
+```
+
+Needs a real terminal with raw-mode keyboard support (a normal TTY — not a
+piped/redirected shell). Runs the Ink app through `tsx` with no build step;
+`pnpm --filter @tock/terminal dev:watch` reloads on file changes while hacking
+on the UI.
+
+### Play in a browser
+
+```bash
+pnpm dev            # pnpm --filter @tock/web dev
+```
+
+Opens a Vite dev server — follow the printed `localhost` URL, or the LAN URL
+to try it on a phone on the same network. `pnpm build` produces the static
+`apps/web/dist/` bundle that gets deployed as the shareable link (see
+[`apps/web/README.md`](./apps/web/README.md) for deploy notes — no backend
+required).
 
 ---
 
 ## How to play
+
+The rules below are shared by both front-ends; the walkthrough describes the
+**terminal** controls specifically (arrow keys). See
+[Playing on the web](#playing-on-the-web) for the touch equivalent.
 
 ### 1. Setup
 
@@ -107,6 +146,17 @@ If a partition can either enter the finish or stay on the ring, you get a quick
 
 When someone gets all four marbles home you see a `🏆 <colour> wins!` screen.
 Press **`r`** to play again (back to setup) or **`q`** (or Ctrl-C) to quit.
+
+### Playing on the web
+
+The web app plays by the same rules through a touch-first interaction, with no
+arrow keys: tap a playable card in your hand and its legal destinations light
+up as **"ghost" markers** on the board — tap a ghost to play there. A Jack
+walks you from your marble to the opponent marble you're swapping with the
+same way; a 5 highlights the opponent marbles you can push. A 7 opens a
+step-by-step split control (allocate steps to a marble, undo, tap **Play**
+once all 7 are spent) instead of a modal panel. There's no separate "game
+over" screen transition to learn — it's the same win screen, tap to restart.
 
 ---
 
@@ -192,57 +242,90 @@ colour-vision deficiency — a known v1 tradeoff.
 
 ---
 
+## Web app roadmap
+
+The web app ([`@tock/web`](./apps/web)) is delivered in milestones, on top of
+the same `@tock/core` engine:
+
+- **M1 — Web, solo vs. bots. Done.** The Vite + React app in this repo today:
+  an SVG wood-themed cross board, the card-first ghost-destination touch
+  interaction (including the progressive 7-split), deployed as a static site —
+  the shareable link. The portfolio centerpiece.
+- **M2 — Local pass-and-play.** Two-to-four human seats on one device, with a
+  "pass the phone" interstitial that hides the previous player's hand between
+  human turns. The engine already supports multiple `human` seats; this is a
+  UI-only addition.
+- **M3 — PWA (roadmap).** Installable, offline-capable, an app icon, a splash
+  screen — turning the manifest metadata already in `apps/web/public/` into a
+  full install prompt.
+- **M4 — Native wrap (roadmap).** Capacitor wraps the same static build for
+  the iOS/Android home screen and, if wanted, the app stores — no logic
+  rewrite, since the web build is already the whole app.
+
+See `docs/superpowers/specs/2026-07-20-tock-mobile-web-design.md` for the full
+design rationale (why web-first, why a pnpm workspace, why Vite).
+
+---
+
 ## For contributors
 
 ### Architecture
 
-The project is built on a **strict engine / UI separation**, so the same engine could
-later back a web UI:
+The project is built on a **strict engine / UI separation**, now enforced as a
+**package boundary**: every app under `apps/*` depends on `@tock/core` and
+nothing else touches the rules.
 
-- **`src/engine/`** and **`src/ai/`** are *isomorphic* — pure TypeScript with **zero
-  Node dependencies**. They run unchanged in a browser or on a server.
+- **`packages/core` (`@tock/core`)** is *isomorphic* — pure TypeScript with **zero
+  Node dependencies**. It runs unchanged in a browser or on a server.
 - **`GameState` is 100% JSON-serialisable** — plain data, no methods, no stored
   functions. Ready for networked or replay play later.
 - **`applyMove` is immutable** — it returns a new state, never mutating its input.
-- Every UI talks to the game through one small contract: **`getLegalMoves` → choose a
-  move → `applyMove`**. Because both humans and bots choose only from
-  `getLegalMoves`, illegal moves are structurally impossible.
+- Every UI (`@tock/terminal`, `@tock/web`) talks to the game through one small
+  contract: **`getLegalMoves` → choose a move → `applyMove`**. Because both
+  humans and bots choose only from `getLegalMoves`, illegal moves are
+  structurally impossible, and `@tock/core` never imports from an app.
 
 ### Project layout
 
 ```
-src/
-├── engine/     the rules — pure, headless, JSON-serialisable
-│   ├── types.ts    data model: Position, Card, Marble, the Move union, GameState
-│   ├── board.ts    ring geometry: startCell, laneMouth, ringDestinations
-│   ├── cards.ts    deck, shuffle, rank → steps mapping
-│   ├── state.ts    createGame, drawCard, colour/id helpers
-│   ├── moves.ts    getLegalMoves, applyMove, 7-split enumeration
-│   └── index.ts    the single public API
-├── ai/         the "Normal" bot — pure heuristic
-│   ├── score.ts    scoreMove, WEIGHTS, cardKeepValue
-│   ├── bot.ts      pickMove / pickRandomMove
-│   └── index.ts    the AI public API
-├── ui/         React + Ink terminal UI (the only place with Node/React deps)
-│   ├── App.tsx · Setup.tsx · Board.tsx · Hand.tsx · Status.tsx
-│   ├── SplitPanel.tsx · GameLog.tsx · GameOver.tsx
-│   ├── format.ts · layout.ts · selection.ts · theme.ts   (pure presentation helpers)
-│   └── hooks/  useGameLoop (drives bots + turns), useTurnInput (keyboard)
-└── index.tsx   renders <App /> into the terminal
+packages/core/            @tock/core — the rules + bot, pure and headless
+├── src/engine/           types.ts · board.ts · cards.ts · state.ts · moves.ts · index.ts
+├── src/ai/               score.ts (scoreMove, WEIGHTS, cardKeepValue) · bot.ts (pickMove / pickRandomMove) · index.ts
+├── src/geometry/         board2d.ts — shared 2D grid geometry (Cell/Side, ring layout) used by both UIs
+├── src/index.ts          the single public API: re-exports engine + ai + board2d
+└── tests/                engine/ · ai/ · board2d.test.ts (support.ts = shared helpers)
 
-tests/          engine/ · ai/ · ui/ — one file per feature (support.ts = shared helpers)
-docs/superpowers/   design specs and implementation plans, one pair per feature
+apps/terminal/            @tock/terminal — React + Ink terminal UI
+├── src/ui/               App.tsx · Setup.tsx · Board.tsx · Hand.tsx · Status.tsx
+│                         SplitPanel.tsx · GameLog.tsx · GameOver.tsx
+│                         format.ts · layout.ts · selection.ts · theme.ts (pure presentation helpers)
+│                         hooks/  useGameLoop (drives bots + turns), useTurnInput (keyboard)
+├── src/index.tsx         renders <App /> into the terminal
+└── tests/ui/             one file per feature
+
+apps/web/                 @tock/web — Vite + React 19 mobile web UI
+├── src/components/       App.tsx (routing) · GameScreen.tsx (interaction state machine)
+│                         Setup.tsx · GameOver.tsx · Board.tsx · Marble.tsx · Ghost.tsx
+│                         Hand.tsx · StatusBar.tsx · GameLog.tsx · SplitControls.tsx
+├── src/hooks/            useTockGame (state + commitMove) · useBotAutoplay (drives bot seats)
+├── src/                  svgGeometry.ts · moveSelection.ts · splitAllocation.ts · theme.ts · format.ts
+├── src/main.tsx          renders <App /> into the DOM
+├── public/               manifest.webmanifest (PWA metadata, no service worker yet — M3)
+└── tests/                one file per feature
+
+docs/superpowers/         design specs and implementation plans, one pair per feature
 ```
 
 ### Commands
 
 ```bash
-pnpm dev            # launch the game
-pnpm dev:watch      # launch with reload on change
-pnpm test           # run the full Vitest suite once
-pnpm test <path>    # run a single file, e.g. pnpm test tests/engine/split7.test.ts
-pnpm test:watch     # Vitest in watch mode
-pnpm typecheck      # tsc --noEmit
+pnpm --filter @tock/web dev          # launch the web app (alias: pnpm dev)
+pnpm --filter @tock/terminal dev     # launch the terminal app (alias: pnpm dev:terminal)
+pnpm --filter @tock/web build        # production build → apps/web/dist/ (alias: pnpm build)
+pnpm -r test                         # run every package's Vitest suite once (alias: pnpm test)
+pnpm -r typecheck                    # tsc --noEmit in every package (alias: pnpm typecheck)
+pnpm --filter <pkg> test <path>      # run a single test file in one package,
+                                      # e.g. pnpm --filter @tock/core test tests/engine/split7.test.ts
 ```
 
 ### Code style
@@ -260,5 +343,6 @@ See [`CLAUDE.md`](./CLAUDE.md) for the full architecture notes and conventions, 
 
 ## Not in v1
 
-Networked/web multiplayer, team play (2v2), a "Hard" multi-ply bot, an "Easy" bot in the
-menu, more than four players, undo/history, and animations beyond the between-turn pause.
+Networked multiplayer (only same-device play — solo now, local pass-and-play at M2),
+team play (2v2), a "Hard" multi-ply bot, an "Easy" bot in the menu, more than four
+players, undo/history, and animations beyond the between-turn pause.

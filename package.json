@@ -4,22 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
-    "dev": "tsx src/index.tsx",
-    "dev:watch": "tsx watch src/index.tsx"
-  },
-  "devDependencies": {
-    "@types/react": "^19.2.17",
-    "ink-testing-library": "^4.0.0",
-    "tsx": "^4.23.1",
-    "typescript": "^5.5.0",
-    "vitest": "^2.0.0"
-  },
-  "dependencies": {
-    "ink": "^7.1.1",
-    "react": "^19.2.7",
-    "react-devtools-core": "^6.1.5"
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "dev": "pnpm --filter @tock/web dev",
+    "dev:terminal": "pnpm --filter @tock/terminal dev",
+    "build": "pnpm --filter @tock/web build"
   }
 }

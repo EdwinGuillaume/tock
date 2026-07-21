@@ -1,0 +1,8 @@
+{
+  "name": "Tock",
+  "short_name": "Tock",
+  "display": "standalone",
+  "background_color": "#5c3a17",
+  "theme_color": "#5c3a17",
+  "icons": []
+}
