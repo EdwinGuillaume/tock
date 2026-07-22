@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 web UI are all built, tested, and merged.** The repo is a **pnpm workspace**:
 `packages/core` (`@tock/core` — engine + ai + shared 2D grid geometry),
 `apps/terminal` (`@tock/terminal` — the Ink TUI), `apps/web` (`@tock/web` — the
-mobile web app). **246 passing tests** across the workspace (core 132,
-terminal 65, web 49), `pnpm -r typecheck` clean. Both apps are **playable
+mobile web app). **263 passing tests** across the workspace (core 132,
+terminal 65, web 66), `pnpm -r typecheck` clean. Both apps are **playable
 end-to-end** — `pnpm dev:terminal` launches the terminal game, `pnpm dev`
 launches the web app. Toolchain in place: TypeScript + Vitest + pnpm + tsx +
 Vite + React + Ink.
@@ -17,9 +17,11 @@ Vite + React + Ink.
 Features shipped on top of the base rules: continuous draw (constant 5-card
 hand), the 5 pushes an opponent, selectable board size (48 or 72), the board
 rendered as a cross, and smart forced-discard in the bot. On top of that, the
-web app (M1 of the mobile-web roadmap) ships a solo-vs-bots game: an SVG
-wood-themed cross board, card-first ghost-destination touch interaction, and a
-progressive 7-split control, deployable as a static shareable link.
+web app ships M1 (solo vs. bots) and M2 (local pass-and-play): an SVG
+wood-themed cross board, card-first ghost-destination touch interaction, a
+progressive 7-split control, per-seat human/bot/inactive setup, and a "pass
+the phone" interstitial between different humans' turns, deployable as a static
+shareable link.
 
 **The authoritative specs are `docs/superpowers/specs/2026-07-15-tock-terminal-design.md`**
 (the game, English), **`docs/superpowers/specs/2026-07-16-tock-ai-design.md`**
@@ -48,9 +50,9 @@ capture, `case de départ` = start square.
 full-screen, colored terminal TUI. Single bot level ("Normal", greedy
 heuristic with 1-ply lookahead). On top of that, a mobile web port
 (`apps/web`) is underway as a shareable-link portfolio piece, reusing the same
-engine and bot unchanged: M1 (solo vs. bots) is done; local pass-and-play (M2),
-an installable PWA (M3), and a Capacitor native wrap (M4) are roadmap items —
-see `docs/superpowers/specs/2026-07-20-tock-mobile-web-design.md` §2.
+engine and bot unchanged: M1 (solo vs. bots) and M2 (local pass-and-play) are
+done; an installable PWA (M3) and a Capacitor native wrap (M4) are roadmap
+items — see `docs/superpowers/specs/2026-07-20-tock-mobile-web-design.md` §2.
 
 ## Commands
 
@@ -204,11 +206,13 @@ apps/terminal/src/ui/     React + Ink terminal UI
 apps/terminal/src/index.tsx   renders <App /> into the terminal
 
 apps/web/src/components/   Vite + React 19 web UI (SVG board, touch)
-├── App.tsx           routing: Setup → GameScreen → GameOver; owns useTockGame + useBotAutoplay
+├── App.tsx           routing: Setup → GameScreen → GameOver, plus the pass-and-play handoff
+│                     gate (PassInterstitial); owns useTockGame + useBotAutoplay + awaitingHandoff
 ├── GameScreen.tsx    the interaction state machine (pickCard | ghosts | swapTarget | split
 │                     phases), wires Board/Hand/SplitControls together for one turn
-├── Setup.tsx         opponent count + board-size choice
+├── Setup.tsx         per-seat human/bot/inactive cycling + board-size choice
 ├── GameOver.tsx       winner screen
+├── PassInterstitial.tsx   "pass the phone" screen shown between two different humans' turns
 ├── Board.tsx · Marble.tsx · Ghost.tsx   the SVG cross board, marbles, tappable "ghost" destinations
 ├── Hand.tsx           the human's cards, unplayable ones dimmed
 ├── StatusBar.tsx       whose turn, piles, prompt
@@ -216,6 +220,7 @@ apps/web/src/components/   Vite + React 19 web UI (SVG board, touch)
 └── SplitControls.tsx   remaining/Play/Undo controls for the progressive 7-split
 apps/web/src/   svgGeometry.ts (SVG coordinates over board2d) · moveSelection.ts (Ghost +
                 legal-move → ghost mapping) · splitAllocation.ts (7-split draft state)
+                · passAndPlay.ts (humanSeatIds/activeHumanSeat/needsHandoff — handoff logic)
                 · theme.ts · format.ts   — all pure
 apps/web/src/hooks/   useTockGame (owns GameState + commitMove, continuous draw is automatic
                       via applyMove) · useBotAutoplay (drives bot seats on a timer, isHumanSeat)
@@ -267,8 +272,9 @@ from a per-package `tests/support.ts` (not shared across packages):
 - **`apps/web/tests/`** uses `jsdom` + `@testing-library/react` (configured in
   `apps/web/vite.config.ts`, which doubles as the Vitest config) — rendering,
   tap/click interaction, ghost-destination selection, the split-allocation
-  state machine, and geometry math (`svgGeometry.test.ts`, `board2d.test.ts` in
-  `@tock/core`).
+  state machine, the pass-and-play handoff logic and interstitial
+  (`passAndPlay.test.ts`, `handoff.test.tsx`, `passInterstitial.test.tsx`), and
+  geometry math (`svgGeometry.test.ts`, `board2d.test.ts` in `@tock/core`).
 
 ## Code Style
 

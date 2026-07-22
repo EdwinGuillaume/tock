@@ -27,7 +27,7 @@ themselves — see [Architecture](#architecture) below. `@tock/core` also ships
 **a "Normal" bot** (greedy 1-ply heuristic that captures, races, and discards
 intelligently), reused unchanged by both UIs.
 
-**246 passing tests** across the engine, AI, terminal UI, and web UI; `tsc --noEmit`
+**263 passing tests** across the engine, AI, terminal UI, and web UI; `tsc --noEmit`
 clean workspace-wide.
 
 ```
@@ -158,6 +158,14 @@ step-by-step split control (allocate steps to a marble, undo, tap **Play**
 once all 7 are spent) instead of a modal panel. There's no separate "game
 over" screen transition to learn — it's the same win screen, tap to restart.
 
+**Setup and pass-and-play.** Seat 0 is always you; each of the other three
+seats has a button that cycles **human → bot → inactive**, so you can mix any
+number of local humans and bots (or a full four-human table). When play passes
+from one human to a *different* human, a **"Pass to \<colour\>"** interstitial
+covers the board first — the next player taps *"reveal your hand"* to take
+over, so nobody sees the previous player's cards. Bot turns in between never
+trigger it, and a solo-vs-bots game (one human) never shows it at all.
+
 ---
 
 ## The cards
@@ -228,6 +236,8 @@ order `4 > 7 > J > A > K > 5 > Q > 10 > 9 > 8 > 6 > 3 > 2`.
 ## Features at a glance
 
 - Human vs. 1–3 bots on a 4-seat, free-for-all board (no teams)
+- **Local pass-and-play on the web** — mix humans and bots across the four seats,
+  with a "pass the phone" screen that hides the previous player's hand
 - Selectable board size: **48** or **72** ring cells
 - Continuous draw — your hand is always 5 cards, no round-based redeal
 - The full card set: exits, backward-4, the Jack swap, the 5-push, and splittable 7s
@@ -251,10 +261,11 @@ the same `@tock/core` engine:
   an SVG wood-themed cross board, the card-first ghost-destination touch
   interaction (including the progressive 7-split), deployed as a static site —
   the shareable link. The portfolio centerpiece.
-- **M2 — Local pass-and-play.** Two-to-four human seats on one device, with a
-  "pass the phone" interstitial that hides the previous player's hand between
-  human turns. The engine already supports multiple `human` seats; this is a
-  UI-only addition.
+- **M2 — Local pass-and-play. Done.** Any mix of human and bot seats on one
+  device: each seat cycles human/bot/inactive at setup, and a "pass the phone"
+  interstitial hides the previous player's hand between different humans' turns
+  (bot turns in between don't trigger it). A UI-only addition — the engine
+  already supported multiple `human` seats.
 - **M3 — PWA (roadmap).** Installable, offline-capable, an app icon, a splash
   screen — turning the manifest metadata already in `apps/web/public/` into a
   full install prompt.
@@ -305,10 +316,10 @@ apps/terminal/            @tock/terminal — React + Ink terminal UI
 
 apps/web/                 @tock/web — Vite + React 19 mobile web UI
 ├── src/components/       App.tsx (routing) · GameScreen.tsx (interaction state machine)
-│                         Setup.tsx · GameOver.tsx · Board.tsx · Marble.tsx · Ghost.tsx
+│                         Setup.tsx · GameOver.tsx · PassInterstitial.tsx · Board.tsx · Marble.tsx · Ghost.tsx
 │                         Hand.tsx · StatusBar.tsx · GameLog.tsx · SplitControls.tsx
 ├── src/hooks/            useTockGame (state + commitMove) · useBotAutoplay (drives bot seats)
-├── src/                  svgGeometry.ts · moveSelection.ts · splitAllocation.ts · theme.ts · format.ts
+├── src/                  svgGeometry.ts · moveSelection.ts · splitAllocation.ts · passAndPlay.ts · theme.ts · format.ts
 ├── src/main.tsx          renders <App /> into the DOM
 ├── public/               manifest.webmanifest (PWA metadata, no service worker yet — M3)
 └── tests/                one file per feature
@@ -343,6 +354,7 @@ See [`CLAUDE.md`](./CLAUDE.md) for the full architecture notes and conventions, 
 
 ## Not in v1
 
-Networked multiplayer (only same-device play — solo now, local pass-and-play at M2),
-team play (2v2), a "Hard" multi-ply bot, an "Easy" bot in the menu, more than four
-players, undo/history, and animations beyond the between-turn pause.
+Networked multiplayer (only same-device play — solo vs. bots or local
+pass-and-play), team play (2v2), a "Hard" multi-ply bot, an "Easy" bot in the
+menu, more than four players, undo/history, and animations beyond the
+between-turn pause.

@@ -5,9 +5,11 @@ wood-themed cross board and reuses the shared [`@tock/core`](../../packages/core
 engine + bot unchanged. This is the **shareable-link** front-end — a single URL
 that opens straight in a phone browser, no install.
 
-Currently playable **solo vs. 1–3 bots** (M1). Local pass-and-play (M2), an
-installable PWA (M3), and a Capacitor native wrap (M4) are on the roadmap — see
-the root [`README.md`](../../README.md) for the full milestone list.
+Playable **solo vs. 1–3 bots** (M1) and in **local pass-and-play** (M2) — any
+mix of human and bot seats on one device, with a "pass the phone" screen
+between different humans' turns. An installable PWA (M3) and a Capacitor native
+wrap (M4) are on the roadmap — see the root [`README.md`](../../README.md) for
+the full milestone list.
 
 ## Run it
 
@@ -66,13 +68,12 @@ configuration are required on any of the hosts above.
 
 ## No backend
 
-There is **no server component** to this app. Solo play (a human seat plus
-1–3 bots) and the upcoming local pass-and-play (M2, multiple human seats
-sharing one device) both run **entirely client-side** — the engine, the bot,
-and all game state live in the browser tab. Nothing is persisted or sent over
-the network; refreshing the page starts a new game. This keeps the deploy
-story to "upload static files" with no database, API, or hosting cost beyond
-a static host's free tier.
+There is **no server component** to this app. Both solo play (a human seat plus
+1–3 bots) and local pass-and-play (multiple human seats sharing one device) run
+**entirely client-side** — the engine, the bot, and all game state live in the
+browser tab. Nothing is persisted or sent over the network; refreshing the page
+starts a new game. This keeps the deploy story to "upload static files" with no
+database, API, or hosting cost beyond a static host's free tier.
 
 ## Manifest
 
