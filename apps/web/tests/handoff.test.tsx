@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../src/components/App'
@@ -10,6 +10,12 @@ import { App } from '../src/components/App'
 // moves are the four Ace exits (one per marble) — 2..5 of clubs are unplayable
 // this turn. So: tap the Ace card (opens ghost destinations, since exiting is
 // not a single unambiguous outcome), then tap the first ghost to commit.
+//
+// App wraps every screen change in a Framer-Motion AnimatePresence, so the
+// next screen mounts asynchronously after an action that swaps screens —
+// findBy* (awaited) is used for anything expected to appear after such a
+// change; getBy*/getAllBy* is fine for content within a screen that is
+// already mounted.
 describe('handoff in a two-human game', () => {
   beforeEach(() => {
     vi.spyOn(Math, 'random').mockReturnValue(0)
@@ -22,14 +28,18 @@ describe('handoff in a two-human game', () => {
   it('shows the pass screen after seat 0 commits a move, and reveals the board again on tap', async () => {
     render(<App />)
 
-    const seatOneButton = () => screen.getByRole('button', { name: /^seat 1:/ })
-    await userEvent.click(seatOneButton())
-    await userEvent.click(seatOneButton())
-    expect(seatOneButton()).toHaveTextContent('seat 1: human')
+    // Home screen is the first thing rendered; enter the game to reach Setup.
+    // This is a screen swap (home -> setup), so wait for Setup to mount.
+    await userEvent.click(screen.getByRole('button', { name: /nouvelle partie/i }))
+    const seat1 = await screen.findByTestId('seat-1')
 
-    await userEvent.click(screen.getByRole('button', { name: /start/i }))
+    // New Setup UI: seat 1 defaults to a present 'bot' chair with a segmented
+    // humain/bot control. Switch it to human.
+    await userEvent.click(within(seat1).getByRole('button', { name: 'humain' }))
 
-    expect(screen.getByLabelText('board')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: /lancer la partie/i }))
+
+    expect(await screen.findByLabelText('board')).toBeInTheDocument()
 
     const aceButton = screen.getByLabelText('card-A-clubs')
     expect(aceButton).toBeEnabled()
@@ -39,23 +49,23 @@ describe('handoff in a two-human game', () => {
     expect(ghostList.length).toBeGreaterThan(0)
     await userEvent.click(ghostList[0] as HTMLElement)
 
-    expect(screen.getByRole('button', { name: /reveal/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /révéler ma main/i })).toBeInTheDocument()
     expect(screen.queryByLabelText('board')).not.toBeInTheDocument()
 
-    await userEvent.click(screen.getByRole('button', { name: /reveal/i }))
+    await userEvent.click(screen.getByRole('button', { name: /révéler ma main/i }))
 
-    expect(screen.getByLabelText('board')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /reveal/i })).not.toBeInTheDocument()
+    expect(await screen.findByLabelText('board')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /révéler ma main/i })).not.toBeInTheDocument()
   })
 })
 
-// Seat layout: seat 0 human, seat 1 bot (Setup's default), seat 2 human — turned
-// on by a single click (its default is 'inactive', and the toggle cycle is
-// human -> bot -> inactive -> human, so one click lands on 'human'). This
-// exercises the bot->human leg of the handoff, which is the regression this
-// wave fixes: useBotAutoplay must be driven by the handoff-aware committer
-// too, or a bot's move into a human seat never raises the interstitial and
-// whoever is holding the device sees the next human's hand.
+// Seat layout: seat 0 human, seat 1 bot (Setup's default present chair),
+// seat 2 human — turned on by adding the absent chair (which seats a bot)
+// then flipping its segmented control to humain. This exercises the
+// bot->human leg of the handoff, which is the regression this wave fixes:
+// useBotAutoplay must be driven by the handoff-aware committer too, or a
+// bot's move into a human seat never raises the interstitial and whoever is
+// holding the device sees the next human's hand.
 describe('handoff after a bot move in a human-bot-human game', () => {
   beforeEach(() => {
     vi.spyOn(Math, 'random').mockReturnValue(0)
@@ -68,13 +78,18 @@ describe('handoff after a bot move in a human-bot-human game', () => {
   it('shows the pass screen once the bot seat hands off to the next human seat', async () => {
     render(<App />)
 
-    const seatTwoButton = () => screen.getByRole('button', { name: /^seat 2:/ })
-    await userEvent.click(seatTwoButton())
-    expect(seatTwoButton()).toHaveTextContent('seat 2: human')
+    // Home screen is the first thing rendered; enter the game to reach Setup.
+    // This is a screen swap (home -> setup), so wait for Setup to mount.
+    await userEvent.click(screen.getByRole('button', { name: /nouvelle partie/i }))
+    const addSeat2Button = await screen.findByLabelText('ajouter le joueur 2')
 
-    await userEvent.click(screen.getByRole('button', { name: /start/i }))
+    // Seat 2 starts absent; the add button seats a bot there first.
+    await userEvent.click(addSeat2Button)
+    await userEvent.click(within(screen.getByTestId('seat-2')).getByRole('button', { name: 'humain' }))
 
-    expect(screen.getByLabelText('board')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: /lancer la partie/i }))
+
+    expect(await screen.findByLabelText('board')).toBeInTheDocument()
 
     // Same deterministic seat-0 hand as the two-human case above: the Ace is
     // the only playable card, opens ghost destinations, first ghost commits.
@@ -94,6 +109,6 @@ describe('handoff after a bot move in a human-bot-human game', () => {
       await new Promise(resolve => setTimeout(resolve, 1000))
     })
 
-    expect(screen.getByRole('button', { name: /reveal/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /révéler ma main/i })).toBeInTheDocument()
   }, 10000)
 })

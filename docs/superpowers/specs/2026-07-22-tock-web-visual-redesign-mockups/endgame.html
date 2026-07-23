@@ -1,0 +1,89 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+  .stage { font-family: 'Inter', system-ui, sans-serif; color: #e8eaf0; max-width: 800px; margin: 0 auto; padding: 4px 8px 40px; }
+  .stage h2 { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 24px; margin: 0 0 4px; }
+  .stage .sub { color: #9aa2b4; margin: 0 0 22px; font-size: 15px; line-height: 1.5; }
+  .row { display: flex; gap: 34px; justify-content: center; flex-wrap: wrap; }
+  .phone { width: 300px; padding: 14px; background: #04050a; border-radius: 42px; box-shadow: 0 22px 55px rgba(0,0,0,.55), inset 0 0 0 2px #1a1c26; }
+  .screen { border-radius: 28px; overflow: hidden; height: 560px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+            background: radial-gradient(125% 90% at 50% 25%, #1f5147 0%, #0c211d 70%); box-shadow: inset 0 0 90px rgba(0,0,0,.55); }
+  .cap { text-align: center; font-size: 13px; color: #aab2c6; margin-top: 12px }
+
+  .logo-sm { font-family:'Fredoka',sans-serif; font-weight:700; font-size:18px; letter-spacing:2px; color:#ffd873; opacity:.85; margin-bottom: 8px }
+  .win-marble { width: 84px; height: 84px; border-radius: 50%; position: relative; margin-bottom: 14px;
+                background: radial-gradient(circle at 35% 30%, #ff8a8f, #c02b31); box-shadow: 0 0 40px rgba(229,72,77,.65), 0 10px 20px rgba(0,0,0,.5);
+                animation: pop 2.6s ease-in-out infinite }
+  .win-marble::after { content:''; position:absolute; top:16px; left:20px; width:20px; height:20px; border-radius:50%; background:rgba(255,255,255,.8); filter: blur(1px) }
+  @keyframes pop { 0%,100%{ transform: translateY(0) scale(1) } 50%{ transform: translateY(-6px) scale(1.03) } }
+  .win-title { font-family:'Fredoka',sans-serif; font-weight:700; font-size:30px; color:#ff8a8f; text-shadow:0 2px 10px rgba(0,0,0,.5) }
+  .win-sub { font-size:13.5px; color:#c9cfdb; margin-bottom: 26px }
+  .cta { font-family:'Fredoka',sans-serif; font-weight:700; font-size:17px; color:#4a2f0c; background:linear-gradient(#ffcf5f,#e6a636); border:none; border-radius:15px; padding:14px 34px;
+         box-shadow:0 6px 0 #9c6b1e, 0 12px 20px rgba(0,0,0,.45); cursor:pointer; transition: transform .08s, box-shadow .08s }
+  .cta:active { transform: translateY(4px); box-shadow:0 2px 0 #9c6b1e }
+  .textbtn { margin-top: 14px; background:none; border:none; color:#b7c0cf; font-size:13.5px; cursor:pointer; text-decoration: underline; text-underline-offset: 3px }
+
+  .confetti { position:absolute; inset:0; overflow:hidden; pointer-events:none }
+  .conf { position:absolute; top:-14px; width:8px; height:12px; border-radius:2px; animation: fall linear infinite }
+  @keyframes fall { 0%{ transform: translateY(-14px) rotate(0); opacity:0 } 8%{opacity:1} 100%{ transform: translateY(580px) rotate(540deg); opacity:1 } }
+
+  /* pass */
+  .pass-label { font-size:11px; letter-spacing:4px; text-transform:uppercase; color:#cdb277; opacity:.8; margin-bottom: 20px }
+  .pass-marble { width: 70px; height: 70px; border-radius:50%; position:relative; margin-bottom: 18px;
+                 background: radial-gradient(circle at 35% 30%, #86e6a0, #2e8a4a); box-shadow:0 0 34px rgba(70,167,88,.6), 0 8px 18px rgba(0,0,0,.5); animation: pop 2.6s ease-in-out infinite }
+  .pass-marble::after { content:''; position:absolute; top:13px; left:17px; width:16px; height:16px; border-radius:50%; background:rgba(255,255,255,.8); filter:blur(1px) }
+  .pass-title { font-family:'Fredoka',sans-serif; font-weight:700; font-size:24px; color:#e8eaf0; margin-bottom: 4px }
+  .pass-title b { color:#86e6a0 }
+  .pass-sub { font-size:13px; color:#9aa2b4; margin-bottom: 26px }
+  .facedown { display:flex; gap:-6px; margin-top: 26px }
+  .fd { width:34px; height:48px; border-radius:6px; margin:0 -4px; background: linear-gradient(135deg,#3a2a12,#1c1408); border:1px solid rgba(255,216,115,.25); box-shadow:0 4px 8px rgba(0,0,0,.4);
+        display:flex; align-items:center; justify-content:center; color:rgba(255,216,115,.5); font-family:'Fredoka'; font-weight:700 }
+</style>
+
+<div class="stage">
+  <h2>Fin de partie &amp; passe-le-téléphone (référence validée)</h2>
+  <p class="sub">Fin de partie (confettis dosés, démarrés une fois l'écran posé) et « passe le téléphone » (la main reste cachée jusqu'au tap, pour la confidentialité en pass-and-play).</p>
+
+  <div class="row">
+    <!-- GAME OVER -->
+    <div>
+      <div class="phone"><div class="screen">
+        <div class="confetti" id="confetti"></div>
+        <div class="logo-sm">TOCK</div>
+        <div class="win-marble"></div>
+        <div class="win-title">Rouge gagne&nbsp;!</div>
+        <div class="win-sub">Toutes ses billes sont rentrées.</div>
+        <button class="cta">Rejouer</button>
+        <button class="textbtn">Retour au menu</button>
+      </div></div>
+      <p class="cap">Fin de partie — confettis or + couleurs, bille du vainqueur qui pulse doucement.</p>
+    </div>
+
+    <!-- PASS -->
+    <div>
+      <div class="phone"><div class="screen">
+        <div class="pass-label">passe le téléphone</div>
+        <div class="pass-marble"></div>
+        <div class="pass-title">À <b>Vert</b> de jouer</div>
+        <div class="pass-sub">Passe l'appareil, puis révèle ta main.</div>
+        <button class="cta">Révéler ma main</button>
+        <div class="facedown"><div class="fd">T</div><div class="fd">T</div><div class="fd">T</div><div class="fd">T</div><div class="fd">T</div></div>
+      </div></div>
+      <p class="cap">Passe-le-téléphone — main cachée (dos de cartes) jusqu'au tap.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const colors = ['#ffd873','#ff8a8f','#86e6a0','#93b6ff','#ffe79a']
+  const box = document.getElementById('confetti')
+  for (let i = 0; i < 26; i++) {
+    const c = document.createElement('div'); c.className = 'conf'
+    c.style.left = Math.round(Math.random()*100) + '%'
+    c.style.background = colors[Math.floor(Math.random()*colors.length)]
+    c.style.animationDuration = (2.4 + Math.random()*2).toFixed(2) + 's'
+    c.style.animationDelay = (Math.random()*3).toFixed(2) + 's'
+    c.style.opacity = 0.9
+    box.appendChild(c)
+  }
+</script>

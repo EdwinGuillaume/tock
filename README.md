@@ -16,10 +16,12 @@ front-ends:
   browser or on a server.
 - **[`@tock/terminal`](./apps/terminal)** — a React + Ink full-screen coloured
   TUI. The original front-end.
-- **[`@tock/web`](./apps/web)** — a Vite + React 19 mobile web app: an SVG
-  wood-themed cross board, touch-first ghost-destination interaction, and a
-  **shareable link** — open it on a phone, no install, no backend. The
-  portfolio piece.
+- **[`@tock/web`](./apps/web)** — a Vite + React 19 mobile web app with a
+  polished **"Feutrine & or"** (warm felt & gold) look: a welcome screen, a
+  felt-channel SVG cross board with glossy marbles, touch-first
+  ghost-destination interaction, dosed animations (all respecting
+  `prefers-reduced-motion`), and a **shareable link** — open it on a phone, no
+  install, no backend. The portfolio piece.
 
 Both front-ends talk to `@tock/core` through the exact same contract
 (`getLegalMoves` → chosen `Move` → `applyMove`) and add nothing to the rules
@@ -27,7 +29,7 @@ themselves — see [Architecture](#architecture) below. `@tock/core` also ships
 **a "Normal" bot** (greedy 1-ply heuristic that captures, races, and discards
 intelligently), reused unchanged by both UIs.
 
-**263 passing tests** across the engine, AI, terminal UI, and web UI; `tsc --noEmit`
+**286 passing tests** across the engine, AI, terminal UI, and web UI; `tsc --noEmit`
 clean workspace-wide.
 
 ```
@@ -258,13 +260,15 @@ The web app ([`@tock/web`](./apps/web)) is delivered in milestones, on top of
 the same `@tock/core` engine:
 
 - **M1 — Web, solo vs. bots. Done.** The Vite + React app in this repo today:
-  an SVG wood-themed cross board, the card-first ghost-destination touch
-  interaction (including the progressive 7-split), deployed as a static site —
-  the shareable link. The portfolio centerpiece.
+  a welcome screen and a felt-channel SVG cross board (the "Feutrine & or"
+  redesign), the card-first ghost-destination touch interaction (including the
+  progressive 7-split, where you tap the marble on the board to choose it),
+  deployed as a static site — the shareable link. The portfolio centerpiece.
 - **M2 — Local pass-and-play. Done.** Any mix of human and bot seats on one
-  device: each seat cycles human/bot/inactive at setup, and a "pass the phone"
-  interstitial hides the previous player's hand between different humans' turns
-  (bot turns in between don't trigger it). A UI-only addition — the engine
+  device: a chairs-based setup adds/removes opponents and picks human/bot, and a
+  "pass the phone" interstitial hides the previous player's hand between
+  different humans' turns (bot turns in between don't trigger it). A UI-only
+  addition — the engine
   already supported multiple `human` seats.
 - **M3 — PWA (roadmap).** Installable, offline-capable, an app icon, a splash
   screen — turning the manifest metadata already in `apps/web/public/` into a
@@ -314,12 +318,12 @@ apps/terminal/            @tock/terminal — React + Ink terminal UI
 ├── src/index.tsx         renders <App /> into the terminal
 └── tests/ui/             one file per feature
 
-apps/web/                 @tock/web — Vite + React 19 mobile web UI
-├── src/components/       App.tsx (routing) · GameScreen.tsx (interaction state machine)
-│                         Setup.tsx · GameOver.tsx · PassInterstitial.tsx · Board.tsx · Marble.tsx · Ghost.tsx
-│                         Hand.tsx · StatusBar.tsx · GameLog.tsx · SplitControls.tsx
+apps/web/                 @tock/web — Vite + React 19 mobile web UI ("Feutrine & or" theme)
+├── src/components/       App.tsx (routing) · Home.tsx (welcome) · GameScreen.tsx (interaction state machine)
+│                         Setup.tsx · GameOver.tsx · Confetti.tsx · PassInterstitial.tsx · ScreenTransition.tsx
+│                         Board.tsx · Marble.tsx · Ghost.tsx · Hand.tsx · StatusBar.tsx · GameLog.tsx · SplitControls.tsx
 ├── src/hooks/            useTockGame (state + commitMove) · useBotAutoplay (drives bot seats)
-├── src/                  svgGeometry.ts · moveSelection.ts · splitAllocation.ts · passAndPlay.ts · theme.ts · format.ts
+├── src/                  svgGeometry.ts · moveSelection.ts · splitAllocation.ts · passAndPlay.ts · theme.ts · motion.ts · format.ts
 ├── src/main.tsx          renders <App /> into the DOM
 ├── public/               manifest.webmanifest (PWA metadata, no service worker yet — M3)
 └── tests/                one file per feature

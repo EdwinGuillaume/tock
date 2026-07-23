@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 web UI are all built, tested, and merged.** The repo is a **pnpm workspace**:
 `packages/core` (`@tock/core` — engine + ai + shared 2D grid geometry),
 `apps/terminal` (`@tock/terminal` — the Ink TUI), `apps/web` (`@tock/web` — the
-mobile web app). **263 passing tests** across the workspace (core 132,
-terminal 65, web 66), `pnpm -r typecheck` clean. Both apps are **playable
+mobile web app). **286 passing tests** across the workspace (core 132,
+terminal 65, web 89), `pnpm -r typecheck` clean. Both apps are **playable
 end-to-end** — `pnpm dev:terminal` launches the terminal game, `pnpm dev`
 launches the web app. Toolchain in place: TypeScript + Vitest + pnpm + tsx +
 Vite + React + Ink.
@@ -17,11 +17,24 @@ Vite + React + Ink.
 Features shipped on top of the base rules: continuous draw (constant 5-card
 hand), the 5 pushes an opponent, selectable board size (48 or 72), the board
 rendered as a cross, and smart forced-discard in the bot. On top of that, the
-web app ships M1 (solo vs. bots) and M2 (local pass-and-play): an SVG
-wood-themed cross board, card-first ghost-destination touch interaction, a
-progressive 7-split control, per-seat human/bot/inactive setup, and a "pass
-the phone" interstitial between different humans' turns, deployable as a static
-shareable link.
+web app ships M1 (solo vs. bots) and M2 (local pass-and-play): a welcome screen
+with a floating card, a chairs-based setup, a card-first ghost-destination touch
+interaction, a progressive 7-split control (the marble is chosen by tapping it
+on the board), per-seat human/bot/inactive setup, and a "pass the phone"
+interstitial between different humans' turns, deployable as a static shareable
+link.
+
+The web UI has been through a full **"Feutrine & or"** (warm felt & gold)
+visual + UX redesign (Balatro-inspired: colourful yet elegant, adult, dosed
+"juice"): a felt-channel SVG board with carved sockets, gold-thread finish lanes
+and clockwise-rotated home pods; glossy marbles that glide between cells and glow
+when selected; suited fanned cards; echo (ripple) destination markers; a discreet
+non-reflowing hint chip and one-line overlay log; confetti on the game-over
+screen; and Framer-Motion screen transitions — all honouring
+`prefers-reduced-motion`. The design tokens live in `apps/web/src/theme.ts` and
+motion tokens in `apps/web/src/motion.ts`; the redesign is `apps/web`-only
+(`@tock/core` untouched). See its paired spec + validated mockups + plan (dated
+2026-07-22) under `docs/superpowers/`.
 
 **The authoritative specs are `docs/superpowers/specs/2026-07-15-tock-terminal-design.md`**
 (the game, English), **`docs/superpowers/specs/2026-07-16-tock-ai-design.md`**
@@ -205,26 +218,31 @@ apps/terminal/src/ui/     React + Ink terminal UI
 └── hooks/          useGameLoop (drives bots + turn advance), useTurnInput (keyboard)
 apps/terminal/src/index.tsx   renders <App /> into the terminal
 
-apps/web/src/components/   Vite + React 19 web UI (SVG board, touch)
-├── App.tsx           routing: Setup → GameScreen → GameOver, plus the pass-and-play handoff
-│                     gate (PassInterstitial); owns useTockGame + useBotAutoplay + awaitingHandoff
+apps/web/src/components/   Vite + React 19 web UI (SVG board, touch), "Feutrine & or" theme
+├── App.tsx           routing: Home → Setup → GameScreen → GameOver, plus the pass-and-play
+│                     handoff gate (PassInterstitial), each wrapped in ScreenTransition;
+│                     owns useTockGame + useBotAutoplay + awaitingHandoff + entered
+├── Home.tsx          welcome screen: TOCK logo, a floating card, marbles, "Nouvelle partie" CTA
 ├── GameScreen.tsx    the interaction state machine (pickCard | ghosts | swapTarget | split
-│                     phases), wires Board/Hand/SplitControls together for one turn
-├── Setup.tsx         per-seat human/bot/inactive cycling + board-size choice
-├── GameOver.tsx       winner screen
-├── PassInterstitial.tsx   "pass the phone" screen shown between two different humans' turns
-├── Board.tsx · Marble.tsx · Ghost.tsx   the SVG cross board, marbles, tappable "ghost" destinations
-├── Hand.tsx           the human's cards, unplayable ones dimmed
-├── StatusBar.tsx       whose turn, piles, prompt
-├── GameLog.tsx         scrolling move history
-└── SplitControls.tsx   remaining/Play/Undo controls for the progressive 7-split
-apps/web/src/   svgGeometry.ts (SVG coordinates over board2d) · moveSelection.ts (Ghost +
-                legal-move → ghost mapping) · splitAllocation.ts (7-split draft state)
+│                     phases), wires Board/Hand/SplitControls together for one turn; the
+│                     discreet hint chip is an absolute (non-reflowing) overlay
+├── Setup.tsx         chairs-based per-seat setup (add/remove opponent, Humain/Bot segmented) + board-size cards
+├── GameOver.tsx       winner screen (winner marble + dosed Confetti)
+├── Confetti.tsx       deterministic falling-confetti burst (no Math.random)
+├── PassInterstitial.tsx   "pass the phone" screen shown between two different humans' turns (hidden hand)
+├── ScreenTransition.tsx   Framer-Motion (motion/react) crossfade wrapper; fast opaque cover for the handoff
+├── Board.tsx · Marble.tsx · Ghost.tsx   felt-channel SVG board, glossy marbles (glide + selection ring), echo "ghost" destinations
+├── Hand.tsx           suited fanned cards; only the newly-drawn card deals in; dimmed when unplayable / discard-only
+├── StatusBar.tsx       whose turn (bobbing colour dot), pile pills, prompt
+├── GameLog.tsx         one-line ticker with an expandable overlay history (non-reflowing)
+└── SplitControls.tsx   7-pip budget gauge + Undo/Play for the progressive 7-split
+apps/web/src/   svgGeometry.ts (SVG coordinates over board2d: ring channel, finish threads, homes) ·
+                moveSelection.ts (Ghost + legal-move → ghost mapping) · splitAllocation.ts (7-split draft state)
                 · passAndPlay.ts (humanSeatIds/activeHumanSeat/needsHandoff — handoff logic)
-                · theme.ts · format.ts   — all pure
+                · theme.ts (design tokens) · motion.ts (durations/easings + prefersReducedMotion) · format.ts   — all pure
 apps/web/src/hooks/   useTockGame (owns GameState + commitMove, continuous draw is automatic
                       via applyMove) · useBotAutoplay (drives bot seats on a timer, isHumanSeat)
-apps/web/src/main.tsx   renders <App /> into the DOM
+apps/web/src/main.tsx   renders <App /> into the DOM; imports the self-hosted @fontsource fonts
 apps/web/public/manifest.webmanifest   PWA metadata (name/theme color), no service worker yet — M3
 ```
 

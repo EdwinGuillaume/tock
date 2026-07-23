@@ -1,0 +1,117 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+  .stage { font-family: 'Inter', system-ui, sans-serif; color: #e8eaf0; max-width: 760px; margin: 0 auto; padding: 4px 8px 40px; }
+  .stage h2 { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 24px; margin: 0 0 4px; }
+  .stage .sub { color: #9aa2b4; margin: 0 0 22px; font-size: 15px; line-height: 1.5; }
+  .layout { display: flex; gap: 32px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+  .phone { width: 340px; padding: 14px; background: #04050a; border-radius: 44px; box-shadow: 0 22px 55px rgba(0,0,0,.55), inset 0 0 0 2px #1a1c26; }
+  .screen { border-radius: 30px; overflow: hidden; padding: 16px; background: radial-gradient(130% 90% at 50% 45%, #1f5147 0%, #0c211d 72%); box-shadow: inset 0 0 90px rgba(0,0,0,.55); }
+  #board { width: 100%; height: auto; display: block; filter: drop-shadow(0 12px 22px rgba(0,0,0,.45)); }
+  .echo { animation: echo 3.2s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+  .echo.b { animation-delay: 1.6s; }
+  @keyframes echo { 0%{ transform: scale(.9); opacity:.6 } 100%{ transform: scale(1.8); opacity:0 } }
+  .note { width: 320px; font-size: 13.5px; color: #aab2c6; line-height: 1.6 }
+  .note h4 { font-family: 'Fredoka', sans-serif; color: #ffd873; margin: 0 0 6px; font-size: 15px } .note b { color:#e8eaf0; font-weight:600 }
+</style>
+
+<div class="stage">
+  <h2>Plateau — référence validée (ring 48)</h2>
+  <p class="sub">Géométrie portée depuis <b>board2d</b> (grille 13×13). Piste principale continue en feutrine (style B) ; couloirs d'arrivée en fil d'or (style C) ; nids tournés dans le sens horaire.</p>
+  <div class="layout">
+    <div class="phone"><div class="screen">
+      <svg id="board" viewBox="0 0 300 300" role="img" aria-label="plateau complet"></svg>
+    </div></div>
+    <div class="note">
+      <h4>Règles de rendu figées</h4>
+      <ul>
+        <li><b>Piste</b> : canal de feutrine continu suivant l'anneau, <b>sockets creusés</b> petits par rapport au pas (feutrine qui respire, pas de chevauchement).</li>
+        <li><b>Couloirs</b> : fil d'or reliant des sockets liserés à la couleur du siège, s'arrêtant <b>au bord de l'emblème</b> (sans le traverser).</li>
+        <li><b>Nids</b> : rouge→bas-gauche, vert→haut-gauche, jaune→haut-droite, bleu→bas-droite (du côté de la case de départ).</li>
+        <li><b>Départs</b> : anneau coloré sur la piste. <b>Emblème</b> central « T » doré.</li>
+        <li><b>Billes</b> : verre brillant (dégradé + éclat + ombre) ; bille sélectionnée = anneau or fixe ; destinations = écho lent.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  const NS = 'http://www.w3.org/2000/svg'
+  const svg = document.getElementById('board')
+  const add = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent||svg).appendChild(e); return e }
+
+  const ringSize = 48, side = 13, mid = 6, arm = 5
+  const STEP = [[1,0],[-1,0],[0,1],[0,-1]]
+  const isPlus = (r,c) => Math.abs(c-mid)<=1 || Math.abs(r-mid)<=1
+  const inGrid = (r,c) => r>=0 && r<side && c>=0 && c<side
+  const onRing = (r,c) => { if (!inGrid(r,c)) return false
+    const isCorner = (r===arm-1||r===side-arm) && (c===arm-1||c===side-arm); if (isCorner) return true
+    if (!isPlus(r,c)) return false
+    return STEP.some(([dr,dc]) => !inGrid(r+dr,c+dc) || !isPlus(r+dr,c+dc)) }
+  const same = (a,b) => a.row===b.row && a.col===b.col
+  const neighbours = cell => STEP.map(([dr,dc]) => ({row:cell.row+dr,col:cell.col+dc})).filter(n => onRing(n.row,n.col))
+  const ring = [{row:side-1,col:mid-1}]
+  let prev = ring[0], cur = {row:side-2,col:mid-1}
+  while (!same(cur, ring[0])) { ring.push(cur); if (ring.length>ringSize) break; const next = neighbours(cur).find(n => !same(n,prev)); if (!next) break; prev=cur; cur=next }
+
+  const P = 21, off = (300 - side*P)/2
+  const cc = (r,c) => [off + (c+0.5)*P, off + (r+0.5)*P]
+  const SOCK = 7, MAR = 6.3, CHAN = 2*SOCK + 8
+
+  const seat = { red:{l:'#ff8a8f',d:'#c02b31',s:'229,72,77'}, green:{l:'#86e6a0',d:'#2e8a4a',s:'70,167,88'}, yellow:{l:'#ffe79a',d:'#d29a1e',s:'255,197,61'}, blue:{l:'#93b6ff',d:'#345fd0',s:'79,139,255'} }
+  const defs = add('defs', {})
+  for (const c in seat) { const g = add('radialGradient',{id:'m-'+c,cx:'35%',cy:'30%',r:'75%'},defs); add('stop',{offset:'0%','stop-color':seat[c].l},g); add('stop',{offset:'100%','stop-color':seat[c].d},g) }
+  const sg = add('radialGradient',{id:'sock',cx:'50%',cy:'42%',r:'62%'},defs); add('stop',{offset:'0%','stop-color':'#05100d'},sg); add('stop',{offset:'55%','stop-color':'#0a201b'},sg); add('stop',{offset:'100%','stop-color':'#1b4d42'},sg)
+
+  const ringPts = ring.map(c => cc(c.row, c.col))
+  const dRing = ringPts.map((p,i) => (i?'L':'M') + p.join(' ')).join(' ') + ' Z'
+  add('path',{d:dRing,fill:'none',stroke:'#173e35','stroke-width':CHAN,'stroke-linejoin':'round','stroke-linecap':'round'})
+  add('path',{d:dRing,fill:'none',stroke:'rgba(255,216,115,.08)','stroke-width':CHAN,'stroke-linejoin':'round'})
+
+  const [cxE,cyE] = cc(6,6)
+  const EMB = 13
+  const finish = {
+    red:    { cells:[[11,6],[10,6],[9,6],[8,6]], mouth:cc(11,6), stop:[cxE,cyE+EMB] },
+    yellow: { cells:[[1,6],[2,6],[3,6],[4,6]],   mouth:cc(1,6),  stop:[cxE,cyE-EMB] },
+    green:  { cells:[[6,1],[6,2],[6,3],[6,4]],   mouth:cc(6,1),  stop:[cxE-EMB,cyE] },
+    blue:   { cells:[[6,11],[6,10],[6,9],[6,8]], mouth:cc(6,11), stop:[cxE+EMB,cyE] }
+  }
+  // gold thread stops at the emblem edge, does not cross it
+  for (const c in finish) add('line',{x1:finish[c].mouth[0],y1:finish[c].mouth[1],x2:finish[c].stop[0],y2:finish[c].stop[1],stroke:'rgba(255,216,115,.38)','stroke-width':2,'stroke-linecap':'round'})
+
+  const socket = (r,cl, rim) => { const [x,y]=cc(r,cl)
+    add('circle',{cx:x,cy:y,r:SOCK,fill:'url(#sock)'})
+    add('circle',{cx:x,cy:y,r:SOCK,fill:'none',stroke: rim ? `rgba(${rim},.75)` : 'rgba(0,0,0,.5)','stroke-width': rim ? 1.6 : 1.1})
+    add('path',{d:`M ${x-SOCK+1.4} ${y+1.4} A ${SOCK-1} ${SOCK-1} 0 0 0 ${x+SOCK-1.4} ${y+1.4}`,fill:'none',stroke:'rgba(255,255,255,.13)','stroke-width':1.1})
+    return [x,y] }
+
+  ring.forEach(c => socket(c.row, c.col))
+  for (const c in finish) finish[c].cells.forEach(([r,cl]) => socket(r,cl, seat[c].s))
+
+  const homes = { green:[1,1], yellow:[1,10], red:[10,1], blue:[10,10] }
+  for (const c in homes){ const [hr,hc]=homes[c]; const p0=cc(hr,hc), p1=cc(hr+1,hc+1)
+    add('rect',{x:Math.min(p0[0],p1[0])-SOCK-5,y:Math.min(p0[1],p1[1])-SOCK-5,width:Math.abs(p1[0]-p0[0])+2*SOCK+10,height:Math.abs(p1[1]-p0[1])+2*SOCK+10,rx:SOCK+7,fill:`rgba(${seat[c].s},.15)`,stroke:`rgba(${seat[c].s},.5)`,'stroke-width':1.4}) }
+  for (const c in homes){ const [hr,hc]=homes[c]; [[0,0],[0,1],[1,0],[1,1]].forEach(o => socket(hr+o[0], hc+o[1], seat[c].s)) }
+
+  const startColor = ['red','green','yellow','blue']
+  ;[0,12,24,36].forEach((idx,k) => { const c=ring[idx]; const [x,y]=cc(c.row,c.col); add('circle',{cx:x,cy:y,r:SOCK+3,fill:'none',stroke:seat[startColor[k]].l,'stroke-width':2,opacity:.9}) })
+
+  add('circle',{cx:cxE,cy:cyE,r:EMB,fill:'rgba(255,216,115,.10)',stroke:'rgba(255,216,115,.4)','stroke-width':1.4})
+  const tk=add('text',{x:cxE,y:cyE+5,'text-anchor':'middle','font-family':'Fredoka','font-size':14,'font-weight':700,fill:'#ffd873'}); tk.textContent='T'
+
+  const marble = (r,cl,c) => { const [x,y]=cc(r,cl)
+    add('ellipse',{cx:x,cy:y+MAR-1,rx:MAR*0.8,ry:2,fill:'rgba(0,0,0,.4)'})
+    add('circle',{cx:x,cy:y,r:MAR,fill:'url(#m-'+c+')'})
+    add('circle',{cx:x-2,cy:y-2.4,r:1.9,fill:'rgba(255,255,255,.72)'}); return [x,y] }
+
+  marble(ring[18].row,ring[18].col,'green'); marble(ring[30].row,ring[30].col,'blue')
+  marble(9,6,'red')
+  marble(homes.yellow[0],homes.yellow[1],'yellow'); marble(homes.yellow[0],homes.yellow[1]+1,'yellow')
+
+  const selIdx = 4
+  const sc = ring[selIdx]; const sm = marble(sc.row, sc.col, 'red')
+  add('circle',{cx:sm[0],cy:sm[1],r:MAR+3,fill:'none',stroke:'#ffd873','stroke-width':2,opacity:.9})
+  ;[selIdx+3, selIdx+6, selIdx+10].forEach(i => { const c=ring[i%ring.length]; const [x,y]=cc(c.row,c.col)
+    add('circle',{cx:x,cy:y,r:SOCK,fill:'rgba(255,216,115,.16)',stroke:'#ffd873','stroke-width':1.5})
+    const e1=add('circle',{cx:x,cy:y,r:SOCK,fill:'none',stroke:'#ffd873','stroke-width':1.5}); e1.setAttribute('class','echo')
+    const e2=add('circle',{cx:x,cy:y,r:SOCK,fill:'none',stroke:'#ffd873','stroke-width':1.5}); e2.setAttribute('class','echo b') })
+</script>

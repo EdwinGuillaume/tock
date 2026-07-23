@@ -1,21 +1,24 @@
 import { describe, expect, it } from 'vitest'
-import { marbleGradientId, seatColor, theme } from '../src/theme'
+import { seatColor, theme, marbleGradientId } from '../src/theme'
 
-describe('wood theme', () => {
-  it('exposes a light+dark stop for every seat color', () => {
+describe('theme tokens', () => {
+  it('exposes the four seat colours with light/dark/soft', () => {
     for (const color of ['red', 'green', 'yellow', 'blue'] as const) {
       expect(seatColor[color].light).toMatch(/^#/)
       expect(seatColor[color].dark).toMatch(/^#/)
+      expect(seatColor[color].soft).toMatch(/^\d+,\d+,\d+$/)
     }
   })
 
-  it('derives a stable, unique gradient id per color', () => {
-    expect(marbleGradientId('red')).toBe('marble-red')
-    expect(marbleGradientId('blue')).toBe('marble-blue')
+  it('exposes the core felt & gold tokens', () => {
+    expect(theme.gold).toBe('#ffd873')
+    expect(theme.feltPanel).toBe('#173e35')
+    expect(theme.cardFace).toBe('#f5ecd6')
+    expect(theme.fontDisplay).toContain('Fredoka')
+    expect(theme.ease.accel).toContain('cubic-bezier')
   })
 
-  it('provides board + card tokens', () => {
-    expect(theme.board).toMatch(/^#|gradient/)
-    expect(theme.cardFace).toMatch(/^#/)
+  it('builds a marble gradient id', () => {
+    expect(marbleGradientId('red')).toBe('marble-red')
   })
 })

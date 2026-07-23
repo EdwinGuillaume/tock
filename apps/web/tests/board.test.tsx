@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { createGame, marbleId } from '@tock/core'
+import type { MarbleId } from '@tock/core'
 import { Board } from '../src/components/Board'
 
 describe('Board', () => {
@@ -13,12 +14,14 @@ describe('Board', () => {
     expect(screen.getByTestId(`marble-${marbleId(0, 0)}`)).toBeInTheDocument()
   })
 
-  it('draws the wood board backdrop: a tile rect for every ring cell', () => {
+  it('renders a continuous ring channel', () => {
     const state = createGame(['human', 'bot'], 48)
     const { container } = render(<Board state={state} ghostList={[]} onGhost={() => {}} />)
-    // The ring alone is 48 tiles; finish lanes and home pads add more. Before the
-    // backdrop existed the board had zero <rect> nodes (only marble circles).
-    expect(container.querySelectorAll('rect').length).toBeGreaterThanOrEqual(48)
+    // The felt board draws the ring as one continuous channel path rather than
+    // per-cell tiles; marble rendering must still be unaffected.
+    const channel = container.querySelector('path[data-role="ring-channel"]')
+    expect(channel).not.toBeNull()
+    expect(screen.getAllByTestId(/^marble-/)).toHaveLength(8)
   })
 
   it('renders a ghost per entry and fires onGhost with its key when tapped', async () => {
@@ -33,5 +36,18 @@ describe('Board', () => {
     )
     await userEvent.click(screen.getByLabelText('ghost-7'))
     expect(onGhost).toHaveBeenCalledWith('g1')
+  })
+
+  it('highlights the selected marble with a selection ring when selectedMarbleId is set', () => {
+    const state = createGame(['human', 'bot'], 48)
+    const selected: MarbleId = marbleId(0, 0)
+    const { container } = render(<Board state={state} ghostList={[]} onGhost={() => {}} selectedMarbleId={selected} />)
+    expect(container.querySelector('[data-selected="true"]')).not.toBeNull()
+  })
+
+  it('shows no selection ring when selectedMarbleId is absent', () => {
+    const state = createGame(['human', 'bot'], 48)
+    const { container } = render(<Board state={state} ghostList={[]} onGhost={() => {}} />)
+    expect(container.querySelector('[data-selected="true"]')).toBeNull()
   })
 })

@@ -8,9 +8,9 @@ describe('PassInterstitial', () => {
     const onReveal = vi.fn()
     render(<PassInterstitial color="green" onReveal={onReveal} />)
 
-    expect(screen.getByText(/green/i)).toBeInTheDocument()
+    expect(screen.getByText(/vert/i)).toBeInTheDocument()
 
-    await userEvent.click(screen.getByRole('button', { name: /reveal/i }))
+    await userEvent.click(screen.getByRole('button', { name: /révéler ma main/i }))
     expect(onReveal).toHaveBeenCalledTimes(1)
   })
 })

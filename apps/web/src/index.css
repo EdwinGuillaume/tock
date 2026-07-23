@@ -1,23 +1,29 @@
-:root {
-  color-scheme: dark;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-}
-
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
 body {
-  /* Wood table backdrop behind the centered board column (design spec §5.2). */
-  background: radial-gradient(circle at 50% 28%, #3a2913, #1a1005 82%);
-  color: #e6e9f0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: radial-gradient(circle at 50% 30%, #1f5147, #0c211d 82%);
+  color: #e8eaf0;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* ---- ambient keyframes (disabled under reduced motion, see below) ---- */
+@keyframes tock-echo { 0% { transform: scale(.9); opacity: .6 } 100% { transform: scale(1.8); opacity: 0 } }
+@keyframes tock-deal { 0% { transform: translateY(-44px) scale(.9); opacity: 0 } 100% { transform: none; opacity: 1 } }
+@keyframes tock-discard { 0% { transform: none; opacity: 1 } 100% { transform: translateY(-48px) scale(.9); opacity: 0 } }
+@keyframes tock-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-2px) } }
+@keyframes tock-confetti { 0% { transform: translateY(-14px) rotate(0); opacity: 0 } 8% { opacity: 1 } 100% { transform: translateY(620px) rotate(540deg); opacity: 1 } }
+@keyframes tock-float { from { transform: rotate(-5deg) translateY(2px) } to { transform: rotate(-5deg) translateY(-8px) } }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+.tock-echo { animation: tock-echo 3.2s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.tock-echo--b { animation-delay: 1.6s; }
+.tock-bob { animation: tock-bob 1.4s ease-in-out infinite; }
+.tock-deal { animation: tock-deal 0.36s cubic-bezier(.7,0,.84,0); }
+.tock-confetti { animation-name: tock-confetti; }
+.tock-float { animation: tock-float 2.4s ease-in-out infinite alternate; }

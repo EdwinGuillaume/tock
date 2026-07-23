@@ -1,0 +1,120 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+  .stage { font-family: 'Inter', system-ui, sans-serif; color: #e8eaf0; max-width: 900px; margin: 0 auto; padding: 4px 8px 40px; }
+  .stage h2 { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 24px; margin: 0 0 4px; }
+  .stage .sub { color: #9aa2b4; margin: 0 0 22px; font-size: 15px; line-height: 1.5; }
+  .row { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
+  .panel { width: 270px; background: radial-gradient(120% 100% at 50% 30%, #1f5147, #0c211d 78%); border-radius: 22px; padding: 16px 16px 14px; box-shadow: inset 0 0 60px rgba(0,0,0,.5), 0 14px 30px rgba(0,0,0,.4); position: relative; overflow: hidden; }
+  .ptitle { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 16px; color: #ffd873; margin: 0 0 2px; }
+  .pdesc { font-size: 12px; color: #aeb6c6; margin: 0 0 10px; line-height: 1.45; min-height: 50px; }
+  .seg-svg { width: 100%; height: auto; display: block; }
+  .echo { animation: echo 3.2s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+  .echo.b { animation-delay: 1.6s }
+  @keyframes echo { 0%{ transform: scale(.9); opacity:.6 } 100%{ transform: scale(1.8); opacity:0 } }
+
+  .sevenbar { margin-top: 10px; background: rgba(0,0,0,.24); border-radius: 12px; padding: 9px 11px; }
+  .pips { display: flex; gap: 5px; justify-content: center; margin-bottom: 8px }
+  .pip { width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid rgba(255,216,115,.55) }
+  .pip.on { background: linear-gradient(#f4c04c,#e0a233); border-color: transparent; box-shadow: 0 0 8px rgba(255,197,61,.5) }
+  .sevenctl { display: flex; align-items: center; gap: 8px; justify-content: center }
+  .rest { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 13px; color: #ffe6a6 }
+  .mini { font-family:'Inter',sans-serif; font-size: 12px; font-weight: 600; border: none; border-radius: 9px; padding: 7px 12px; cursor: pointer }
+  .mini.ghost { background: rgba(255,255,255,.08); color: #cdd3df }
+  .mini.gold { background: linear-gradient(#f4c04c,#e0a233); color: #3f280a; box-shadow: 0 3px 0 #9c6b1e }
+  .mini.gold[disabled] { opacity: .4; box-shadow: none; cursor: default }
+
+  .hint { display: inline-block; font-size: 11.5px; color: rgba(232,234,240,.66); background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.13); border-radius: 8px; padding: 4px 10px; margin: 6px auto 0 }
+  .hand { display: flex; justify-content: center; align-items: flex-end; height: 96px; margin-top: 6px; position: relative }
+  .pcard { width: 46px; height: 66px; border-radius: 8px; background: #f5ecd6; position: relative; margin: 0 -5px; transform-origin: bottom center; box-shadow: 0 6px 10px rgba(0,0,0,.4) }
+  .pcard.dim { opacity: .4 }
+  .pcard .cn { position: absolute; top: 4px; left: 5px; font-family:'Fredoka',sans-serif; font-weight:700; font-size:12px; line-height:.85; text-align:center }
+  .pcard .mid { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:24px }
+  .pcard .cn, .pcard .mid { color:#2a2320 } .pcard.red .cn, .pcard.red .mid { color:#c8323a }
+  /* discard = reverse of the draw: the card lifts straight up out of the hand and fades, fast, sudden accel */
+  .flycard { position: absolute; width: 46px; height: 66px; border-radius: 8px; background:#f5ecd6; box-shadow: 0 6px 10px rgba(0,0,0,.4);
+             left: 112px; bottom: 12px; animation: discard 2.4s cubic-bezier(.7,0,.84,0) infinite }
+  .flycard .cn { position:absolute; top:4px; left:5px; font-family:'Fredoka',sans-serif; font-weight:700; font-size:12px; color:#c8323a }
+  @keyframes discard { 0%,28%{ transform: translateY(0); opacity:1 } 60%{ transform: translateY(-48px); opacity:0 } 100%{ transform: translateY(-48px); opacity:0 } }
+</style>
+
+<div class="stage">
+  <h2>Interactions particulières (référence validée)</h2>
+  <p class="sub">Le 7 (à répartir), le valet (échange) et la défausse — ambiance A, écho pour les cibles.</p>
+
+  <div class="row">
+    <!-- 7 -->
+    <div class="panel">
+      <p class="ptitle">Le 7 — à répartir</p>
+      <p class="pdesc">Tape une bille, puis une destination (l'écho montre les arrivées possibles). Chaque saut dépense des pas. Recommence jusqu'à 0, puis « Jouer ».</p>
+      <svg class="seg-svg" viewBox="0 0 270 74" data-kind="seven"></svg>
+      <div class="sevenbar">
+        <div class="pips"><span class="pip on"></span><span class="pip on"></span><span class="pip on"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span></div>
+        <div class="sevenctl"><span class="rest">Reste 4</span><button class="mini ghost">Annuler</button><button class="mini gold" disabled>Jouer le 7</button></div>
+      </div>
+    </div>
+
+    <!-- valet -->
+    <div class="panel">
+      <p class="ptitle">Le valet — échange</p>
+      <p class="pdesc">Tape le valet, puis ta bille : les billes échangeables se marquent d'un « ⇄ » (écho). Tape la cible, les deux billes permutent.</p>
+      <svg class="seg-svg" viewBox="0 0 270 74" data-kind="swap"></svg>
+      <p style="font-size:11.5px;color:#9aa2b4;text-align:center;margin-top:12px">Ta bille rouge est sélectionnée ; vert et bleu sont des cibles ⇄.</p>
+    </div>
+
+    <!-- discard -->
+    <div class="panel">
+      <p class="ptitle">La défausse</p>
+      <p class="pdesc">Aucun coup possible → cartes grisées. Touche une carte : elle part avec l'animation de pioche <b>à l'envers</b> (elle remonte hors de la main, courte et vive), puis tu repioches.</p>
+      <div style="height:70px"></div>
+      <div style="text-align:center"><span class="hint">Aucun coup — touche une carte pour la défausser</span></div>
+      <div class="hand">
+        <div class="pcard red dim" style="transform:rotate(-12deg) translateY(7px)"><div class="cn">A<br>&#9829;</div><div class="mid">&#9829;</div></div>
+        <div class="pcard dim" style="transform:rotate(-6deg) translateY(2px)"><div class="cn">K<br>&#9824;</div><div class="mid">&#9824;</div></div>
+        <div class="pcard dim" style="transform:rotate(0)"><div class="cn">4<br>&#9827;</div><div class="mid">&#9827;</div></div>
+        <div class="pcard red dim" style="transform:rotate(6deg) translateY(2px)"><div class="cn">2<br>&#9830;</div><div class="mid">&#9830;</div></div>
+        <div class="pcard dim" style="transform:rotate(12deg) translateY(7px)"><div class="cn">9<br>&#9824;</div><div class="mid">&#9824;</div></div>
+        <div class="flycard"><div class="cn">2&#9830;</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const NS = 'http://www.w3.org/2000/svg'
+  const seat = { red:{l:'#ff8a8f',d:'#c02b31'}, green:{l:'#86e6a0',d:'#2e8a4a'}, blue:{l:'#93b6ff',d:'#345fd0'} }
+  const SOCK = 8.5, MAR = 7.6, CHAN = 2*SOCK + 8
+  const ys = 37, xs = [34, 74, 114, 154, 194, 234]
+
+  document.querySelectorAll('svg[data-kind]').forEach(svg => {
+    const kind = svg.dataset.kind
+    const add = (t,a) => { const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); svg.appendChild(e); return e }
+    const defs = add('defs',{})
+    for (const c in seat){ const g=document.createElementNS(NS,'radialGradient'); g.id='m-'+c; g.setAttribute('cx','35%'); g.setAttribute('cy','30%'); g.setAttribute('r','75%'); const s0=document.createElementNS(NS,'stop'); s0.setAttribute('offset','0%'); s0.setAttribute('stop-color',seat[c].l); const s1=document.createElementNS(NS,'stop'); s1.setAttribute('offset','100%'); s1.setAttribute('stop-color',seat[c].d); g.appendChild(s0); g.appendChild(s1); defs.appendChild(g) }
+    const sg=document.createElementNS(NS,'radialGradient'); sg.id='sock'; sg.setAttribute('cx','50%'); sg.setAttribute('cy','42%'); sg.setAttribute('r','62%'); ;[['0%','#05100d'],['55%','#0a201b'],['100%','#1b4d42']].forEach(s=>{const st=document.createElementNS(NS,'stop'); st.setAttribute('offset',s[0]); st.setAttribute('stop-color',s[1]); sg.appendChild(st)}); defs.appendChild(sg)
+
+    add('line',{x1:xs[0],y1:ys,x2:xs[5],y2:ys,stroke:'#173e35','stroke-width':CHAN,'stroke-linecap':'round'})
+    add('line',{x1:xs[0],y1:ys,x2:xs[5],y2:ys,stroke:'rgba(255,216,115,.08)','stroke-width':CHAN,'stroke-linecap':'round'})
+    const socket = x => { add('circle',{cx:x,cy:ys,r:SOCK,fill:'url(#sock)'}); add('circle',{cx:x,cy:ys,r:SOCK,fill:'none',stroke:'rgba(0,0,0,.5)','stroke-width':1.2}); add('path',{d:`M ${x-SOCK+1.5} ${ys+1.5} A ${SOCK-1} ${SOCK-1} 0 0 0 ${x+SOCK-1.5} ${ys+1.5}`,fill:'none',stroke:'rgba(255,255,255,.13)','stroke-width':1.2}) }
+    xs.forEach(socket)
+
+    const marble = (x,c) => { add('ellipse',{cx:x,cy:ys+MAR-1,rx:MAR*0.8,ry:2.2,fill:'rgba(0,0,0,.4)'}); add('circle',{cx:x,cy:ys,r:MAR,fill:'url(#m-'+c+')'}); add('circle',{cx:x-2.4,cy:ys-2.8,r:2.1,fill:'rgba(255,255,255,.72)'}) }
+    const echoTarget = (x,label) => {
+      add('circle',{cx:x,cy:ys,r:SOCK,fill:'rgba(255,216,115,.16)',stroke:'#ffd873','stroke-width':1.6})
+      const e1=add('circle',{cx:x,cy:ys,r:SOCK,fill:'none',stroke:'#ffd873','stroke-width':1.6}); e1.setAttribute('class','echo')
+      const e2=add('circle',{cx:x,cy:ys,r:SOCK,fill:'none',stroke:'#ffd873','stroke-width':1.6}); e2.setAttribute('class','echo b')
+      const t=add('text',{x:x,y:ys+3.5,'text-anchor':'middle','font-family':'Fredoka','font-size':10,'font-weight':700,fill:'#ffe6a6'}); t.textContent=label
+    }
+
+    if (kind === 'seven') {
+      const sel = xs[0]; marble(sel,'red')
+      add('circle',{cx:sel,cy:ys,r:MAR+3,fill:'none',stroke:'#ffd873','stroke-width':2,opacity:.9})
+      marble(xs[3],'red')
+      echoTarget(xs[2],'2'); echoTarget(xs[4],'4')
+    } else if (kind === 'swap') {
+      const sel = xs[1]; marble(sel,'red')
+      add('circle',{cx:sel,cy:ys,r:MAR+3,fill:'none',stroke:'#ffd873','stroke-width':2,opacity:.9})
+      marble(xs[3],'green'); marble(xs[5],'blue')
+      ;[xs[3],xs[5]].forEach(x=>{ const e1=add('circle',{cx:x,cy:ys,r:MAR+3,fill:'none',stroke:'#ffd873','stroke-width':1.6}); e1.setAttribute('class','echo'); const t=add('text',{x:x,y:ys+3.5,'text-anchor':'middle','font-family':'Inter','font-size':11,'font-weight':700,fill:'#fff'}); t.textContent='⇄' })
+    }
+  })
+</script>

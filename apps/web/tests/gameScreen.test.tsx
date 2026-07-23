@@ -4,17 +4,22 @@ import { describe, expect, it, vi } from 'vitest'
 import { createGame } from '@tock/core'
 import { card, place, setHand } from './support'
 import { GameScreen } from '../src/components/GameScreen'
+import { colorLabel } from '../src/format'
 
 describe('GameScreen (human turn interaction)', () => {
   it('reveals ghost destinations when tapping a playable exit card', async () => {
     const state = setHand(createGame(['human', 'bot'], 48), 0, [card('A', 'clubs')])
     render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)
 
+    expect(screen.getByText('À toi de jouer')).toBeInTheDocument()
+    expect(screen.getByText('choisis une carte')).toBeInTheDocument()
+
     const aceButton = screen.getByLabelText('card-A-clubs')
     expect(aceButton).toBeEnabled()
 
     await userEvent.click(aceButton)
     expect(screen.getAllByLabelText(/^ghost-/).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('choisis où poser ta bille')).toBeInTheDocument()
   })
 
   it('commits an exit move when a ghost is tapped', async () => {
@@ -55,15 +60,16 @@ describe('GameScreen (human turn interaction)', () => {
 
     // Only one own marble is on the ring (the other three are home), so the
     // single reachable split partition is that marble taking the full 7 steps.
-    const candidateButton = screen.getByRole('button', { name: 'p0m0' })
-    await userEvent.click(candidateButton)
+    await userEvent.click(screen.getByLabelText('select-marble-p0m0'))
+
+    expect(screen.getByText('répartis le 7')).toBeInTheDocument()
 
     const ghostList = screen.getAllByLabelText(/^ghost-/)
     expect(ghostList.length).toBeGreaterThanOrEqual(1)
     await userEvent.click(ghostList[0] as HTMLElement)
 
-    expect(screen.getByText('0 left ✓')).toBeInTheDocument()
-    const playButton = screen.getByRole('button', { name: /play the 7/i })
+    expect(screen.getByText('0 ✓')).toBeInTheDocument()
+    const playButton = screen.getByRole('button', { name: /jouer le 7/i })
     expect(playButton).toBeEnabled()
     expect(commitMove).not.toHaveBeenCalled()
 
@@ -73,11 +79,30 @@ describe('GameScreen (human turn interaction)', () => {
     expect(commitMove.mock.calls[0]?.[0]).toMatchObject({ type: 'split7' })
   })
 
-  it('does not build ghosts or accept card taps on a bot seat', () => {
+  it('does not build ghosts or accept card taps on a bot seat, and shows the bot turn line', () => {
     const state = { ...createGame(['human', 'bot'], 48), currentPlayer: 1 as const }
     const commitMove = vi.fn()
     render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={commitMove} />)
     expect(screen.queryAllByLabelText(/^ghost-/)).toHaveLength(0)
+    expect(screen.getByText(`${colorLabel.green} réfléchit…`)).toBeInTheDocument()
+  })
+
+  it('shows the discard hint and commits a discard on tap when the whole hand is stuck', async () => {
+    const stuck = setHand(createGame(['human', 'bot'], 48), 0, [
+      card('5', 'clubs'), card('6', 'clubs'), card('8', 'clubs'), card('9', 'clubs'), card('10', 'clubs')
+    ])
+    const commitMove = vi.fn()
+    render(<GameScreen state={stuck} logList={[]} humanSeatIds={[0]} commitMove={commitMove} />)
+
+    expect(screen.getByText('aucun coup — touche une carte pour la défausser')).toBeInTheDocument()
+
+    const fiveButton = screen.getByLabelText('card-5-clubs')
+    expect(fiveButton).toBeEnabled()
+
+    await userEvent.click(fiveButton)
+
+    expect(commitMove).toHaveBeenCalledTimes(1)
+    expect(commitMove.mock.calls[0]?.[0]).toMatchObject({ type: 'discard' })
   })
 
   it('keeps the human hand visible at the bottom while a bot takes its turn', () => {

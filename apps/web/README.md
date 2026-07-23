@@ -1,9 +1,12 @@
 # @tock/web
 
-A mobile-first web build of Tock: a Vite + React 19 app that renders an SVG
-wood-themed cross board and reuses the shared [`@tock/core`](../../packages/core)
-engine + bot unchanged. This is the **shareable-link** front-end — a single URL
-that opens straight in a phone browser, no install.
+A mobile-first web build of Tock: a Vite + React 19 app with a polished
+**"Feutrine & or"** (warm felt & gold) look — a welcome screen, a felt-channel
+SVG cross board with glossy marbles, suited fanned cards, and dosed animations
+(all respecting `prefers-reduced-motion`) — reusing the shared
+[`@tock/core`](../../packages/core) engine + bot unchanged. This is the
+**shareable-link** front-end — a single URL that opens straight in a phone
+browser, no install.
 
 Playable **solo vs. 1–3 bots** (M1) and in **local pass-and-play** (M2) — any
 mix of human and bot seats on one device, with a "pass the phone" screen

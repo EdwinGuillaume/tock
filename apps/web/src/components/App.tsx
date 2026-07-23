@@ -4,10 +4,12 @@ import { applyMove, colorOf } from '@tock/core'
 import { useTockGame } from '../hooks/useTockGame'
 import { useBotAutoplay } from '../hooks/useBotAutoplay'
 import { humanSeatIds, needsHandoff } from '../passAndPlay'
+import { Home } from './Home'
 import { GameScreen } from './GameScreen'
 import { Setup } from './Setup'
 import { GameOver } from './GameOver'
 import { PassInterstitial } from './PassInterstitial'
+import { ScreenTransition } from './ScreenTransition'
 
 const BOT_DELAY_MS = 900
 
@@ -15,6 +17,7 @@ export const App = () => {
   const { state, logList, start, restart, commitMove } = useTockGame()
   const humanIdList = useMemo(() => (state ? humanSeatIds(state) : []), [state])
   const [awaitingHandoff, setAwaitingHandoff] = useState(false)
+  const [entered, setEntered] = useState(false)
 
   // needsHandoff decides from the state AFTER the move, but commitMove updates
   // state asynchronously — so recompute the next state directly with applyMove
@@ -42,9 +45,13 @@ export const App = () => {
     restart()
   }
 
-  if (!state) return <Setup onStart={(kindList, ringSize) => start(kindList, ringSize)} />
-  if (state.winner !== null) return <GameOver winnerColor={colorOf(state.winner)} onRestart={handleRestart} />
-  if (awaitingHandoff) return <PassInterstitial color={colorOf(state.currentPlayer)} onReveal={() => setAwaitingHandoff(false)} />
+  const screen = (() => {
+    if (!entered && !state) return { key: 'home', cover: false, node: <Home onPlay={() => setEntered(true)} /> }
+    if (!state) return { key: 'setup', cover: false, node: <Setup onStart={(kindList, ringSize) => start(kindList, ringSize)} /> }
+    if (state.winner !== null) return { key: 'over', cover: false, node: <GameOver winnerColor={colorOf(state.winner)} onRestart={handleRestart} /> }
+    if (awaitingHandoff) return { key: `pass-${state.currentPlayer}`, cover: true, node: <PassInterstitial color={colorOf(state.currentPlayer)} onReveal={() => setAwaitingHandoff(false)} /> }
+    return { key: 'game', cover: false, node: <GameScreen state={state} logList={logList} humanSeatIds={humanIdList} commitMove={commitAndPass} /> }
+  })()
 
-  return <GameScreen state={state} logList={logList} humanSeatIds={humanIdList} commitMove={commitAndPass} />
+  return <ScreenTransition screenKey={screen.key} cover={screen.cover}>{screen.node}</ScreenTransition>
 }

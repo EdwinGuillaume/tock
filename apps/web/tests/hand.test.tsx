@@ -21,4 +21,26 @@ describe('Hand', () => {
     render(<Hand hand={hand} playableList={[true, false]} selectedIndex={-1} onSelect={() => {}} />)
     expect(screen.getByLabelText('card-7-hearts')).toBeDisabled()
   })
+
+  it('shows the suit glyph and keeps the card aria-label', () => {
+    render(<Hand hand={[{ rank: 'A', suit: 'hearts' }]} playableList={[true]} selectedIndex={-1} onSelect={() => {}} />)
+    const card = screen.getByLabelText('card-A-hearts')
+    expect(card).toHaveTextContent('A')
+    expect(card).toHaveTextContent('♥')
+  })
+
+  it('dims a playable card but keeps it enabled when discardMode is on', () => {
+    render(
+      <Hand
+        hand={[{ rank: '5', suit: 'clubs' }]}
+        playableList={[true]}
+        selectedIndex={-1}
+        discardMode
+        onSelect={() => {}}
+      />
+    )
+    const button = screen.getByLabelText('card-5-clubs')
+    expect(button).toBeEnabled()
+    expect(button.style.opacity).toBe('0.42')
+  })
 })

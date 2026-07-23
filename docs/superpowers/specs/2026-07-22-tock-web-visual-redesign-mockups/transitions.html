@@ -1,0 +1,89 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+  .stage { font-family: 'Inter', system-ui, sans-serif; color: #e8eaf0; max-width: 760px; margin: 0 auto; padding: 4px 8px 40px; }
+  .stage h2 { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 24px; margin: 0 0 4px; }
+  .stage .sub { color: #9aa2b4; margin: 0 0 20px; font-size: 15px; line-height: 1.5; }
+  .layout { display:flex; gap:32px; align-items:flex-start; justify-content:center; flex-wrap:wrap }
+
+  .phone { width: 300px; padding: 14px; background:#04050a; border-radius:42px; box-shadow:0 22px 55px rgba(0,0,0,.55), inset 0 0 0 2px #1a1c26 }
+  .screen { border-radius:28px; overflow:hidden; height:520px; position:relative; background:#0c211d }
+
+  .scene { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; opacity:0; pointer-events:none;
+           background: radial-gradient(125% 90% at 50% 30%, #1f5147 0%, #0c211d 70%);
+           transition: opacity .3s cubic-bezier(.7,0,.84,0), transform .3s cubic-bezier(.7,0,.84,0); transform: scale(1.03) }
+  .scene.active { opacity:1; transform:none; pointer-events:auto }
+  .scene.fastcover { transition: opacity .16s ease-out, transform .16s ease-out }   /* privacy: opaque quickly */
+
+  .logo-sm { font-family:'Fredoka'; font-weight:700; font-size:16px; letter-spacing:2px; color:#ffd873; opacity:.8 }
+  .big { font-family:'Fredoka'; font-weight:700; font-size:26px }
+  .marble { width:70px; height:70px; border-radius:50%; position:relative; box-shadow:0 8px 18px rgba(0,0,0,.5) }
+  .marble::after { content:''; position:absolute; top:13px; left:17px; width:16px; height:16px; border-radius:50%; background:rgba(255,255,255,.8); filter:blur(1px) }
+  .r { background:radial-gradient(circle at 35% 30%,#ff8a8f,#c02b31); box-shadow:0 0 34px rgba(229,72,77,.6),0 8px 18px rgba(0,0,0,.5) }
+  .g { background:radial-gradient(circle at 35% 30%,#86e6a0,#2e8a4a); box-shadow:0 0 34px rgba(70,167,88,.6),0 8px 18px rgba(0,0,0,.5) }
+  .sub2 { font-size:13px; color:#9aa2b4 }
+  .cta { font-family:'Fredoka'; font-weight:700; font-size:15px; color:#4a2f0c; background:linear-gradient(#ffcf5f,#e6a636); border:none; border-radius:13px; padding:11px 26px; box-shadow:0 5px 0 #9c6b1e; cursor:pointer; margin-top:10px }
+  .label2 { font-size:11px; letter-spacing:4px; text-transform:uppercase; color:#cdb277; opacity:.8; margin-bottom:14px }
+  .dots { display:flex; gap:8px; margin-top:8px }
+  .dot { width:12px; height:12px; border-radius:50%; opacity:.9 }
+
+  .controls { margin-top:16px; display:flex; flex-direction:column; gap:8px; align-items:center }
+  .controls .btn { font-family:'Inter'; font-weight:600; font-size:13px; border:none; border-radius:10px; padding:9px 16px; cursor:pointer; background:rgba(255,255,255,.08); color:#e8eaf0; width:220px }
+  .controls .btn:hover { background:rgba(255,216,115,.16) }
+  .note { width:300px; font-size:13.5px; color:#aab2c6; line-height:1.6 }
+  .note b { color:#e8eaf0; font-weight:600 } .note h4 { font-family:'Fredoka'; color:#ffd873; margin:0 0 6px; font-size:15px }
+</style>
+
+<div class="stage">
+  <h2>Transitions — démo (clique les boutons)</h2>
+  <p class="sub">Fondu + accélération vive. Compare la fin de partie (fondu classique) et le passage de joueur (couverture opaque rapide, puis le texte apparaît).</p>
+
+  <div class="layout">
+    <div>
+      <div class="phone"><div class="screen" id="screen">
+        <div class="scene active" data-scene="game">
+          <div class="logo-sm">EN JEU</div>
+          <div class="dots"><span class="dot" style="background:#ff8a8f"></span><span class="dot" style="background:#86e6a0"></span></div>
+          <div class="sub2" style="margin-top:12px">le plateau…</div>
+        </div>
+        <div class="scene" data-scene="over">
+          <div class="logo-sm">TOCK</div>
+          <div class="marble r" style="margin:8px 0 12px"></div>
+          <div class="big" style="color:#ff8a8f">Rouge gagne&nbsp;!</div>
+          <div class="sub2">Toutes ses billes sont rentrées.</div>
+          <button class="cta" onclick="go('game')">Rejouer</button>
+        </div>
+        <div class="scene" data-scene="pass">
+          <div class="label2">passe le téléphone</div>
+          <div class="marble g" style="margin-bottom:14px"></div>
+          <div class="big">À <span style="color:#86e6a0">Vert</span> de jouer</div>
+          <div class="sub2">Passe l'appareil, puis révèle ta main.</div>
+          <button class="cta" onclick="go('game')">Révéler ma main</button>
+        </div>
+      </div></div>
+      <div class="controls">
+        <button class="btn" onclick="go('over')">→ Fin de partie (fondu)</button>
+        <button class="btn" onclick="go('pass', true)">→ Passe le téléphone (couverture rapide)</button>
+        <button class="btn" onclick="go('game')">→ Retour au jeu</button>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>Ce que tu sens</h4>
+      <p><b>Fin de partie</b> : fondu + accélération (~0,3 s). Dans la vraie appli, les confettis partiront une fois l'écran posé.</p>
+      <p><b>Passe le téléphone</b> : le voile devient opaque <b>très vite</b> (~0,16 s) pour couvrir la main du joueur précédent, puis le contenu s'installe — pas de transparence qui laisse fuiter l'info.</p>
+      <p><b>Retour au jeu</b> : fondu classique.</p>
+      <p style="margin-top:10px">Direction validée : fondu + accélération partout, couverture opaque rapide pour le passage de joueur, quasi-instantané en <code>prefers-reduced-motion</code>.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const scenes = document.querySelectorAll('.scene')
+  function go(name, fast) {
+    scenes.forEach(s => {
+      const isTarget = s.dataset.scene === name
+      s.classList.toggle('fastcover', !!fast && isTarget)
+      s.classList.toggle('active', isTarget)
+    })
+  }
+</script>

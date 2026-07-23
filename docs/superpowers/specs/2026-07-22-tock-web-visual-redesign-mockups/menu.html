@@ -1,0 +1,136 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  .stage { font-family: 'Inter', system-ui, sans-serif; color: #e8eaf0; max-width: 760px; margin: 0 auto; padding: 4px 8px 40px; }
+  .stage h2 { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 24px; margin: 0 0 4px; }
+  .stage .sub { color: #9aa2b4; margin: 0 0 22px; font-size: 15px; line-height: 1.5; }
+  .layout { display: flex; gap: 34px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+
+  .phone { width: 320px; padding: 14px; background: #04050a; border-radius: 42px; box-shadow: 0 22px 55px rgba(0,0,0,.55), inset 0 0 0 2px #1a1c26; }
+  .screen { border-radius: 28px; overflow: hidden; min-height: 640px; position: relative; padding: 26px 20px 22px;
+            background: radial-gradient(125% 90% at 50% 12%, #1f5147 0%, #0c211d 66%); box-shadow: inset 0 0 90px rgba(0,0,0,.55);
+            display: flex; flex-direction: column; }
+
+  .brand { text-align: center; }
+  .brand .logo { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 46px; letter-spacing: 3px; color: #ffd873; text-shadow: 0 2px 0 #7a4e12, 0 6px 14px rgba(0,0,0,.5); line-height: 1; }
+  .brand .tag { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #cdb277; margin-top: 6px; opacity: .8; }
+  .rule { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,216,115,.35), transparent); margin: 20px 0 16px; }
+  .label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #d8b871; opacity: .85; margin: 0 2px 10px; }
+
+  .dot { width: 22px; height: 22px; border-radius: 50%; position: relative; flex: none; box-shadow: 0 0 10px rgba(0,0,0,.4); }
+  .dot::after { content: ''; position: absolute; top: 4px; left: 5px; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.8); filter: blur(.5px); }
+  .name { font-size: 14px; font-weight: 500; color: #edeae0; }
+  .you-chip { font-size: 11px; font-weight: 600; letter-spacing: 1px; color: #4a2f0c; background: linear-gradient(#f4c04c,#e0a233); padding: 5px 12px; border-radius: 20px; }
+
+  .seg { display: flex; background: rgba(0,0,0,.28); border-radius: 10px; padding: 3px; gap: 2px; }
+  .seg .opt { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: #b9c0cf; border: none; background: transparent; padding: 6px 11px; border-radius: 8px; cursor: pointer; transition: all .15s ease; }
+  .seg .opt:hover { color: #edeae0; }
+  .seg .opt.selected { background: linear-gradient(#f4c04c,#e0a233); color: #3f280a; box-shadow: 0 2px 5px rgba(0,0,0,.35); }
+
+  /* seat rows — empty-slot "chairs" model */
+  .seat { display: flex; align-items: center; gap: 11px; padding: 9px 11px; margin-bottom: 9px; min-height: 44px;
+          background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.07); border-radius: 14px; }
+  .slot .filled-view, .slot .empty-view { display: flex; align-items: center; gap: 11px; width: 100%; }
+  .slot .filled-view { display: none; }
+  .slot.filled .empty-view { display: none; }
+  .slot.filled .filled-view { display: flex; }
+  .slot.empty { background: transparent; border-style: dashed; border-color: rgba(255,255,255,.16); cursor: pointer; }
+  .slot.empty:hover { border-color: rgba(255,216,115,.5); background: rgba(255,216,115,.05); }
+  .ghost-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px dashed; flex: none; opacity: .55; }
+  .add-txt { font-size: 13.5px; color: #9aa2b4; font-weight: 500; }
+  .add-plus { margin-left: auto; font-size: 20px; color: #ffd873; font-weight: 700; line-height: 1; }
+  .rm { margin-left: auto; width: 24px; height: 24px; border-radius: 50%; border: none; cursor: pointer; flex: none; background: rgba(255,255,255,.08); color: #cbb; font-size: 15px; line-height: 1; }
+  .rm:hover { background: rgba(229,72,77,.3); color: #fff; }
+  .filled-view .name { flex: 1; }
+
+  .sizes { display: flex; gap: 10px; }
+  .size { flex: 1; text-align: center; padding: 12px 8px; border-radius: 13px; cursor: pointer; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.08); transition: all .15s ease; }
+  .size .t { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 15px; color: #edeae0; }
+  .size .d { font-size: 11px; color: #9aa2b4; margin-top: 2px; }
+  .size.selected { background: rgba(255,216,115,.12); border-color: rgba(255,216,115,.55); }
+  .size.selected .t { color: #ffd873; }
+
+  .cta { margin-top: auto; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: .5px; color: #4a2f0c;
+         background: linear-gradient(#ffcf5f, #e6a636); border: none; border-radius: 16px; padding: 16px; box-shadow: 0 6px 0 #9c6b1e, 0 12px 20px rgba(0,0,0,.45);
+         cursor: pointer; transition: transform .08s ease, box-shadow .08s ease; margin-top: 18px; }
+  .cta:active { transform: translateY(4px); box-shadow: 0 2px 0 #9c6b1e, 0 6px 12px rgba(0,0,0,.4); }
+
+  .note { max-width: 340px; font-size: 13.5px; color: #aab2c6; line-height: 1.6; }
+  .note b { color: #ffd873; font-weight: 600; } .note ul { padding-left: 18px; margin: 8px 0 0; } .note li { margin-bottom: 7px; }
+</style>
+
+<div class="stage">
+  <h2>Menu / démarrage — référence validée</h2>
+  <p class="sub">Chaque siège porte la couleur de sa bille. Présence gérée par des « chaises » (＋ ajouter / × retirer) ; le segmenté ne fait que Humain/Bot. Teste : ajoute/retire un joueur, change de rôle, change la taille, appuie sur le bouton.</p>
+
+  <div class="layout">
+    <div class="phone"><div class="screen">
+      <div class="brand"><div class="logo">TOCK</div><div class="tag">course de billes</div></div>
+      <div class="rule"></div>
+
+      <div class="label">Joueurs</div>
+
+      <div class="seat" style="border-style:solid">
+        <span class="dot" style="background:radial-gradient(circle at 35% 30%, #ff8a8f, #c02b31)"></span>
+        <span class="name" style="flex:1">Vous · Rouge</span>
+        <span class="you-chip">JOUEUR</span>
+      </div>
+
+      <div class="seat slot filled">
+        <div class="empty-view"><span class="ghost-dot" style="border-color:#46a758;color:#46a758"></span><span class="add-txt">Ajouter Vert</span><span class="add-plus">+</span></div>
+        <div class="filled-view">
+          <span class="dot" style="background:radial-gradient(circle at 35% 30%, #86e6a0, #2e8a4a)"></span>
+          <span class="name">Vert</span>
+          <div class="seg"><button class="opt" onclick="pick(this)">Humain</button><button class="opt selected" onclick="pick(this)">Bot</button></div>
+          <button class="rm" title="retirer">&times;</button>
+        </div>
+      </div>
+
+      <div class="seat slot empty">
+        <div class="empty-view"><span class="ghost-dot" style="border-color:#ffc53d;color:#ffc53d"></span><span class="add-txt">Ajouter Jaune</span><span class="add-plus">+</span></div>
+        <div class="filled-view">
+          <span class="dot" style="background:radial-gradient(circle at 35% 30%, #ffe79a, #d29a1e)"></span>
+          <span class="name">Jaune</span>
+          <div class="seg"><button class="opt" onclick="pick(this)">Humain</button><button class="opt selected" onclick="pick(this)">Bot</button></div>
+          <button class="rm" title="retirer">&times;</button>
+        </div>
+      </div>
+
+      <div class="seat slot empty">
+        <div class="empty-view"><span class="ghost-dot" style="border-color:#4f8bff;color:#4f8bff"></span><span class="add-txt">Ajouter Bleu</span><span class="add-plus">+</span></div>
+        <div class="filled-view">
+          <span class="dot" style="background:radial-gradient(circle at 35% 30%, #93b6ff, #345fd0)"></span>
+          <span class="name">Bleu</span>
+          <div class="seg"><button class="opt" onclick="pick(this)">Humain</button><button class="opt selected" onclick="pick(this)">Bot</button></div>
+          <button class="rm" title="retirer">&times;</button>
+        </div>
+      </div>
+
+      <div class="label" style="margin-top:18px">Plateau</div>
+      <div class="sizes">
+        <div class="size selected" onclick="pickSize(this)"><div class="t">Standard</div><div class="d">48 cases · vif</div></div>
+        <div class="size" onclick="pickSize(this)"><div class="t">Grand</div><div class="d">72 cases · long</div></div>
+      </div>
+
+      <button class="cta">Lancer la partie</button>
+    </div></div>
+
+    <div class="note">
+      <p>Décisions figées :</p>
+      <ul>
+        <li>Sièges à la <b>couleur</b> de la bille ; siège 0 = « Vous » verrouillé (puce or).</li>
+        <li>Présence via <b>chaises</b> (＋ ajouter → défaut Bot, × retirer) — pas d'interrupteurs.</li>
+        <li>Segmenté <b>uniquement</b> Humain/Bot.</li>
+        <li>Taille de plateau explicite (vif / long).</li>
+        <li>Un seul bouton « héros » qui s'enfonce.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  function pick(el) { el.parentElement.querySelectorAll('.opt').forEach(o => o.classList.remove('selected')); el.classList.add('selected') }
+  function pickSize(el) { el.parentElement.querySelectorAll('.size').forEach(s => s.classList.remove('selected')); el.classList.add('selected') }
+  document.querySelectorAll('.slot .empty-view').forEach(v => v.addEventListener('click', () => v.closest('.slot').classList.add('filled')))
+  document.querySelectorAll('.slot .rm').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); b.closest('.slot').classList.remove('filled') }))
+</script>
