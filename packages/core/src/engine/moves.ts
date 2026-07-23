@@ -284,10 +284,11 @@ export const getLegalMoves = (state: GameState, player: PlayerId): Move[] => {
   }
 
   if (result.length === 0) {
-    const seenRankSet = new Set<string>()
+    // One discard per card in hand: discarding a specific card is a distinct
+    // legal action, so every card (even two of the same rank) must be
+    // individually discardable. UIs map a chosen card to its move by rank AND
+    // suit, so collapsing same-rank cards would make all but one un-discardable.
     for (const playedCard of hand) {
-      if (seenRankSet.has(playedCard.rank)) continue
-      seenRankSet.add(playedCard.rank)
       result.push({ type: 'discard', card: playedCard })
     }
   }

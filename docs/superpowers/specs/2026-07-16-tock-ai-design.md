@@ -199,9 +199,11 @@ Edge cases:
   discarded first): `4 > 7 > J > A > K > 5 > Q > 10 > 9 > 8 > 6 > 3 > 2` — the 4
   leads because, played just after an exit, it lands a marble at `start - 4`, a
   few cells behind its own lane mouth, saving almost a full lap. Each rank has a
-  distinct value and discards are de-duplicated by rank, so the choice is
-  deterministic (RNG-independent). `scoreMove` is unchanged; smart discard lives
-  in the selector. See `docs/superpowers/specs/2026-07-20-tock-ai-smart-discard-design.md`.
+  distinct value and `getLegalMoves` emits one discard per card, so the discarded
+  rank is uniquely determined and the choice is functionally deterministic (two
+  same-rank cards tie but are interchangeable). `scoreMove` is unchanged; smart
+  discard lives in the selector.
+  See `docs/superpowers/specs/2026-07-20-tock-ai-smart-discard-design.md`.
 
 ## 7. Deferred / future work
 

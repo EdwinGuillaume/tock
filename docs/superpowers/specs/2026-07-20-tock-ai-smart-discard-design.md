@@ -49,13 +49,18 @@ human and the bot choose only from `getLegalMoves`.
   - **5 next** — offensive push value, above plain forward cards.
   - **Plain forward cards `Q,10,9,8,6,3,2`** rank by descending reach; the **2**
     is the least valuable and is discarded first.
-- **The discarded card is uniquely determined.** `getLegalMoves` de-duplicates
-  discards by rank, and every rank has a **distinct** keep-value, so the offered
-  discards always have distinct keep-values and the lowest one is unique. The
-  smart discard is therefore **deterministic** — independent of the RNG. The
-  selector still routes the (singleton) result through the same RNG tie-break used
-  elsewhere, purely for uniformity and as a defensive fallback should two ranks
-  ever be given the same keep-value.
+- **The discarded rank is uniquely determined.** `getLegalMoves` emits one
+  discard per card, and every rank has a **distinct** keep-value, so the lowest
+  keep-value belongs to a single rank. The smart discard is therefore
+  **functionally deterministic** — independent of the RNG. When the hand holds two
+  cards of that weakest rank they tie, and the selector's RNG tie-break picks one;
+  since both carry the same rank, the outcome is identical either way.
+
+  > Note (2026-07-23): `getLegalMoves` originally **de-duplicated** discards by
+  > rank, which made the discarded card strictly unique. That collapse made
+  > same-rank cards individually un-discardable in the UIs (they map a chosen card
+  > to its move by rank **and** suit), so it was replaced by one-discard-per-card.
+  > The rank-level determinism above still holds.
 
 ## 3. Why the selection layer, not `scoreMove` (approach B)
 

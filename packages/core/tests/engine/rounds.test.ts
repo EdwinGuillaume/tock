@@ -6,13 +6,17 @@ import { setHand, card } from '../../tests/support'
 const game = () => createGame(['human', 'bot', 'bot', 'bot'], 48, () => 0)
 
 describe('discard', () => {
-  it('offers a discard per distinct rank when nothing is playable', () => {
-    // all marbles in home, hand has no exit card -> must discard
-    const state = setHand(game(), 0, [card('5'), card('5'), card('9')])
+  it('offers a discard per card when nothing is playable, so any card is discardable', () => {
+    // all marbles in home, hand has no exit card -> must discard. Two same-rank
+    // cards (different suits) must each be individually discardable, not collapsed
+    // to one — the UI maps a chosen card to its move by rank AND suit.
+    const state = setHand(game(), 0, [card('5', 'hearts'), card('5', 'spades'), card('9')])
     const moveList = getLegalMoves(state, 0)
     expect(moveList.every(move => move.type === 'discard')).toBe(true)
-    const rankSet = new Set(moveList.map(move => move.card.rank))
-    expect(rankSet).toEqual(new Set(['5', '9']))
+    expect(moveList).toContainEqual({ type: 'discard', card: card('5', 'hearts') })
+    expect(moveList).toContainEqual({ type: 'discard', card: card('5', 'spades') })
+    expect(moveList).toContainEqual({ type: 'discard', card: card('9') })
+    expect(moveList).toHaveLength(3)
   })
 
   it('offers no discard when a real move exists', () => {

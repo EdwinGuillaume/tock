@@ -22,9 +22,10 @@ export const pickMove = (state: GameState, random: () => number = Math.random): 
   const topList = scoredList.filter(entry => entry.score === bestScore).map(entry => entry.move)
   // Forced-discard turn: getLegalMoves offers `discard` moves only when nothing
   // else is playable, so if every top move is a discard, keep the strong cards
-  // and throw the weakest. The lowest keep-value is unique (distinct per rank,
-  // and discards are de-duplicated by rank), so this is deterministic; the RNG
-  // path is kept for uniformity and as a defensive fallback.
+  // and throw the weakest. getLegalMoves emits one discard per card, so the
+  // discarded *rank* is uniquely determined (every rank has a distinct keep-value
+  // and the lowest is unique), while two same-rank cards tie — the RNG picks one,
+  // which is functionally identical (same rank leaves the hand).
   const discardTopList = topList.filter(move => move.type === 'discard')
   if (discardTopList.length === topList.length && discardTopList.length > 0) {
     const keepList = discardTopList.map(move => ({ move, keep: cardKeepValue(move.card.rank) }))
