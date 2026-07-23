@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 web UI are all built, tested, and merged.** The repo is a **pnpm workspace**:
 `packages/core` (`@tock/core` — engine + ai + shared 2D grid geometry),
 `apps/terminal` (`@tock/terminal` — the Ink TUI), `apps/web` (`@tock/web` — the
-mobile web app). **286 passing tests** across the workspace (core 132,
-terminal 65, web 89), `pnpm -r typecheck` clean. Both apps are **playable
+mobile web app). **299 passing tests** across the workspace (core 132,
+terminal 65, web 102), `pnpm -r typecheck` clean. Both apps are **playable
 end-to-end** — `pnpm dev:terminal` launches the terminal game, `pnpm dev`
 launches the web app. Toolchain in place: TypeScript + Vitest + pnpm + tsx +
 Vite + React + Ink.
@@ -63,9 +63,11 @@ capture, `case de départ` = start square.
 full-screen, colored terminal TUI. Single bot level ("Normal", greedy
 heuristic with 1-ply lookahead). On top of that, a mobile web port
 (`apps/web`) is underway as a shareable-link portfolio piece, reusing the same
-engine and bot unchanged: M1 (solo vs. bots) and M2 (local pass-and-play) are
-done; an installable PWA (M3) and a Capacitor native wrap (M4) are roadmap
-items — see `docs/superpowers/specs/2026-07-20-tock-mobile-web-design.md` §2.
+engine and bot unchanged: M1 (solo vs. bots), M2 (local pass-and-play), and M3
+(installable, offline PWA — vite-plugin-pwa service worker, generated icon
+set, in-app update banner, install affordance) are done; a Capacitor native
+wrap (M4) is a roadmap item — see
+`docs/superpowers/specs/2026-07-20-tock-mobile-web-design.md` §2.
 
 ## Commands
 
@@ -235,15 +237,21 @@ apps/web/src/components/   Vite + React 19 web UI (SVG board, touch), "Feutrine 
 ├── Hand.tsx           suited fanned cards; only the newly-drawn card deals in; dimmed when unplayable / discard-only
 ├── StatusBar.tsx       whose turn (bobbing colour dot), pile pills, prompt
 ├── GameLog.tsx         one-line ticker with an expandable overlay history (non-reflowing)
-└── SplitControls.tsx   7-pip budget gauge + Undo/Play for the progressive 7-split
+├── SplitControls.tsx   7-pip budget gauge + Undo/Play for the progressive 7-split
+├── InstallButton.tsx  install affordance on Home (beforeinstallprompt; iOS Share-sheet hint fallback)
+└── UpdateBanner.tsx    "Nouvelle version — Recharger" toast (vite-plugin-pwa useRegisterSW, registerType 'prompt')
 apps/web/src/   svgGeometry.ts (SVG coordinates over board2d: ring channel, finish threads, homes) ·
                 moveSelection.ts (Ghost + legal-move → ghost mapping) · splitAllocation.ts (7-split draft state)
                 · passAndPlay.ts (humanSeatIds/activeHumanSeat/needsHandoff — handoff logic)
                 · theme.ts (design tokens) · motion.ts (durations/easings + prefersReducedMotion) · format.ts   — all pure
+apps/web/src/pwa/   platform.ts (isStandalone/isIosSafari) · useInstallPrompt (beforeinstallprompt) ·
+                    useServiceWorkerUpdate (wraps virtual:pwa-register/react)
 apps/web/src/hooks/   useTockGame (owns GameState + commitMove, continuous draw is automatic
                       via applyMove) · useBotAutoplay (drives bot seats on a timer, isHumanSeat)
 apps/web/src/main.tsx   renders <App /> into the DOM; imports the self-hosted @fontsource fonts
-apps/web/public/manifest.webmanifest   PWA metadata (name/theme color), no service worker yet — M3
+apps/web/public/icon.svg   frozen source icon; @vite-pwa/assets-generator derives the full icon
+                           set (favicon, apple-touch-icon, maskable) from it at build time
+apps/web/pwa-assets.config.ts   @vite-pwa/assets-generator preset (minimal-2023) — icon set from public/icon.svg
 ```
 
 Tests live in each package's own `tests/` directory — `packages/core/tests/{engine,ai}/`

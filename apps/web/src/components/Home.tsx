@@ -1,5 +1,6 @@
 import type { Color } from '@tock/core'
 import { seatColor, theme } from '../theme'
+import { InstallButton } from './InstallButton'
 
 type HomeProps = { onPlay: () => void }
 
@@ -36,5 +37,6 @@ export const Home = ({ onPlay }: HomeProps) => (
       style={{ fontFamily: theme.fontDisplay, fontWeight: 700, fontSize: 19, color: '#4a2f0c', background: `linear-gradient(${theme.goldButtonTop}, ${theme.goldButtonBottom})`, border: 'none', borderRadius: theme.radius.lg, padding: '16px 34px', boxShadow: `0 6px 0 ${theme.goldButtonLip}, 0 12px 20px rgba(0,0,0,.45)`, cursor: 'pointer' }}>
       Nouvelle partie
     </button>
+    <InstallButton />
   </div>
 )

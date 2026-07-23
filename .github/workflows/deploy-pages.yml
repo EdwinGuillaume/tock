@@ -1,0 +1,58 @@
+name: Deploy web app to GitHub Pages
+
+# Builds apps/web and publishes it to GitHub Pages. Runs on every push to main
+# and can be triggered manually (workflow_dispatch) against any branch — used to
+# preview a feature branch on a real device before merging.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least-privilege token plus the id-token needed by the Pages deployment.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One live deployment at a time; let a newer run supersede an in-flight one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # GITHUB_PAGES=true switches the Vite base to /tock/ (the project-site
+      # subpath). See apps/web/vite.config.ts.
+      - name: Build web app
+        run: pnpm --filter @tock/web build
+        env:
+          GITHUB_PAGES: 'true'
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

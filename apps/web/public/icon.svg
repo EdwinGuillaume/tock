@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Tock">
+  <!--
+    Tock app icon — the frozen "Le quatuor" direction chosen at brainstorm (2026-07-23).
+    This is the single source of truth for apps/web/public/icon.svg. Do NOT redraw
+    from memory — copy this file. Colours come verbatim from apps/web/src/theme.ts
+    (feltGradient + seatColor). The canvas is a FULL-BLEED square: rounded corners and
+    the circular/squircle mask are applied by the OS, never baked in. The four marbles
+    sit inside the maskable safe zone (central 80%): farthest marble point is 194px
+    from centre < the 205px safe radius, so no marble is clipped.
+  -->
+  <defs>
+    <radialGradient id="felt" cx="50%" cy="42%" r="80%">
+      <stop offset="0%" stop-color="#1f5147"/>
+      <stop offset="72%" stop-color="#0c211d"/>
+    </radialGradient>
+    <radialGradient id="mred" cx="36%" cy="30%" r="72%">
+      <stop offset="0%" stop-color="#ffd0d2"/><stop offset="40%" stop-color="#ff8a8f"/><stop offset="100%" stop-color="#a3232a"/>
+    </radialGradient>
+    <radialGradient id="mblue" cx="36%" cy="30%" r="72%">
+      <stop offset="0%" stop-color="#cdddff"/><stop offset="40%" stop-color="#93b6ff"/><stop offset="100%" stop-color="#23409a"/>
+    </radialGradient>
+    <radialGradient id="myellow" cx="36%" cy="30%" r="72%">
+      <stop offset="0%" stop-color="#fff2c9"/><stop offset="40%" stop-color="#ffe79a"/><stop offset="100%" stop-color="#a9760f"/>
+    </radialGradient>
+    <radialGradient id="mgreen" cx="36%" cy="30%" r="72%">
+      <stop offset="0%" stop-color="#c2f3ce"/><stop offset="40%" stop-color="#86e6a0"/><stop offset="100%" stop-color="#1f6335"/>
+    </radialGradient>
+  </defs>
+
+  <!-- full-bleed felt background -->
+  <rect width="512" height="512" fill="url(#felt)"/>
+
+  <!-- four seat marbles in a cross (top=red, right=blue, bottom=yellow, left=green) -->
+  <!-- top — red -->
+  <circle cx="256" cy="142" r="76" fill="#05100d" opacity=".3"/>
+  <circle cx="256" cy="138" r="76" fill="url(#mred)"/>
+  <ellipse cx="230" cy="114" rx="24" ry="16" fill="#fff" opacity=".45"/>
+  <!-- right — blue -->
+  <circle cx="374" cy="260" r="76" fill="#05100d" opacity=".3"/>
+  <circle cx="374" cy="256" r="76" fill="url(#mblue)"/>
+  <ellipse cx="348" cy="232" rx="24" ry="16" fill="#fff" opacity=".45"/>
+  <!-- bottom — yellow -->
+  <circle cx="256" cy="378" r="76" fill="#05100d" opacity=".3"/>
+  <circle cx="256" cy="374" r="76" fill="url(#myellow)"/>
+  <ellipse cx="230" cy="350" rx="24" ry="16" fill="#fff" opacity=".45"/>
+  <!-- left — green -->
+  <circle cx="138" cy="260" r="76" fill="#05100d" opacity=".3"/>
+  <circle cx="138" cy="256" r="76" fill="url(#mgreen)"/>
+  <ellipse cx="112" cy="232" rx="24" ry="16" fill="#fff" opacity=".45"/>
+</svg>

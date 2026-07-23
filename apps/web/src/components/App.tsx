@@ -10,6 +10,7 @@ import { Setup } from './Setup'
 import { GameOver } from './GameOver'
 import { PassInterstitial } from './PassInterstitial'
 import { ScreenTransition } from './ScreenTransition'
+import { UpdateBanner } from './UpdateBanner'
 
 const BOT_DELAY_MS = 900
 
@@ -53,5 +54,10 @@ export const App = () => {
     return { key: 'game', cover: false, node: <GameScreen state={state} logList={logList} humanSeatIds={humanIdList} commitMove={commitAndPass} /> }
   })()
 
-  return <ScreenTransition screenKey={screen.key} cover={screen.cover}>{screen.node}</ScreenTransition>
+  return (
+    <>
+      <ScreenTransition screenKey={screen.key} cover={screen.cover}>{screen.node}</ScreenTransition>
+      <UpdateBanner />
+    </>
+  )
 }
