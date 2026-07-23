@@ -5,7 +5,9 @@ name: Deploy web app to GitHub Pages
 # preview a feature branch on a real device before merging.
 on:
   push:
-    branches: [main]
+    # feat/web-pwa is here TEMPORARILY to preview the branch on Pages before
+    # merging — remove it (leaving only main) when the branch is merged.
+    branches: [main, feat/web-pwa]
   workflow_dispatch:
 
 # Least-privilege token plus the id-token needed by the Pages deployment.
