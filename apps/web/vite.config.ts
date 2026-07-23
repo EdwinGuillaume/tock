@@ -8,8 +8,15 @@ import { defineConfig } from 'vitest/config'
 // try to resolve or run the service-worker machinery.
 const isVitest = process.env.VITEST !== undefined
 
+// GitHub Pages serves this project site under the /tock/ subpath. The Pages
+// build sets GITHUB_PAGES=true so assets, the SW scope, and navigateFallback
+// resolve under that prefix. Every other target (local preview, other static
+// hosts) keeps the path-agnostic relative base.
+const ghPages = process.env.GITHUB_PAGES === 'true'
+const base = ghPages ? '/tock/' : './'
+
 export default defineConfig({
-  base: './',
+  base,
   plugins: [
     react(),
     ...(isVitest
@@ -35,7 +42,7 @@ export default defineConfig({
             },
             workbox: {
               globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
-              navigateFallback: 'index.html'
+              navigateFallback: ghPages ? '/tock/index.html' : 'index.html'
             }
           })
         ])
