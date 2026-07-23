@@ -20,6 +20,9 @@ export const useServiceWorkerUpdate = (): ServiceWorkerUpdate => {
     needRefresh,
     offlineReady,
     update: () => { void updateServiceWorker(true) },
-    dismiss: () => { setNeedRefresh(false); setOfflineReady(false) }
+    dismiss: () => {
+      setNeedRefresh(false)
+      setOfflineReady(false)
+    }
   }
 }
