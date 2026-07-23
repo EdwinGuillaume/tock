@@ -6,13 +6,14 @@ SVG cross board with glossy marbles, suited fanned cards, and dosed animations
 (all respecting `prefers-reduced-motion`) — reusing the shared
 [`@tock/core`](../../packages/core) engine + bot unchanged. This is the
 **shareable-link** front-end — a single URL that opens straight in a phone
-browser, no install.
+browser and, once loaded, installs to the home screen and plays fully offline.
 
-Playable **solo vs. 1–3 bots** (M1) and in **local pass-and-play** (M2) — any
+Playable **solo vs. 1–3 bots** (M1), in **local pass-and-play** (M2) — any
 mix of human and bot seats on one device, with a "pass the phone" screen
-between different humans' turns. An installable PWA (M3) and a Capacitor native
-wrap (M4) are on the roadmap — see the root [`README.md`](../../README.md) for
-the full milestone list.
+between different humans' turns — and **installable, offline-capable** (M3,
+see [below](#installable--offline-m3)). A Capacitor native wrap (M4) is on the
+roadmap — see the root [`README.md`](../../README.md) for the full milestone
+list.
 
 ## Run it
 
@@ -78,9 +79,18 @@ browser tab. Nothing is persisted or sent over the network; refreshing the page
 starts a new game. This keeps the deploy story to "upload static files" with no
 database, API, or hosting cost beyond a static host's free tier.
 
-## Manifest
+## Installable & offline (M3)
 
-[`public/manifest.webmanifest`](./public/manifest.webmanifest) currently holds
-just the metadata a full PWA needs later (name, theme color, standalone
-display) — no service worker and no icons yet. Full installability (offline
-support, an app icon, a splash screen) is scoped to M3.
+The app is a full PWA. A Workbox service worker (registered via
+`vite-plugin-pwa`) precaches the whole built shell at deploy time, so once a
+visit has loaded it, the game keeps working with no network at all. When a
+new build is deployed, an in-app "Nouvelle version — Recharger" banner lets
+returning players know a refresh is available — nothing is forced on them.
+The install affordance on the welcome screen (a native `beforeinstallprompt`
+button on Android/Chrome, a Share-sheet hint on iOS Safari, which exposes no
+native prompt) adds the app to the home screen for a standalone,
+no-browser-chrome launch. The full icon set (favicon, `apple-touch-icon`,
+maskable) is generated at build time from the single source
+[`public/icon.svg`](./public/icon.svg) by `@vite-pwa/assets-generator` (config
+in [`pwa-assets.config.ts`](./pwa-assets.config.ts)) — nothing to draw or
+export by hand.

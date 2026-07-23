@@ -21,7 +21,8 @@ front-ends:
   felt-channel SVG cross board with glossy marbles, touch-first
   ghost-destination interaction, dosed animations (all respecting
   `prefers-reduced-motion`), and a **shareable link** — open it on a phone, no
-  install, no backend. The portfolio piece.
+  backend, and, once loaded, installable to the home screen and playable
+  fully offline. The portfolio piece.
 
 Both front-ends talk to `@tock/core` through the exact same contract
 (`getLegalMoves` → chosen `Move` → `applyMove`) and add nothing to the rules
@@ -29,7 +30,7 @@ themselves — see [Architecture](#architecture) below. `@tock/core` also ships
 **a "Normal" bot** (greedy 1-ply heuristic that captures, races, and discards
 intelligently), reused unchanged by both UIs.
 
-**286 passing tests** across the engine, AI, terminal UI, and web UI; `tsc --noEmit`
+**299 passing tests** across the engine, AI, terminal UI, and web UI; `tsc --noEmit`
 clean workspace-wide.
 
 ```
@@ -91,6 +92,11 @@ to try it on a phone on the same network. `pnpm build` produces the static
 `apps/web/dist/` bundle that gets deployed as the shareable link (see
 [`apps/web/README.md`](./apps/web/README.md) for deploy notes — no backend
 required).
+
+**Install it.** The shareable link is a full PWA: on Android/Chrome, tap the
+in-app "Installer" button on the welcome screen (or use the browser's own
+install menu entry); on iOS Safari, use Share → "Sur l'écran d'accueil".
+Either way, once it's loaded once, it plays fully offline.
 
 ---
 
@@ -270,9 +276,12 @@ the same `@tock/core` engine:
   different humans' turns (bot turns in between don't trigger it). A UI-only
   addition — the engine
   already supported multiple `human` seats.
-- **M3 — PWA (roadmap).** Installable, offline-capable, an app icon, a splash
-  screen — turning the manifest metadata already in `apps/web/public/` into a
-  full install prompt.
+- **M3 — PWA. Done.** Installable and offline-capable: a Workbox service
+  worker (via `vite-plugin-pwa`) precaches the whole app shell, an icon set is
+  generated from a single source SVG, an in-app "Nouvelle version —
+  Recharger" banner surfaces new deploys, and an install affordance (native
+  `beforeinstallprompt` on Android/Chrome, a Share-sheet hint on iOS Safari)
+  sits on the welcome screen.
 - **M4 — Native wrap (roadmap).** Capacitor wraps the same static build for
   the iOS/Android home screen and, if wanted, the app stores — no logic
   rewrite, since the web build is already the whole app.
@@ -322,10 +331,13 @@ apps/web/                 @tock/web — Vite + React 19 mobile web UI ("Feutrine
 ├── src/components/       App.tsx (routing) · Home.tsx (welcome) · GameScreen.tsx (interaction state machine)
 │                         Setup.tsx · GameOver.tsx · Confetti.tsx · PassInterstitial.tsx · ScreenTransition.tsx
 │                         Board.tsx · Marble.tsx · Ghost.tsx · Hand.tsx · StatusBar.tsx · GameLog.tsx · SplitControls.tsx
+│                         InstallButton.tsx · UpdateBanner.tsx (PWA install affordance + update toast)
+├── src/pwa/              platform.ts · useInstallPrompt.ts · useServiceWorkerUpdate.ts
 ├── src/hooks/            useTockGame (state + commitMove) · useBotAutoplay (drives bot seats)
 ├── src/                  svgGeometry.ts · moveSelection.ts · splitAllocation.ts · passAndPlay.ts · theme.ts · motion.ts · format.ts
 ├── src/main.tsx          renders <App /> into the DOM
-├── public/               manifest.webmanifest (PWA metadata, no service worker yet — M3)
+├── public/               icon.svg (source for the generated PWA icon set)
+├── pwa-assets.config.ts  @vite-pwa/assets-generator config — icon set from public/icon.svg
 └── tests/                one file per feature
 
 docs/superpowers/         design specs and implementation plans, one pair per feature
