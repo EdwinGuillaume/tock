@@ -19,7 +19,7 @@ describe('GameScreen (human turn interaction)', () => {
 
     await userEvent.click(aceButton)
     expect(screen.getAllByLabelText(/^ghost-/).length).toBeGreaterThanOrEqual(1)
-    expect(screen.getByText('choisis où poser ta bille')).toBeInTheDocument()
+    expect(screen.getByText("l'As fait sortir une bille")).toBeInTheDocument()
   })
 
   it('commits an exit move when a ghost is tapped', async () => {
@@ -60,7 +60,7 @@ describe('GameScreen (human turn interaction)', () => {
 
     // One movable marble: the 7 behaves like a normal move card — ghost
     // destinations appear immediately and no allocation panel is shown.
-    expect(screen.getByText('choisis où poser ta bille')).toBeInTheDocument()
+    expect(screen.getByText('avance ta bille de 7')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /jouer le 7/i })).toBeNull()
 
     await userEvent.click(screen.getByLabelText('ghost-7'))
@@ -134,14 +134,14 @@ describe('GameScreen (human turn interaction)', () => {
     await userEvent.click(screen.getByLabelText('card-J-clubs'))
 
     // Source-selection step: no targets yet, source hint, both own marbles tappable.
-    expect(screen.getByText('choisis ta bille à échanger')).toBeInTheDocument()
+    expect(screen.getByText('échange 2 billes — choisis la tienne')).toBeInTheDocument()
     expect(screen.queryAllByLabelText(/^ghost-/)).toHaveLength(0)
     expect(screen.getByLabelText('select-marble-p0m0')).toBeInTheDocument()
     expect(screen.getByLabelText('select-marble-p0m1')).toBeInTheDocument()
 
     // Pick the first marble: targets appear and the hint moves to the opponent step.
     await userEvent.click(screen.getByLabelText('select-marble-p0m0'))
-    expect(screen.getByText('choisis la bille adverse')).toBeInTheDocument()
+    expect(screen.getByText('choisis la bille adverse à échanger')).toBeInTheDocument()
     expect(screen.getAllByLabelText(/^ghost-/).length).toBeGreaterThanOrEqual(1)
 
     // Retap the other marble to switch the source, then commit via the target ghost.
@@ -163,7 +163,7 @@ describe('GameScreen (human turn interaction)', () => {
     await userEvent.click(screen.getByLabelText('card-J-clubs'))
 
     // Single candidate: skip straight to the opponent step, no source tap needed.
-    expect(screen.getByText('choisis la bille adverse')).toBeInTheDocument()
+    expect(screen.getByText('choisis la bille adverse à échanger')).toBeInTheDocument()
     expect(screen.getAllByLabelText(/^ghost-/).length).toBeGreaterThanOrEqual(1)
 
     await userEvent.click(screen.getAllByLabelText(/^ghost-/)[0] as HTMLElement)
@@ -197,5 +197,35 @@ describe('GameScreen (human turn interaction)', () => {
     // The human's own card is shown (dimmed), never the bot's hand.
     expect(screen.getByLabelText('card-A-clubs')).toBeInTheDocument()
     expect(screen.queryByLabelText('card-K-spades')).toBeNull()
+  })
+
+  it('teaches the push when a 5 is tapped', async () => {
+    let state = createGame(['human', 'bot'], 48)
+    state = place(state, 'p1m0', { zone: 'track', index: 30 })
+    state = setHand(state, 0, [card('5', 'clubs')])
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)
+
+    await userEvent.click(screen.getByLabelText('card-5-clubs'))
+    expect(screen.getByText('avance un adversaire de 5 — choisis lequel')).toBeInTheDocument()
+  })
+
+  it('guides the 7-split progressively', async () => {
+    let rigged = place(createGame(['human', 'bot'], 48), 'p0m0', { zone: 'track', index: 10 })
+    rigged = place(rigged, 'p0m1', { zone: 'track', index: 30 })
+    const state = setHand(rigged, 0, [card('7', 'clubs')])
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)
+
+    await userEvent.click(screen.getByLabelText('card-7-clubs'))
+    expect(screen.getByText('le 7 se répartit — choisis une bille')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByLabelText('select-marble-p0m0'))
+    expect(screen.getByText("choisis jusqu'où avancer")).toBeInTheDocument()
+  })
+
+  it('reserves bottom clearance so the hint does not overlap the board', () => {
+    const state = setHand(createGame(['human', 'bot'], 48), 0, [card('A', 'clubs')])
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)
+    const stage = screen.getByTestId('board-stage')
+    expect(parseInt(stage.style.paddingBottom, 10)).toBeGreaterThanOrEqual(32)
   })
 })

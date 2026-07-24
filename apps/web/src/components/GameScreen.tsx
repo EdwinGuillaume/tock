@@ -9,12 +9,14 @@ import { ghostsForCard, handIsPlayable, isDiscardOnly, isSplitCard, movesForCard
 import type { SplitDraft } from '../splitAllocation'
 import { allocate, completedSplitMove, splitCandidateIds, splitGhostsForMarble, splitRemaining, startSplit, undoLast } from '../splitAllocation'
 import { marbleCenter } from '../svgGeometry'
-import { theme } from '../theme'
+import type { HintContext } from '../hint'
+import { useHint } from '../hooks/useHint'
 import { Board } from './Board'
 import { Hand } from './Hand'
 import { StatusBar } from './StatusBar'
 import { GameLog } from './GameLog'
 import { SplitControls } from './SplitControls'
+import { Hint } from './Hint'
 
 type GameScreenProps = { state: GameState, logList: string[], humanSeatIds: PlayerId[], commitMove: (move: Move) => void }
 
@@ -23,6 +25,11 @@ type Interaction =
   | { phase: 'ghosts', cardIndex: number }
   | { phase: 'swapTarget', cardIndex: number, marbleId: MarbleId | null }
   | { phase: 'split', cardIndex: number, draft: SplitDraft, focusMarbleId: MarbleId | null }
+
+// Bottom space reserved in the board stage for the overlay column (hint chip, and
+// the taller split gauge) so it clears the board. The board stays vertically
+// centred in the space that remains above this reserved band.
+const BOARD_BOTTOM_CLEARANCE = 110
 
 export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScreenProps) => {
   const [interaction, setInteraction] = useState<Interaction>({ phase: 'pickCard' })
@@ -105,11 +112,20 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
   const swapSourceIds = interaction.phase === 'swapTarget' && swapCard ? ownSwapMarbleIds(swapCard, legalMoves) : []
 
   const turnLine = humanTurn ? 'À toi de jouer' : `${colorLabel[colorOf(state.currentPlayer)]} réfléchit…`
-  const hint = !humanTurn ? '' : onlyDiscards ? 'aucun coup — touche une carte pour la défausser'
-    : interaction.phase === 'split' ? ''
-    : interaction.phase === 'pickCard' ? 'choisis une carte'
-    : interaction.phase === 'swapTarget' ? (interaction.marbleId === null ? 'choisis ta bille à échanger' : 'choisis la bille adverse')
-    : 'choisis où poser ta bille'
+  const buildHintContext = (): HintContext => {
+    if (!humanTurn) return { kind: 'idle' }
+    if (onlyDiscards) return { kind: 'onlyDiscards' }
+    switch (interaction.phase) {
+      case 'pickCard': return { kind: 'pickCard' }
+      case 'swapTarget': return interaction.marbleId === null ? { kind: 'swapSource' } : { kind: 'swapTarget' }
+      case 'split': return { kind: 'split', focused: interaction.focusMarbleId !== null, remaining: splitRemaining(interaction.draft) }
+      case 'ghosts': {
+        const card = hand[interaction.cardIndex]
+        return card ? { kind: 'ghosts', card, moves: movesForCard(card, legalMoves) } : { kind: 'pickCard' }
+      }
+    }
+  }
+  const hint = useHint(buildHintContext())
   const selectedIndex = interaction.phase === 'pickCard' ? -1 : interaction.cardIndex
   const selectedMarbleId = interaction.phase === 'swapTarget' ? interaction.marbleId : interaction.phase === 'split' ? interaction.focusMarbleId : null
 
@@ -117,7 +133,7 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
     <div style={{ maxWidth: 460, margin: '0 auto', display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
       <StatusBar turnColor={colorOf(state.currentPlayer)} drawCount={state.drawPile.length} discardCount={state.discardPile.length} prompt={turnLine} />
       <GameLog logList={logList} />
-      <div style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 12px' }}>
+      <div data-testid="board-stage" style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 12px', paddingBottom: BOARD_BOTTOM_CLEARANCE }}>
         <Board
           state={state}
           ghostList={ghostList.map(ghost => ({ key: ghost.key, cx: ghost.cx, cy: ghost.cy, label: ghost.label }))}
@@ -130,11 +146,9 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
               ? (id: MarbleId) => setInteraction({ phase: 'swapTarget', cardIndex: interaction.cardIndex, marbleId: id })
               : undefined}
         />
-        {hint && (
-          <div style={{ position: 'absolute', left: '50%', bottom: 8, transform: 'translateX(-50%)', fontSize: 12, color: 'rgba(232,234,240,.62)', background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.13)', borderRadius: theme.radius.sm, padding: '4px 12px', whiteSpace: 'nowrap', pointerEvents: 'none' }}>{hint}</div>
-        )}
-        {interaction.phase === 'split' && (
-          <div data-testid="split-overlay" style={{ position: 'absolute', left: 0, right: 0, bottom: 8, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
+        <div data-testid="split-overlay" style={{ position: 'absolute', left: 0, right: 0, bottom: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, pointerEvents: 'none' }}>
+          <Hint text={hint} />
+          {interaction.phase === 'split' && (
             <div style={{ pointerEvents: 'auto' }}>
               <SplitControls
                 remaining={splitRemaining(interaction.draft)}
@@ -146,8 +160,8 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
                 }}
               />
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <Hand hand={hand} playableList={playableList} selectedIndex={selectedIndex} discardMode={onlyDiscards} onSelect={handleCard} />
     </div>
