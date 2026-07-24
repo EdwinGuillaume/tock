@@ -14,7 +14,7 @@ body {
 @keyframes tock-deal { 0% { transform: translateY(-44px) scale(.9); opacity: 0 } 100% { transform: none; opacity: 1 } }
 @keyframes tock-discard { 0% { transform: none; opacity: 1 } 100% { transform: translateY(-48px) scale(.9); opacity: 0 } }
 @keyframes tock-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-2px) } }
-@keyframes tock-confetti { 0% { transform: translateY(-14px) rotate(0); opacity: 0 } 8% { opacity: 1 } 100% { transform: translateY(620px) rotate(540deg); opacity: 1 } }
+@keyframes tock-confetti { 0% { transform: translateY(-14px) rotate(0); opacity: 0 } 8% { opacity: 1 } 100% { transform: translateY(100dvh) rotate(540deg); opacity: 1 } }
 @keyframes tock-float { from { transform: rotate(-5deg) translateY(2px) } to { transform: rotate(-5deg) translateY(-8px) } }
 
 @media (prefers-reduced-motion: reduce) {
@@ -26,4 +26,4 @@ body {
 .tock-bob { animation: tock-bob 1.4s ease-in-out infinite; }
 .tock-deal { animation: tock-deal 0.36s cubic-bezier(.7,0,.84,0); }
 .tock-confetti { animation-name: tock-confetti; }
-.tock-float { animation: tock-float 2.4s ease-in-out infinite alternate; }
+.tock-float { animation: tock-float 2.2s ease-in-out infinite alternate; }
