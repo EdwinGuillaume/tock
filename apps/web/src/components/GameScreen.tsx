@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { GameState, MarbleId, Move, PlayerId } from '@tock/core'
 import { colorOf, getLegalMoves } from '@tock/core'
 import { isHumanSeat } from '../hooks/useBotAutoplay'
+import type { LogEntry } from '../format'
 import { colorLabel } from '../format'
 import { activeHumanSeat } from '../passAndPlay'
 import type { Ghost as GhostType } from '../moveSelection'
@@ -18,7 +19,7 @@ import { GameLog } from './GameLog'
 import { SplitControls } from './SplitControls'
 import { Hint } from './Hint'
 
-type GameScreenProps = { state: GameState, logList: string[], humanSeatIds: PlayerId[], commitMove: (move: Move) => void }
+type GameScreenProps = { state: GameState, logList: LogEntry[], humanSeatIds: PlayerId[], commitMove: (move: Move) => void }
 
 type Interaction =
   | { phase: 'pickCard' }

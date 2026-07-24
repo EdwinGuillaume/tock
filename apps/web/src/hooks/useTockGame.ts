@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react'
 import type { GameState, Move, PlayerKind } from '@tock/core'
 import { applyMove, createGame } from '@tock/core'
+import type { LogEntry } from '../format'
 import { moveLabel } from '../format'
 
 export const useTockGame = () => {
   const [state, setState] = useState<GameState | null>(null)
-  const [logList, setLogList] = useState<string[]>([])
+  const [logList, setLogList] = useState<LogEntry[]>([])
 
   const start = useCallback((kindList: PlayerKind[], ringSize: number) => {
     setState(createGame(kindList, ringSize))
