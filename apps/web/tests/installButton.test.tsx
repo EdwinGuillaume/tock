@@ -8,6 +8,7 @@ const makeOffer = (over: Partial<InstallOffer>): InstallOffer => ({
   canOfferInstall: false,
   canInstall: false,
   iosEligible: false,
+  inAppBrowser: false,
   promptInstall: vi.fn(),
   ...over
 })

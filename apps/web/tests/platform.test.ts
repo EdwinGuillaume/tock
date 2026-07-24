@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { isIosSafari, isStandalone } from '../src/pwa/platform'
+import { isInAppBrowser, isIosSafari, isStandalone } from '../src/pwa/platform'
 
 const setUserAgent = (value: string) =>
   Object.defineProperty(window.navigator, 'userAgent', { value, configurable: true })
@@ -22,6 +22,31 @@ describe('platform', () => {
 
   it('isIosSafari is false for Chrome on iOS (CriOS)', () => {
     setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/120.0 Mobile/15E148 Safari/604.1')
+    expect(isIosSafari()).toBe(false)
+  })
+
+  it('isInAppBrowser is true inside the Messenger web view (iOS)', () => {
+    setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [FBAN/MessengerForiOS;FBAV/430.0.0.0.0;]')
+    expect(isInAppBrowser()).toBe(true)
+  })
+
+  it('isInAppBrowser is true inside the Facebook web view (Android)', () => {
+    setUserAgent('Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/440.0.0.0;]')
+    expect(isInAppBrowser()).toBe(true)
+  })
+
+  it('isInAppBrowser is true inside the Instagram web view', () => {
+    setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 302.0.0.0.0')
+    expect(isInAppBrowser()).toBe(true)
+  })
+
+  it('isInAppBrowser is false in a plain mobile browser', () => {
+    setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')
+    expect(isInAppBrowser()).toBe(false)
+  })
+
+  it('isIosSafari is false inside an in-app browser even when the UA carries a Safari token', () => {
+    setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1 [FBAN/FBIOS;]')
     expect(isIosSafari()).toBe(false)
   })
 
