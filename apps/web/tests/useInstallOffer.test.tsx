@@ -35,4 +35,12 @@ describe('useInstallOffer', () => {
     const { result } = renderHook(() => useInstallOffer())
     expect(result.current.canOfferInstall).toBe(false)
   })
+
+  it('flags an in-app browser and offers no install there', () => {
+    vi.spyOn(installHook, 'useInstallPrompt').mockReturnValue({ canInstall: false, promptInstall: vi.fn() })
+    setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [FBAN/MessengerForiOS;FBAV/430.0.0.0.0;]')
+    const { result } = renderHook(() => useInstallOffer())
+    expect(result.current.inAppBrowser).toBe(true)
+    expect(result.current.canOfferInstall).toBe(false)
+  })
 })
