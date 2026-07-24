@@ -6,7 +6,7 @@ export const SplitControls = ({ remaining, canPlay, onUndo, onPlay }: SplitContr
   const spent = 7 - remaining
   const mini = { fontFamily: theme.fontUi, fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 9, padding: '7px 12px', cursor: 'pointer' } as const
   return (
-    <div style={{ margin: '0 16px', background: 'rgba(0,0,0,.24)', borderRadius: theme.radius.md, padding: '9px 11px' }}>
+    <div style={{ margin: '0 16px', background: 'rgba(12,10,20,.72)', border: '1px solid rgba(255,255,255,.13)', boxShadow: '0 8px 22px rgba(0,0,0,.45)', borderRadius: theme.radius.md, padding: '9px 11px' }}>
       <div style={{ display: 'flex', gap: 5, justifyContent: 'center', marginBottom: 8 }}>
         {Array.from({ length: 7 }, (_unused, index) => {
           const on = index < spent

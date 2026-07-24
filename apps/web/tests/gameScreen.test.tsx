@@ -50,7 +50,7 @@ describe('GameScreen (human turn interaction)', () => {
     expect(screen.queryAllByLabelText(/^ghost-/)).toHaveLength(0)
   })
 
-  it('drives the full 7-split flow: pick marble, spend steps, then Play', async () => {
+  it('routes a 7 with a single movable marble through the ghost flow (no split panel)', async () => {
     const rigged = place(createGame(['human', 'bot'], 48), 'p0m0', { zone: 'track', index: 10 })
     const state = setHand(rigged, 0, [card('7', 'clubs')])
     const commitMove = vi.fn()
@@ -58,15 +58,32 @@ describe('GameScreen (human turn interaction)', () => {
 
     await userEvent.click(screen.getByLabelText('card-7-clubs'))
 
-    // Only one own marble is on the ring (the other three are home), so the
-    // single reachable split partition is that marble taking the full 7 steps.
+    // One movable marble: the 7 behaves like a normal move card — ghost
+    // destinations appear immediately and no allocation panel is shown.
+    expect(screen.getByText('choisis où poser ta bille')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /jouer le 7/i })).toBeNull()
+
+    await userEvent.click(screen.getByLabelText('ghost-7'))
+
+    expect(commitMove).toHaveBeenCalledTimes(1)
+    expect(commitMove.mock.calls[0]?.[0]).toMatchObject({ type: 'split7' })
+  })
+
+  it('drives the full 7-split flow with two movable marbles: panel, spend steps, Play', async () => {
+    let rigged = place(createGame(['human', 'bot'], 48), 'p0m0', { zone: 'track', index: 10 })
+    rigged = place(rigged, 'p0m1', { zone: 'track', index: 30 })
+    const state = setHand(rigged, 0, [card('7', 'clubs')])
+    const commitMove = vi.fn()
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={commitMove} />)
+
+    await userEvent.click(screen.getByLabelText('card-7-clubs'))
+
+    // Two movable marbles: the allocation panel is shown.
+    expect(screen.getByRole('button', { name: /jouer le 7/i })).toBeInTheDocument()
+
     await userEvent.click(screen.getByLabelText('select-marble-p0m0'))
-
-    expect(screen.getByText('répartis le 7')).toBeInTheDocument()
-
-    const ghostList = screen.getAllByLabelText(/^ghost-/)
-    expect(ghostList.length).toBeGreaterThanOrEqual(1)
-    await userEvent.click(ghostList[0] as HTMLElement)
+    // Give the whole 7 to the first marble (its lone full-7 landing).
+    await userEvent.click(screen.getByLabelText('ghost-7'))
 
     expect(screen.getByText('0 ✓')).toBeInTheDocument()
     const playButton = screen.getByRole('button', { name: /jouer le 7/i })
@@ -153,6 +170,19 @@ describe('GameScreen (human turn interaction)', () => {
 
     expect(commitMove).toHaveBeenCalledTimes(1)
     expect(commitMove.mock.calls[0]?.[0]).toMatchObject({ type: 'swap', marbleId: 'p0m0' })
+  })
+
+  it('renders the split panel as an out-of-flow overlay (no layout reflow)', async () => {
+    let rigged = place(createGame(['human', 'bot'], 48), 'p0m0', { zone: 'track', index: 10 })
+    rigged = place(rigged, 'p0m1', { zone: 'track', index: 30 })
+    const state = setHand(rigged, 0, [card('7', 'clubs')])
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)
+
+    await userEvent.click(screen.getByLabelText('card-7-clubs'))
+
+    const overlay = screen.getByTestId('split-overlay')
+    expect(overlay.style.position).toBe('absolute')
+    expect(screen.getByRole('button', { name: /jouer le 7/i })).toBeInTheDocument()
   })
 
   it('keeps the human hand visible at the bottom while a bot takes its turn', () => {

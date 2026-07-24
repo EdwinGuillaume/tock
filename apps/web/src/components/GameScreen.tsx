@@ -106,7 +106,7 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
 
   const turnLine = humanTurn ? 'À toi de jouer' : `${colorLabel[colorOf(state.currentPlayer)]} réfléchit…`
   const hint = !humanTurn ? '' : onlyDiscards ? 'aucun coup — touche une carte pour la défausser'
-    : interaction.phase === 'split' ? 'répartis le 7'
+    : interaction.phase === 'split' ? ''
     : interaction.phase === 'pickCard' ? 'choisis une carte'
     : interaction.phase === 'swapTarget' ? (interaction.marbleId === null ? 'choisis ta bille à échanger' : 'choisis la bille adverse')
     : 'choisis où poser ta bille'
@@ -133,18 +133,22 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
         {hint && (
           <div style={{ position: 'absolute', left: '50%', bottom: 8, transform: 'translateX(-50%)', fontSize: 12, color: 'rgba(232,234,240,.62)', background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.13)', borderRadius: theme.radius.sm, padding: '4px 12px', whiteSpace: 'nowrap', pointerEvents: 'none' }}>{hint}</div>
         )}
+        {interaction.phase === 'split' && (
+          <div data-testid="split-overlay" style={{ position: 'absolute', left: 0, right: 0, bottom: 8, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
+            <div style={{ pointerEvents: 'auto' }}>
+              <SplitControls
+                remaining={splitRemaining(interaction.draft)}
+                canPlay={completedSplitMove(interaction.draft, legalMoves) !== undefined}
+                onUndo={() => setInteraction({ phase: 'split', cardIndex: interaction.cardIndex, draft: undoLast(interaction.draft), focusMarbleId: null })}
+                onPlay={() => {
+                  const done = completedSplitMove(interaction.draft, legalMoves)
+                  if (done) doCommit(done)
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
-      {interaction.phase === 'split' && (
-        <SplitControls
-          remaining={splitRemaining(interaction.draft)}
-          canPlay={completedSplitMove(interaction.draft, legalMoves) !== undefined}
-          onUndo={() => setInteraction({ phase: 'split', cardIndex: interaction.cardIndex, draft: undoLast(interaction.draft), focusMarbleId: null })}
-          onPlay={() => {
-            const done = completedSplitMove(interaction.draft, legalMoves)
-            if (done) doCommit(done)
-          }}
-        />
-      )}
       <Hand hand={hand} playableList={playableList} selectedIndex={selectedIndex} discardMode={onlyDiscards} onSelect={handleCard} />
     </div>
   )

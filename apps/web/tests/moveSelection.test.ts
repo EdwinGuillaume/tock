@@ -42,15 +42,31 @@ describe('moveSelection', () => {
     expect(handIsPlayable(card('2', 'clubs'), legal)).toBe(false)
   })
 
-  it('a 7 with a marble on the ring is a split card with no ghosts', () => {
+  it('a 7 with a single movable marble is not a split card and yields ghosts', () => {
     const state = setHand(
       place(createGame(['human', 'bot'], 48), 'p0m0', { zone: 'track', index: 10 }),
       0,
       [card('7', 'clubs')]
     )
     const legal = getLegalMoves(state, 0)
+    expect(isSplitCard(card('7', 'clubs'), legal)).toBe(false)
+    const ghostList = ghostsForCard(card('7', 'clubs'), state, legal)
+    expect(ghostList.length).toBeGreaterThanOrEqual(1)
+    expect(ghostList.every(ghost => ghost.move.type === 'split7')).toBe(true)
+  })
+
+  it('a 7 with two movable marbles is a split card', () => {
+    const state = setHand(
+      place(
+        place(createGame(['human', 'bot'], 48), 'p0m0', { zone: 'track', index: 10 }),
+        'p0m1',
+        { zone: 'track', index: 30 }
+      ),
+      0,
+      [card('7', 'clubs')]
+    )
+    const legal = getLegalMoves(state, 0)
     expect(isSplitCard(card('7', 'clubs'), legal)).toBe(true)
-    expect(ghostsForCard(card('7', 'clubs'), state, legal).length).toBe(0)
   })
 
   it('a Jack with an own and an enemy marble on the ring yields consistent swap helpers and no ghosts', () => {
