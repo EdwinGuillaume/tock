@@ -1,11 +1,12 @@
 import type { Color } from '@tock/core'
 
-// Ink color name per player color. Blue uses the brighter variant so it stays
-// legible on dark terminal backgrounds (spec §10).
+// Ink color name per player color. Blue and purple use the brighter variants so
+// they stay legible on dark terminal backgrounds (spec §10). Ink has no "purple",
+// so purple maps to magentaBright — a vivid violet, clearly distinct from red.
 export const inkColor: Record<Color, string> = {
   red: 'red',
   green: 'green',
-  yellow: 'yellow',
+  purple: 'magentaBright',
   blue: 'blueBright'
 }
 

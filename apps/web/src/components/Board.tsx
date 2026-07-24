@@ -101,7 +101,7 @@ export const Board = ({ state, ghostList, onGhost, selectedMarbleId, selectableM
   return (
     <svg viewBox={viewBox(state.ringSize)} role="img" aria-label="board" style={{ width: '100%', height: '100%', display: 'block' }}>
       <defs>
-        {(['red', 'green', 'yellow', 'blue'] as const).map(color => (
+        {(['red', 'green', 'purple', 'blue'] as const).map(color => (
           <radialGradient key={color} id={`marble-${color}`} cx="35%" cy="30%" r="75%">
             <stop offset="0%" stopColor={seatColor[color].light} />
             <stop offset="100%" stopColor={seatColor[color].dark} />

@@ -24,7 +24,7 @@ export const drawCard = (
 }
 
 const playerOrder: PlayerId[] = [0, 1, 2, 3]
-const colorByPlayer: Record<PlayerId, Color> = { 0: 'red', 1: 'green', 2: 'yellow', 3: 'blue' }
+const colorByPlayer: Record<PlayerId, Color> = { 0: 'red', 1: 'green', 2: 'purple', 3: 'blue' }
 
 export const colorOf = (player: PlayerId): Color => colorByPlayer[player]
 

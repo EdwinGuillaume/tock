@@ -3,7 +3,7 @@ import { seatColor, theme, marbleGradientId } from '../src/theme'
 
 describe('theme tokens', () => {
   it('exposes the four seat colours with light/dark/soft', () => {
-    for (const color of ['red', 'green', 'yellow', 'blue'] as const) {
+    for (const color of ['red', 'green', 'purple', 'blue'] as const) {
       expect(seatColor[color].light).toMatch(/^#/)
       expect(seatColor[color].dark).toMatch(/^#/)
       expect(seatColor[color].soft).toMatch(/^\d+,\d+,\d+$/)

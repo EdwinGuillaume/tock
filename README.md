@@ -34,7 +34,7 @@ intelligently), reused unchanged by both UIs.
 clean workspace-wide.
 
 ```
-                  yellow
+                  purple
                     │
           green ──  ✦  ── blue
                     │
@@ -254,7 +254,7 @@ order `4 > 7 > J > A > K > 5 > Q > 10 > 9 > 8 > 6 > 3 > 2`.
 - A greedy heuristic bot with smart forced-discard
 - Live move log, in-turn previews, and a guided 7-split editor
 
-Colour is the sole cue that tells players apart (red / green / yellow / blue), which
+Colour is the sole cue that tells players apart (red / green / purple / blue), which
 means the board isn't distinguishable on a no-colour terminal or under red/green
 colour-vision deficiency — a known v1 tradeoff.
 

@@ -5,7 +5,7 @@ describe('theme', () => {
   test('maps every player color to an Ink color name', () => {
     expect(inkColor.red).toBe('red')
     expect(inkColor.green).toBe('green')
-    expect(inkColor.yellow).toBe('yellow')
+    expect(inkColor.purple).toBe('magentaBright')
     expect(inkColor.blue).toBe('blueBright')
   })
 

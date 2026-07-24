@@ -5,7 +5,7 @@ import { seatColor } from '../theme'
 // (no Math.random) so the render is deterministic and SSR/test-safe.
 export const Confetti = () => {
   const pieceList = useMemo(() => {
-    const palette = ['#ffd873', seatColor.red.light, seatColor.green.light, seatColor.blue.light, seatColor.yellow.light]
+    const palette = ['#ffd873', seatColor.red.light, seatColor.green.light, seatColor.blue.light, seatColor.purple.light]
     return Array.from({ length: 26 }, (_unused, index) => ({
       left: (index * 37) % 100,
       color: palette[index % palette.length] ?? '#ffd873',

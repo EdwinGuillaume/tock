@@ -68,7 +68,7 @@ const buildGrid = (state: GameState, highlight: Highlight[]): Map<string, CellVi
   const nestAnchor: Record<PlayerId, Cell> = {
     0: { row: side - 3, col: 1 },        // red   bottom-left
     1: { row: 0, col: 1 },               // green top-left
-    2: { row: 0, col: side - 3 },        // yellow top-right
+    2: { row: 0, col: side - 3 },        // purple top-right
     3: { row: side - 3, col: side - 3 }  // blue  bottom-right
   }
   for (const owner of [0, 1, 2, 3] as PlayerId[]) {

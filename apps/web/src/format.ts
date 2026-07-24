@@ -1,7 +1,7 @@
 import type { Color, GameState, Move } from '@tock/core'
 import { colorOf } from '@tock/core'
 
-export const colorLabel: Record<Color, string> = { red: 'Rouge', green: 'Vert', yellow: 'Jaune', blue: 'Bleu' }
+export const colorLabel: Record<Color, string> = { red: 'Rouge', green: 'Vert', purple: 'Violet', blue: 'Bleu' }
 
 // Short, human-readable log line for a committed move. Kept deliberately simple
 // for M1 (the terminal has a richer moveLabel; this is the web's own copy).

@@ -4,7 +4,7 @@ import { InstallButton } from './InstallButton'
 
 type HomeProps = { onPlay: () => void }
 
-const marbleColorList: Color[] = ['red', 'green', 'yellow', 'blue']
+const marbleColorList: Color[] = ['red', 'green', 'purple', 'blue']
 
 const Marble = ({ color }: { color: Color }) => (
   <span style={{ position: 'relative', width: 30, height: 30, borderRadius: '50%', flex: 'none', background: `radial-gradient(circle at 35% 30%, ${seatColor[color].light}, ${seatColor[color].dark})`, boxShadow: `0 0 14px rgba(${seatColor[color].soft},.6), 0 4px 8px rgba(0,0,0,.4)` }}>

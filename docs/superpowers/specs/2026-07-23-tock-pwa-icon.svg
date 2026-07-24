@@ -19,8 +19,8 @@
     <radialGradient id="mblue" cx="36%" cy="30%" r="72%">
       <stop offset="0%" stop-color="#cdddff"/><stop offset="40%" stop-color="#93b6ff"/><stop offset="100%" stop-color="#23409a"/>
     </radialGradient>
-    <radialGradient id="myellow" cx="36%" cy="30%" r="72%">
-      <stop offset="0%" stop-color="#fff2c9"/><stop offset="40%" stop-color="#ffe79a"/><stop offset="100%" stop-color="#a9760f"/>
+    <radialGradient id="mpurple" cx="36%" cy="30%" r="72%">
+      <stop offset="0%" stop-color="#e7d3ff"/><stop offset="40%" stop-color="#c9a2ff"/><stop offset="100%" stop-color="#3f1478"/>
     </radialGradient>
     <radialGradient id="mgreen" cx="36%" cy="30%" r="72%">
       <stop offset="0%" stop-color="#c2f3ce"/><stop offset="40%" stop-color="#86e6a0"/><stop offset="100%" stop-color="#1f6335"/>
@@ -30,7 +30,7 @@
   <!-- full-bleed felt background -->
   <rect width="512" height="512" fill="url(#felt)"/>
 
-  <!-- four seat marbles in a cross (top=red, right=blue, bottom=yellow, left=green) -->
+  <!-- four seat marbles in a cross (top=red, right=blue, bottom=purple, left=green) -->
   <!-- top — red -->
   <circle cx="256" cy="142" r="76" fill="#05100d" opacity=".3"/>
   <circle cx="256" cy="138" r="76" fill="url(#mred)"/>
@@ -39,9 +39,9 @@
   <circle cx="374" cy="260" r="76" fill="#05100d" opacity=".3"/>
   <circle cx="374" cy="256" r="76" fill="url(#mblue)"/>
   <ellipse cx="348" cy="232" rx="24" ry="16" fill="#fff" opacity=".45"/>
-  <!-- bottom — yellow -->
+  <!-- bottom — purple -->
   <circle cx="256" cy="378" r="76" fill="#05100d" opacity=".3"/>
-  <circle cx="256" cy="374" r="76" fill="url(#myellow)"/>
+  <circle cx="256" cy="374" r="76" fill="url(#mpurple)"/>
   <ellipse cx="230" cy="350" rx="24" ry="16" fill="#fff" opacity=".45"/>
   <!-- left — green -->
   <circle cx="138" cy="260" r="76" fill="#05100d" opacity=".3"/>

@@ -6,7 +6,7 @@ import type { Color } from '@tock/core'
 export const seatColor: Record<Color, { light: string, dark: string, soft: string }> = {
   red: { light: '#ff8a8f', dark: '#c02b31', soft: '229,72,77' },
   green: { light: '#86e6a0', dark: '#2e8a4a', soft: '70,167,88' },
-  yellow: { light: '#ffe79a', dark: '#d29a1e', soft: '255,197,61' },
+  purple: { light: '#c9a2ff', dark: '#6d28b8', soft: '154,92,232' },
   blue: { light: '#93b6ff', dark: '#345fd0', soft: '79,139,255' }
 }
 

@@ -23,7 +23,7 @@ describe('layout — ring geometry (48-cell cross)', () => {
     expect(sideOf[0]).toBe('bottom')
     expect(ringCoord(startCell(0, 48), 48)).toEqual({ row: 12, col: 5 }) // red bottom
     expect(ringCoord(startCell(1, 48), 48)).toEqual({ row: 5, col: 0 })  // green left
-    expect(ringCoord(startCell(2, 48), 48)).toEqual({ row: 0, col: 7 })  // yellow top
+    expect(ringCoord(startCell(2, 48), 48)).toEqual({ row: 0, col: 7 })  // purple top
     expect(ringCoord(startCell(3, 48), 48)).toEqual({ row: 7, col: 12 }) // blue right
   })
 

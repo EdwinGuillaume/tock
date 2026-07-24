@@ -1,5 +1,5 @@
 export type PlayerId = 0 | 1 | 2 | 3
-export type Color = 'red' | 'green' | 'yellow' | 'blue'
+export type Color = 'red' | 'green' | 'purple' | 'blue'
 export type MarbleId = string
 
 export type Position =
