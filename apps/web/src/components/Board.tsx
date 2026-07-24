@@ -124,7 +124,8 @@ export const Board = ({ state, ghostList, onGhost, selectedMarbleId, selectableM
         <LaneEntryFx key={entry.key} owner={entry.owner} finishIndex={entry.finishIndex} ringSize={state.ringSize} />
       ))}
       {placedList.map(({ marble, point }) => {
-        const marbleNode = (
+        const selectable = Boolean(selectableMarbleIds?.includes(marble.id) && onSelectMarble)
+        return (
           <Marble
             key={marble.id}
             testId={`marble-${marble.id}`}
@@ -132,16 +133,11 @@ export const Board = ({ state, ghostList, onGhost, selectedMarbleId, selectableM
             cx={point.x}
             cy={point.y}
             selected={marble.id === selectedMarbleId}
+            selectable={selectable}
+            ariaLabel={selectable ? `select-marble-${marble.id}` : undefined}
+            onSelect={onSelectMarble ? () => onSelectMarble(marble.id) : undefined}
           />
         )
-        if (selectableMarbleIds?.includes(marble.id) && onSelectMarble) {
-          return (
-            <g key={marble.id} role="button" aria-label={`select-marble-${marble.id}`} onClick={() => onSelectMarble(marble.id)} style={{ cursor: 'pointer' }}>
-              {marbleNode}
-            </g>
-          )
-        }
-        return marbleNode
       })}
       {ghostList.map(ghost => (
         <Ghost key={ghost.key} cx={ghost.cx} cy={ghost.cy} label={ghost.label} onSelect={() => onGhost(ghost.key)} />
