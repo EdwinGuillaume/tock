@@ -105,6 +105,56 @@ describe('GameScreen (human turn interaction)', () => {
     expect(commitMove.mock.calls[0]?.[0]).toMatchObject({ type: 'discard' })
   })
 
+  it('makes you pick which marble the Jack swaps, and switches the source when you retap another', async () => {
+    let state = createGame(['human', 'bot'], 48)
+    state = place(state, 'p0m0', { zone: 'track', index: 5 })
+    state = place(state, 'p0m1', { zone: 'track', index: 15 })
+    state = place(state, 'p1m0', { zone: 'track', index: 30 })
+    state = setHand(state, 0, [card('J', 'clubs')])
+    const commitMove = vi.fn()
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={commitMove} />)
+
+    await userEvent.click(screen.getByLabelText('card-J-clubs'))
+
+    // Source-selection step: no targets yet, source hint, both own marbles tappable.
+    expect(screen.getByText('choisis ta bille à échanger')).toBeInTheDocument()
+    expect(screen.queryAllByLabelText(/^ghost-/)).toHaveLength(0)
+    expect(screen.getByLabelText('select-marble-p0m0')).toBeInTheDocument()
+    expect(screen.getByLabelText('select-marble-p0m1')).toBeInTheDocument()
+
+    // Pick the first marble: targets appear and the hint moves to the opponent step.
+    await userEvent.click(screen.getByLabelText('select-marble-p0m0'))
+    expect(screen.getByText('choisis la bille adverse')).toBeInTheDocument()
+    expect(screen.getAllByLabelText(/^ghost-/).length).toBeGreaterThanOrEqual(1)
+
+    // Retap the other marble to switch the source, then commit via the target ghost.
+    await userEvent.click(screen.getByLabelText('select-marble-p0m1'))
+    await userEvent.click(screen.getAllByLabelText(/^ghost-/)[0] as HTMLElement)
+
+    expect(commitMove).toHaveBeenCalledTimes(1)
+    expect(commitMove.mock.calls[0]?.[0]).toMatchObject({ type: 'swap', marbleId: 'p0m1' })
+  })
+
+  it('auto-selects the only swappable marble and jumps straight to the opponent step', async () => {
+    let state = createGame(['human', 'bot'], 48)
+    state = place(state, 'p0m0', { zone: 'track', index: 5 })
+    state = place(state, 'p1m0', { zone: 'track', index: 30 })
+    state = setHand(state, 0, [card('J', 'clubs')])
+    const commitMove = vi.fn()
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={commitMove} />)
+
+    await userEvent.click(screen.getByLabelText('card-J-clubs'))
+
+    // Single candidate: skip straight to the opponent step, no source tap needed.
+    expect(screen.getByText('choisis la bille adverse')).toBeInTheDocument()
+    expect(screen.getAllByLabelText(/^ghost-/).length).toBeGreaterThanOrEqual(1)
+
+    await userEvent.click(screen.getAllByLabelText(/^ghost-/)[0] as HTMLElement)
+
+    expect(commitMove).toHaveBeenCalledTimes(1)
+    expect(commitMove.mock.calls[0]?.[0]).toMatchObject({ type: 'swap', marbleId: 'p0m0' })
+  })
+
   it('keeps the human hand visible at the bottom while a bot takes its turn', () => {
     const withHands = setHand(
       setHand(createGame(['human', 'bot'], 48), 0, [card('A', 'clubs')]),

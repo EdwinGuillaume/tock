@@ -21,7 +21,7 @@ type GameScreenProps = { state: GameState, logList: string[], humanSeatIds: Play
 type Interaction =
   | { phase: 'pickCard' }
   | { phase: 'ghosts', cardIndex: number }
-  | { phase: 'swapTarget', cardIndex: number, marbleId: MarbleId }
+  | { phase: 'swapTarget', cardIndex: number, marbleId: MarbleId | null }
   | { phase: 'split', cardIndex: number, draft: SplitDraft, focusMarbleId: MarbleId | null }
 
 export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScreenProps) => {
@@ -48,7 +48,7 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
   if (humanTurn && interaction.phase === 'ghosts') {
     const card = hand[interaction.cardIndex]
     if (card) ghostList = ghostsForCard(card, state, legalMoves)
-  } else if (humanTurn && interaction.phase === 'swapTarget') {
+  } else if (humanTurn && interaction.phase === 'swapTarget' && interaction.marbleId !== null) {
     const card = hand[interaction.cardIndex]
     if (card) {
       ghostList = swapTargetsFor(card, interaction.marbleId, legalMoves).map((move, index) => {
@@ -76,9 +76,12 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
       setInteraction({ phase: 'split', cardIndex: index, draft: startSplit(card), focusMarbleId: null })
       return
     }
-    const own = ownSwapMarbleIds(card, legalMoves)[0]
-    if (own) {
-      setInteraction({ phase: 'swapTarget', cardIndex: index, marbleId: own })
+    const swapSourceList = ownSwapMarbleIds(card, legalMoves)
+    if (swapSourceList.length > 0) {
+      // With a single swappable marble the choice is unambiguous, so auto-select
+      // it; with two or more, leave the source unset to force an explicit pick.
+      const onlySource = swapSourceList.length === 1 ? swapSourceList[0] ?? null : null
+      setInteraction({ phase: 'swapTarget', cardIndex: index, marbleId: onlySource })
       return
     }
     setInteraction({ phase: 'ghosts', cardIndex: index })
@@ -98,10 +101,15 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
 
   const splitCard = interaction.phase === 'split' ? hand[interaction.cardIndex] : undefined
   const splitCandidates = interaction.phase === 'split' && splitCard ? splitCandidateIds(splitCard, legalMoves) : []
+  const swapCard = interaction.phase === 'swapTarget' ? hand[interaction.cardIndex] : undefined
+  const swapSourceIds = interaction.phase === 'swapTarget' && swapCard ? ownSwapMarbleIds(swapCard, legalMoves) : []
 
   const turnLine = humanTurn ? 'À toi de jouer' : `${colorLabel[colorOf(state.currentPlayer)]} réfléchit…`
   const hint = !humanTurn ? '' : onlyDiscards ? 'aucun coup — touche une carte pour la défausser'
-    : interaction.phase === 'split' ? 'répartis le 7' : interaction.phase === 'pickCard' ? 'choisis une carte' : 'choisis où poser ta bille'
+    : interaction.phase === 'split' ? 'répartis le 7'
+    : interaction.phase === 'pickCard' ? 'choisis une carte'
+    : interaction.phase === 'swapTarget' ? (interaction.marbleId === null ? 'choisis ta bille à échanger' : 'choisis la bille adverse')
+    : 'choisis où poser ta bille'
   const selectedIndex = interaction.phase === 'pickCard' ? -1 : interaction.cardIndex
   const selectedMarbleId = interaction.phase === 'swapTarget' ? interaction.marbleId : interaction.phase === 'split' ? interaction.focusMarbleId : null
 
@@ -115,10 +123,12 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
           ghostList={ghostList.map(ghost => ({ key: ghost.key, cx: ghost.cx, cy: ghost.cy, label: ghost.label }))}
           onGhost={handleGhost}
           selectedMarbleId={selectedMarbleId}
-          selectableMarbleIds={interaction.phase === 'split' ? splitCandidates : undefined}
+          selectableMarbleIds={interaction.phase === 'split' ? splitCandidates : interaction.phase === 'swapTarget' ? swapSourceIds : undefined}
           onSelectMarble={interaction.phase === 'split'
             ? (id: MarbleId) => setInteraction({ phase: 'split', cardIndex: interaction.cardIndex, draft: interaction.draft, focusMarbleId: id })
-            : undefined}
+            : interaction.phase === 'swapTarget'
+              ? (id: MarbleId) => setInteraction({ phase: 'swapTarget', cardIndex: interaction.cardIndex, marbleId: id })
+              : undefined}
         />
         {hint && (
           <div style={{ position: 'absolute', left: '50%', bottom: 8, transform: 'translateX(-50%)', fontSize: 12, color: 'rgba(232,234,240,.62)', background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.13)', borderRadius: theme.radius.sm, padding: '4px 12px', whiteSpace: 'nowrap', pointerEvents: 'none' }}>{hint}</div>
