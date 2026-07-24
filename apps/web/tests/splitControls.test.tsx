@@ -17,6 +17,16 @@ describe('SplitControls', () => {
     expect(onPlay).toHaveBeenCalled()
   })
 
+  it('disables Annuler while nothing is allocated yet', () => {
+    render(<SplitControls remaining={7} canPlay={false} onUndo={() => {}} onPlay={() => {}} />)
+    expect(screen.getByRole('button', { name: /annuler/i })).toBeDisabled()
+  })
+
+  it('enables Annuler once a part is allocated', () => {
+    render(<SplitControls remaining={5} canPlay={false} onUndo={() => {}} onPlay={() => {}} />)
+    expect(screen.getByRole('button', { name: /annuler/i })).toBeEnabled()
+  })
+
   it('renders seven pips with the spent ones filled', () => {
     const { container } = render(<SplitControls remaining={4} canPlay={false} onUndo={() => {}} onPlay={() => {}} />)
     expect(container.querySelectorAll('[data-pip]').length).toBe(7)

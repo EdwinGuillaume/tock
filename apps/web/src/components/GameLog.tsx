@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { seatColor, theme } from '../theme'
 import { colorLabel } from '../format'
 import type { LogEntry } from '../format'
@@ -38,7 +38,14 @@ const Chevron = ({ open }: { open: boolean }) => (
 
 export const GameLog = ({ logList }: GameLogProps) => {
   const [open, setOpen] = useState(false)
+  const historyRef = useRef<HTMLDivElement>(null)
   const last = logList[logList.length - 1]
+
+  // The newest entry sits at the bottom, so open the history already scrolled to
+  // it (and keep it pinned there as fresh lines arrive while it stays open).
+  useEffect(() => {
+    if (open && historyRef.current) historyRef.current.scrollTop = historyRef.current.scrollHeight
+  }, [open, logList.length])
 
   return (
     <div data-testid="game-log" style={{ position: 'relative', zIndex: 5, margin: '2px 16px 4px', fontSize: 12.5, color: '#b7c0cf' }}>
@@ -59,7 +66,7 @@ export const GameLog = ({ logList }: GameLogProps) => {
         <Chevron open={open} />
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20, background: 'rgba(12,33,29,.97)', border: `1px solid ${theme.hairline}`, borderRadius: theme.radius.md, marginTop: 4, padding: '6px 12px', maxHeight: 160, overflowY: 'auto', boxShadow: theme.shadowFloat, WebkitOverflowScrolling: 'touch' }}>
+        <div ref={historyRef} data-testid="log-history" style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20, background: 'rgba(12,33,29,.97)', border: `1px solid ${theme.hairline}`, borderRadius: theme.radius.md, marginTop: 4, padding: '6px 12px', maxHeight: 160, overflowY: 'auto', boxShadow: theme.shadowFloat, WebkitOverflowScrolling: 'touch' }}>
           {logList.map((entry, index) => (
             <div key={index} style={{ padding: '2px 0', color: index === logList.length - 1 ? theme.ink : undefined }}>
               {renderEntry(entry)}

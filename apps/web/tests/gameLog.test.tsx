@@ -25,4 +25,12 @@ describe('GameLog', () => {
     render(<GameLog logList={[line('red', 'joue')]} />)
     expect(screen.getByText('Rouge').style.color).toBeTruthy()
   })
+
+  it('scrolls the history to its bottom when opened', async () => {
+    // jsdom performs no layout, so give the scroll container a measurable height.
+    Object.defineProperty(HTMLElement.prototype, 'scrollHeight', { configurable: true, value: 500 })
+    render(<GameLog logList={[line('red', 'un'), line('green', 'deux'), line('purple', 'trois')]} />)
+    await userEvent.click(screen.getByLabelText("afficher l'historique"))
+    expect(screen.getByTestId('log-history').scrollTop).toBe(500)
+  })
 })

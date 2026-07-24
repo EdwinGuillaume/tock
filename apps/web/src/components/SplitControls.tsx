@@ -4,6 +4,7 @@ type SplitControlsProps = { remaining: number, canPlay: boolean, onUndo: () => v
 
 export const SplitControls = ({ remaining, canPlay, onUndo, onPlay }: SplitControlsProps) => {
   const spent = 7 - remaining
+  const canUndo = spent > 0
   const mini = { fontFamily: theme.fontUi, fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 9, padding: '7px 12px', cursor: 'pointer' } as const
   return (
     <div style={{ margin: '0 16px', background: 'rgba(12,10,20,.72)', border: '1px solid rgba(255,255,255,.13)', boxShadow: '0 8px 22px rgba(0,0,0,.45)', borderRadius: theme.radius.md, padding: '9px 11px' }}>
@@ -15,7 +16,7 @@ export const SplitControls = ({ remaining, canPlay, onUndo, onPlay }: SplitContr
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
         <span style={{ fontFamily: theme.fontDisplay, fontWeight: 600, fontSize: 13, color: remaining === 0 ? '#86e6a0' : '#ffe6a6' }}>{remaining === 0 ? '0 ✓' : `Reste ${remaining}`}</span>
-        <button onClick={onUndo} style={{ ...mini, background: 'rgba(255,255,255,.08)', color: '#cdd3df' }}>Annuler</button>
+        <button onClick={onUndo} disabled={!canUndo} style={{ ...mini, background: 'rgba(255,255,255,.08)', color: '#cdd3df', cursor: canUndo ? 'pointer' : 'default', opacity: canUndo ? 1 : 0.4 }}>Annuler</button>
         <button onClick={onPlay} disabled={!canPlay} style={{ ...mini, background: `linear-gradient(${theme.goldButtonTop},${theme.goldButtonBottom})`, color: '#3f280a', opacity: canPlay ? 1 : 0.4 }}>Jouer le 7</button>
       </div>
     </div>
