@@ -24,12 +24,12 @@ const ghostsHint = (card: Card, moves: Move[]): string => {
     case '4': return 'recule ta bille de 4 cases — choisis laquelle'
     case '7': return 'avance ta bille de 7'
     case 'A':
-      if (hasExit && hasMove) return "l'As sort une bille ou l'avance de 1"
-      if (hasExit) return "l'As fait sortir une bille"
+      if (hasExit && hasMove) return "sort une nouvelle bille ou avance de 1"
+      if (hasExit) return "sort une nouvelle bille"
       return 'avance ta bille de 1'
     case 'K':
-      if (hasExit && hasMove) return "le Roi sort une bille ou l'avance de 13"
-      if (hasExit) return 'le Roi fait sortir une bille'
+      if (hasExit && hasMove) return "sort une nouvelle bille ou avance de 13"
+      if (hasExit) return 'sort une nouvelle bille'
       return 'avance ta bille de 13'
     default: return `avance ta bille de ${forwardSteps(moves)}`
   }
