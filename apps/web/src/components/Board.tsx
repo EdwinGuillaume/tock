@@ -7,6 +7,8 @@ import {
 import { seatColor, theme } from '../theme'
 import { Marble } from './Marble'
 import { Ghost } from './Ghost'
+import { LaneEntryFx } from './LaneEntryFx'
+import { useLaneEntryFx } from '../hooks/useLaneEntryFx'
 
 type GhostEntry = { key: string, cx: number, cy: number, label?: string }
 type BoardProps = {
@@ -93,6 +95,7 @@ const boardBackdrop = (ringSize: number) => {
 }
 
 export const Board = ({ state, ghostList, onGhost, selectedMarbleId, selectableMarbleIds, onSelectMarble }: BoardProps) => {
+  const entryList = useLaneEntryFx(state)
   const placedList = state.marbleList.map(marble => ({
     marble,
     point: marbleCenter(marble.owner, marble.position, slotIndexOf(state.marbleList, marble), state.ringSize)
@@ -112,8 +115,14 @@ export const Board = ({ state, ghostList, onGhost, selectedMarbleId, selectableM
           <stop offset="55%" stopColor={theme.socketMid} />
           <stop offset="100%" stopColor={theme.socketRim} />
         </radialGradient>
+        <filter id="lane-soft" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="0.9" />
+        </filter>
       </defs>
       {boardBackdrop(state.ringSize)}
+      {entryList.map(entry => (
+        <LaneEntryFx key={entry.key} owner={entry.owner} finishIndex={entry.finishIndex} ringSize={state.ringSize} />
+      ))}
       {placedList.map(({ marble, point }) => {
         const marbleNode = (
           <Marble

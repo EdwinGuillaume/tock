@@ -27,3 +27,13 @@ body {
 .tock-deal { animation: tock-deal 0.36s cubic-bezier(.7,0,.84,0); }
 .tock-confetti { animation-name: tock-confetti; }
 .tock-float { animation: tock-float 2.2s ease-in-out infinite alternate; }
+
+/* ---- finish-lane entry effect (mounted transiently by useLaneEntryFx) ---- */
+@keyframes tock-lane-glow { 0% { opacity: 0 } 22% { opacity: .9 } 100% { opacity: 0 } }
+@keyframes tock-lane-comet { 0% { transform: translate(0,0); opacity: 0 } 16% { opacity: 1 } 100% { transform: translate(var(--lx), var(--ly)); opacity: 0 } }
+@keyframes tock-lane-echo { 0% { transform: scale(.45); opacity: .85 } 100% { transform: scale(1.9); opacity: 0 } }
+
+.tock-lane-glow { animation: tock-lane-glow 1.4s ease-out both; }
+.tock-lane-comet { animation: tock-lane-comet 1s cubic-bezier(.35,0,.5,1) both; }
+.tock-lane-echo { animation: tock-lane-echo .8s ease-out .24s both; transform-box: fill-box; transform-origin: center; }
+.tock-lane-echo--b { animation-delay: .42s; }

@@ -10,3 +10,7 @@ export const prefersReducedMotion = (): boolean =>
   typeof window !== 'undefined' &&
   typeof window.matchMedia === 'function' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+// Lifetime (ms) of the finish-lane entry effect: how long an entry stays mounted
+// before useLaneEntryFx removes it. Covers its longest sub-animation (~1.4s).
+export const laneEntryFxMs = 1600
