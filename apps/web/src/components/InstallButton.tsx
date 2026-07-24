@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { theme } from '../theme'
-import { useInstallPrompt } from '../pwa/useInstallPrompt'
-import { isIosSafari, isStandalone } from '../pwa/platform'
+import type { InstallOffer } from '../pwa/useInstallOffer'
 
 const linkStyle = {
   fontFamily: theme.fontUi,
@@ -17,20 +16,18 @@ const linkStyle = {
   cursor: 'pointer'
 } as const
 
-export const InstallButton = () => {
-  const { canInstall, promptInstall } = useInstallPrompt()
+export const InstallButton = ({ offer }: { offer: InstallOffer }) => {
   const [showHint, setShowHint] = useState(false)
-  const iosEligible = isIosSafari() && !isStandalone()
 
-  if (canInstall) {
+  if (offer.canInstall) {
     return (
-      <button onClick={promptInstall} aria-label="Installer l'app" style={linkStyle}>
+      <button onClick={offer.promptInstall} aria-label="Installer l'app" style={linkStyle}>
         Installer l'app
       </button>
     )
   }
 
-  if (iosEligible) {
+  if (offer.iosEligible) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <button onClick={() => setShowHint(value => !value)} aria-label="Installer l'app" style={linkStyle}>
