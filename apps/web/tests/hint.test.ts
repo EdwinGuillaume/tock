@@ -34,18 +34,18 @@ describe('hintFor', () => {
 
   it('varies the Ace hint by whether exit and move are available', () => {
     expect(hintFor({ kind: 'ghosts', card: card('A'), moves: [exitMove('A'), moveMove('A', 1)] }))
-      .toBe("l'As sort une bille ou l'avance de 1")
+      .toBe('sort une nouvelle bille ou avance de 1')
     expect(hintFor({ kind: 'ghosts', card: card('A'), moves: [exitMove('A')] }))
-      .toBe("l'As fait sortir une bille")
+      .toBe('sort une nouvelle bille')
     expect(hintFor({ kind: 'ghosts', card: card('A'), moves: [moveMove('A', 1)] }))
       .toBe('avance ta bille de 1')
   })
 
   it('varies the King hint the same way', () => {
     expect(hintFor({ kind: 'ghosts', card: card('K'), moves: [exitMove('K'), moveMove('K', 13)] }))
-      .toBe("le Roi sort une bille ou l'avance de 13")
+      .toBe('sort une nouvelle bille ou avance de 13')
     expect(hintFor({ kind: 'ghosts', card: card('K'), moves: [exitMove('K')] }))
-      .toBe('le Roi fait sortir une bille')
+      .toBe('sort une nouvelle bille')
     expect(hintFor({ kind: 'ghosts', card: card('K'), moves: [moveMove('K', 13)] }))
       .toBe('avance ta bille de 13')
   })

@@ -75,6 +75,12 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
     if (!humanTurn) return
     const card = hand[index]
     if (!card || !handIsPlayable(card, legalMoves)) return
+    // Re-tapping the already-selected card clears the selection (and any
+    // in-progress split/swap draft), returning to card picking.
+    if (interaction.phase !== 'pickCard' && interaction.cardIndex === index) {
+      resetInteraction()
+      return
+    }
     if (isDiscardOnly(card, legalMoves)) {
       const first = movesForCard(card, legalMoves)[0]
       if (first) doCommit(first)

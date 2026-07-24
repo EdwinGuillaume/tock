@@ -19,7 +19,7 @@ describe('GameScreen (human turn interaction)', () => {
 
     await userEvent.click(aceButton)
     expect(screen.getAllByLabelText(/^ghost-/).length).toBeGreaterThanOrEqual(1)
-    expect(screen.getByText("l'As fait sortir une bille")).toBeInTheDocument()
+    expect(screen.getByText('sort une nouvelle bille')).toBeInTheDocument()
   })
 
   it('commits an exit move when a ghost is tapped', async () => {
@@ -94,6 +94,36 @@ describe('GameScreen (human turn interaction)', () => {
 
     expect(commitMove).toHaveBeenCalledTimes(1)
     expect(commitMove.mock.calls[0]?.[0]).toMatchObject({ type: 'split7' })
+  })
+
+  it('deselects a card when it is tapped again, hiding its ghost destinations', async () => {
+    const state = setHand(createGame(['human', 'bot'], 48), 0, [card('A', 'clubs')])
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)
+
+    const aceButton = screen.getByLabelText('card-A-clubs')
+    await userEvent.click(aceButton)
+    expect(screen.getAllByLabelText(/^ghost-/).length).toBeGreaterThanOrEqual(1)
+
+    // Re-tapping the already-selected card clears the selection.
+    await userEvent.click(aceButton)
+    expect(screen.queryAllByLabelText(/^ghost-/)).toHaveLength(0)
+    expect(screen.getByText('choisis une carte')).toBeInTheDocument()
+  })
+
+  it('deselects an in-progress split when its card is tapped again', async () => {
+    let rigged = place(createGame(['human', 'bot'], 48), 'p0m0', { zone: 'track', index: 10 })
+    rigged = place(rigged, 'p0m1', { zone: 'track', index: 30 })
+    const state = setHand(rigged, 0, [card('7', 'clubs')])
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)
+
+    const sevenButton = screen.getByLabelText('card-7-clubs')
+    await userEvent.click(sevenButton)
+    expect(screen.getByRole('button', { name: /jouer le 7/i })).toBeInTheDocument()
+
+    // Re-tapping the 7 abandons the split and returns to card selection.
+    await userEvent.click(sevenButton)
+    expect(screen.queryByRole('button', { name: /jouer le 7/i })).toBeNull()
+    expect(screen.getByText('choisis une carte')).toBeInTheDocument()
   })
 
   it('does not build ghosts or accept card taps on a bot seat, and shows the bot turn line', () => {
