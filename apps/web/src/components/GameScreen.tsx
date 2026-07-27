@@ -5,6 +5,7 @@ import { isHumanSeat } from '../hooks/useBotAutoplay'
 import type { LogEntry } from '../format'
 import { colorLabel } from '../format'
 import { activeHumanSeat } from '../passAndPlay'
+import { BOARD_BOTTOM_CLEARANCE, SPLIT_OVERLAY_GAP, safeTop } from '../layout'
 import type { Ghost as GhostType } from '../moveSelection'
 import { ghostsForCard, handIsPlayable, isDiscardOnly, isSplitCard, movesForCard, ownSwapMarbleIds, swapTargetsFor } from '../moveSelection'
 import type { SplitDraft } from '../splitAllocation'
@@ -26,11 +27,6 @@ type Interaction =
   | { phase: 'ghosts', cardIndex: number }
   | { phase: 'swapTarget', cardIndex: number, marbleId: MarbleId | null }
   | { phase: 'split', cardIndex: number, draft: SplitDraft, focusMarbleId: MarbleId | null }
-
-// Bottom space reserved in the board stage for the overlay column (hint chip, and
-// the taller split gauge) so it clears the board. The board stays vertically
-// centred in the space that remains above this reserved band.
-const BOARD_BOTTOM_CLEARANCE = 110
 
 export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScreenProps) => {
   const [interaction, setInteraction] = useState<Interaction>({ phase: 'pickCard' })
@@ -137,7 +133,7 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
   const selectedMarbleId = interaction.phase === 'swapTarget' ? interaction.marbleId : interaction.phase === 'split' ? interaction.focusMarbleId : null
 
   return (
-    <div style={{ maxWidth: 460, margin: '0 auto', display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
+    <div data-testid="game-column" style={{ maxWidth: 460, margin: '0 auto', display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden', paddingTop: safeTop(0) }}>
       <StatusBar turnColor={colorOf(state.currentPlayer)} drawCount={state.drawPile.length} discardCount={state.discardPile.length} prompt={turnLine} />
       <GameLog logList={logList} />
       <div data-testid="board-stage" style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingBottom: BOARD_BOTTOM_CLEARANCE }}>
@@ -156,7 +152,7 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
               ? (id: MarbleId) => setInteraction({ phase: 'swapTarget', cardIndex: interaction.cardIndex, marbleId: id })
               : undefined}
         />
-        <div data-testid="split-overlay" style={{ position: 'absolute', left: 0, right: 0, bottom: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, pointerEvents: 'none' }}>
+        <div data-testid="split-overlay" style={{ position: 'absolute', left: 0, right: 0, bottom: SPLIT_OVERLAY_GAP, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, pointerEvents: 'none' }}>
           <Hint text={hint} />
           {interaction.phase === 'split' && (
             <div style={{ pointerEvents: 'auto' }}>

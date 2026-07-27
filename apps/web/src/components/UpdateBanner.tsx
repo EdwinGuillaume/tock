@@ -1,5 +1,6 @@
 import { theme } from '../theme'
 import { useServiceWorkerUpdate } from '../pwa/useServiceWorkerUpdate'
+import { safeBottom } from '../layout'
 
 export const UpdateBanner = () => {
   const { needRefresh, offlineReady, update, dismiss } = useServiceWorkerUpdate()
@@ -9,7 +10,7 @@ export const UpdateBanner = () => {
     <div role="status" style={{
       position: 'fixed',
       left: '50%',
-      bottom: 16,
+      bottom: safeBottom(16),
       transform: 'translateX(-50%)',
       display: 'flex',
       alignItems: 'center',

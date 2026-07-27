@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { DEFAULT_RING_SIZE } from '@tock/core'
 import { Setup } from '../src/components/Setup'
+import { safeBottom, safeTop } from '../src/layout'
 
 describe('Setup', () => {
   it('defaults to one bot opponent (seats 2 and 3 absent) and starts with that kindList', async () => {
@@ -41,5 +42,17 @@ describe('Setup', () => {
     await userEvent.click(screen.getByLabelText('retirer le joueur 1'))
     await userEvent.click(screen.getByRole('button', { name: 'Lancer la partie' }))
     expect(onStart).toHaveBeenCalledWith(['human', 'inactive', 'inactive', 'inactive'], DEFAULT_RING_SIZE)
+  })
+
+  it('insets both edges: the header clears the status bar, the CTA clears the home indicator', () => {
+    const { container } = render(<Setup onStart={vi.fn()} />)
+    const root = container.firstElementChild as HTMLElement
+    expect(root.style.paddingTop).toBe(safeTop(26))
+    // "Lancer la partie" is pushed to the bottom by a flex spacer, so without the
+    // bottom inset it sits inside the home-indicator gesture zone.
+    expect(root.style.paddingBottom).toBe(safeBottom(22))
+    // Horizontal padding is untouched: the app is portrait-locked.
+    expect(root.style.paddingLeft).toBe('20px')
+    expect(root.style.paddingRight).toBe('20px')
   })
 })

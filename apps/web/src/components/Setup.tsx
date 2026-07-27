@@ -3,6 +3,7 @@ import type { Color, PlayerKind } from '@tock/core'
 import { DEFAULT_RING_SIZE, RING_SIZE_OPTIONS, colorOf } from '@tock/core'
 import { seatColor, theme } from '../theme'
 import { colorLabel } from '../format'
+import { safeBottom, safeTop } from '../layout'
 
 type SetupProps = { onStart: (kindList: PlayerKind[], ringSize: number) => void }
 
@@ -28,7 +29,7 @@ export const Setup = ({ onStart }: SetupProps) => {
   const opt = (on: boolean) => ({ fontFamily: theme.fontUi, fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8, padding: '6px 11px', cursor: 'pointer', background: on ? `linear-gradient(${theme.goldButtonTop},${theme.goldButtonBottom})` : 'transparent', color: on ? '#3f280a' : '#b9c0cf' }) as const
 
   return (
-    <div style={{ maxWidth: 360, margin: '0 auto', padding: '26px 20px 22px', display: 'flex', flexDirection: 'column', minHeight: '100dvh', color: theme.ink }}>
+    <div style={{ maxWidth: 360, margin: '0 auto', paddingTop: safeTop(26), paddingRight: 20, paddingBottom: safeBottom(22), paddingLeft: 20, display: 'flex', flexDirection: 'column', minHeight: '100dvh', color: theme.ink }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontFamily: theme.fontDisplay, fontWeight: 700, fontSize: 46, letterSpacing: 3, color: theme.gold, textShadow: '0 2px 0 #7a4e12, 0 6px 14px rgba(0,0,0,.5)', lineHeight: 1 }}>TOCK</div>
         <div style={{ fontSize: 11, letterSpacing: 4, textTransform: 'uppercase', color: '#cdb277', marginTop: 6, opacity: 0.8 }}>course de billes</div>

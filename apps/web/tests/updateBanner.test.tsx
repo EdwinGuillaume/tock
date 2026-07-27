@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { UpdateBanner } from '../src/components/UpdateBanner'
+import { safeBottom } from '../src/layout'
 
 const mockUpdate = vi.fn()
 const state = { needRefresh: false, offlineReady: false, update: mockUpdate, dismiss: vi.fn() }
@@ -29,5 +30,13 @@ describe('UpdateBanner', () => {
     Object.assign(state, { needRefresh: false, offlineReady: true })
     render(<UpdateBanner />)
     expect(screen.getByText(/hors-ligne/i)).toBeInTheDocument()
+  })
+
+  it('lifts the toast above the home indicator', () => {
+    Object.assign(state, { needRefresh: true, offlineReady: false })
+    render(<UpdateBanner />)
+    // position: fixed resolves against the viewport, so no parent inset reaches
+    // this banner -- it has to carry the inset itself.
+    expect(screen.getByRole('status').style.bottom).toBe(safeBottom(16))
   })
 })

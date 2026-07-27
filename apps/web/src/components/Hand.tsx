@@ -1,5 +1,6 @@
 import type { Card, Suit } from '@tock/core'
 import { theme } from '../theme'
+import { CARD_HEIGHT, CARD_SELECTED_LIFT, CARD_SELECTED_SCALE, HAND_BOTTOM_GAP, HAND_HEIGHT, safeBottom } from '../layout'
 
 type HandProps = {
   hand: Card[]
@@ -15,12 +16,12 @@ const isRed = (card: Card): boolean => card.suit === 'hearts' || card.suit === '
 export const Hand = ({ hand, playableList, selectedIndex, discardMode, onSelect }: HandProps) => {
   const mid = (hand.length - 1) / 2
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: 130, paddingBottom: 'calc(18px + env(safe-area-inset-bottom))' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', height: safeBottom(HAND_HEIGHT), paddingBottom: safeBottom(HAND_BOTTOM_GAP) }}>
       {hand.map((card, index) => {
         const playable = playableList[index] ?? false
         const selected = index === selectedIndex
         const angle = (index - mid) * 8
-        const lift = selected ? -20 : Math.abs(index - mid) * 2
+        const lift = selected ? -CARD_SELECTED_LIFT : Math.abs(index - mid) * 2
         const ink = isRed(card) ? theme.cardInkRed : theme.cardInk
         return (
           <button
@@ -30,10 +31,10 @@ export const Hand = ({ hand, playableList, selectedIndex, discardMode, onSelect 
             onClick={() => onSelect(index)}
             className="tock-deal"
             style={{
-              position: 'relative', width: 62, height: 86, margin: '0 -7px', borderRadius: theme.radius.card, border: 'none',
+              position: 'relative', width: 62, height: CARD_HEIGHT, margin: '0 -7px', borderRadius: theme.radius.card, border: 'none',
               background: theme.cardFace, color: ink, fontFamily: theme.fontDisplay, fontWeight: 700,
               transformOrigin: 'bottom center',
-              transform: `rotate(${selected ? 0 : angle}deg) translateY(${lift}px) scale(${selected ? 1.07 : 1})`,
+              transform: `rotate(${selected ? 0 : angle}deg) translateY(${lift}px) scale(${selected ? CARD_SELECTED_SCALE : 1})`,
               opacity: playable && !discardMode ? 1 : 0.42, cursor: playable ? 'pointer' : 'default',
               boxShadow: selected ? `${theme.shadowFloat}, 0 0 0 2px ${theme.gold}, ${theme.glowGold}` : theme.shadowCard,
               transition: `transform 0.16s ${theme.ease.spring}, box-shadow 0.16s ease`, zIndex: selected ? 5 : 1

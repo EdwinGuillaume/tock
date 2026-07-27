@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import type { Card } from '@tock/core'
 import { Hand } from '../src/components/Hand'
+import { CARD_HEIGHT, CARD_SELECTED_LIFT, CARD_SELECTED_SCALE, HAND_BOTTOM_GAP, HAND_HEIGHT, safeBottom } from '../src/layout'
 
 const hand: Card[] = [
   { rank: 'A', suit: 'clubs' },
@@ -42,5 +43,31 @@ describe('Hand', () => {
     const button = screen.getByLabelText('card-5-clubs')
     expect(button).toBeEnabled()
     expect(button.style.opacity).toBe('0.42')
+  })
+
+  it('grows its reserved box with the bottom inset so the cards stay inside it', () => {
+    const { container } = render(<Hand hand={hand} playableList={[true, true]} selectedIndex={-1} onSelect={() => {}} />)
+    const root = container.firstElementChild as HTMLElement
+    // Height AND padding must both carry the inset so it cancels: the content box
+    // left for the cards stays a device-independent HAND_HEIGHT - HAND_BOTTOM_GAP.
+    // Asserting only the height would still pass if the padding's inset were
+    // dropped -- which is the exact shape of the bug being fixed.
+    expect(root.style.height).toBe(safeBottom(HAND_HEIGHT))
+    expect(root.style.paddingBottom).toBe(safeBottom(HAND_BOTTOM_GAP))
+  })
+
+  it('sizes cards from the shared CARD_HEIGHT token', () => {
+    render(<Hand hand={hand} playableList={[true, true]} selectedIndex={-1} onSelect={() => {}} />)
+    expect(screen.getByLabelText('card-A-clubs').style.height).toBe(`${CARD_HEIGHT}px`)
+  })
+
+  it('lifts the selected card by the CARD_SELECTED_LIFT token', () => {
+    render(<Hand hand={hand} playableList={[true, true]} selectedIndex={0} onSelect={() => {}} />)
+    expect(screen.getByLabelText('card-A-clubs').style.transform).toContain(`translateY(${-CARD_SELECTED_LIFT}px)`)
+  })
+
+  it('scales the selected card by the CARD_SELECTED_SCALE token', () => {
+    render(<Hand hand={hand} playableList={[true, true]} selectedIndex={0} onSelect={() => {}} />)
+    expect(screen.getByLabelText('card-A-clubs').style.transform).toContain(`scale(${CARD_SELECTED_SCALE})`)
   })
 })

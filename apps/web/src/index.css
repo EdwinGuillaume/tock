@@ -1,4 +1,20 @@
-:root { color-scheme: dark; }
+/* Safe-area insets, declared once. iOS resolves these to 59px (Dynamic Island)
+   or 47px (notch) in the installed app, and to 0 in a Safari tab, on Android and
+   on desktop -- so they are the "iPhone and installed" conditional, with no
+   user-agent check. Consumed through src/layout.ts. The 0px fallback is env()'s
+   own second argument, which covers an unrecognised inset name (e.g. a typo, or
+   a platform that doesn't define safe-area-inset-top) -- not an unsupported
+   env() function; where env() itself is unsupported, the whole substitution is
+   unparseable and the declaration is invalid at computed-value time regardless
+   of this fallback. src/layout.ts's composers carry their own separate var()
+   fallback for the case where these custom properties are missing entirely (this
+   stylesheet not loaded, or a property renamed on one side only). No horizontal
+   insets: the manifest pins orientation: portrait. */
+:root {
+  color-scheme: dark;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
 body {

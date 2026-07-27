@@ -5,6 +5,7 @@ import { createGame } from '@tock/core'
 import { card, place, setHand } from './support'
 import { GameScreen } from '../src/components/GameScreen'
 import { colorLabel } from '../src/format'
+import { SPLIT_OVERLAY_GAP, safeTop } from '../src/layout'
 
 describe('GameScreen (human turn interaction)', () => {
   it('reveals ghost destinations when tapping a playable exit card', async () => {
@@ -273,10 +274,24 @@ describe('GameScreen (human turn interaction)', () => {
     expect(screen.getByText("choisis jusqu'où avancer")).toBeInTheDocument()
   })
 
+  it('insets the column top so the iOS status bar does not paint over the header', () => {
+    const state = setHand(createGame(['human', 'bot'], 48), 0, [card('A', 'clubs')])
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)
+    // Standalone iOS gives the web view the whole screen under the translucent
+    // status bar, so the column must inset itself or StatusBar starts at y=0.
+    expect(screen.getByTestId('game-column').style.paddingTop).toBe(safeTop(0))
+  })
+
   it('reserves bottom clearance so the hint does not overlap the board', () => {
     const state = setHand(createGame(['human', 'bot'], 48), 0, [card('A', 'clubs')])
     render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)
     const stage = screen.getByTestId('board-stage')
     expect(parseInt(stage.style.paddingBottom, 10)).toBeGreaterThanOrEqual(32)
+  })
+
+  it('positions the split overlay from the SPLIT_OVERLAY_GAP token', () => {
+    const state = setHand(createGame(['human', 'bot'], 48), 0, [card('A', 'clubs')])
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)
+    expect(screen.getByTestId('split-overlay').style.bottom).toBe(`${SPLIT_OVERLAY_GAP}px`)
   })
 })

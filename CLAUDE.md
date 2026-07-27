@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 web UI are all built, tested, and merged.** The repo is a **pnpm workspace**:
 `packages/core` (`@tock/core` — engine + ai + shared 2D grid geometry),
 `apps/terminal` (`@tock/terminal` — the Ink TUI), `apps/web` (`@tock/web` — the
-mobile web app). **364 passing tests** across the workspace (core 132,
-terminal 65, web 167), `pnpm -r typecheck` clean. Both apps are **playable
+mobile web app). **383 passing tests** across the workspace (core 132,
+terminal 65, web 186), `pnpm -r typecheck` clean. Both apps are **playable
 end-to-end** — `pnpm dev:terminal` launches the terminal game, `pnpm dev`
 launches the web app. Toolchain in place: TypeScript + Vitest + pnpm + tsx +
 Vite + React + Ink.
@@ -245,7 +245,18 @@ apps/web/src/components/   Vite + React 19 web UI (SVG board, touch), "Feutrine 
 apps/web/src/   svgGeometry.ts (SVG coordinates over board2d: ring channel, finish threads, homes) ·
                 moveSelection.ts (Ghost + legal-move → ghost mapping) · splitAllocation.ts (7-split draft state)
                 · passAndPlay.ts (humanSeatIds/activeHumanSeat/needsHandoff — handoff logic)
-                · theme.ts (design tokens) · motion.ts (durations/easings + prefersReducedMotion) · format.ts   — all pure
+                · theme.ts (design tokens) · motion.ts (durations/easings + prefersReducedMotion) ·
+                layout.ts (layout tokens: the safe-area inset composers `safeTop`/`safeBottom` over
+                index.css's `--safe-top`/`--safe-bottom` custom properties, plus the bottom-chrome
+                constants — CARD_HEIGHT, CARD_SELECTED_LIFT, CARD_SELECTED_SCALE, HAND_BOTTOM_GAP,
+                HAND_HEIGHT, BOARD_BOTTOM_CLEARANCE, SPLIT_OVERLAY_GAP — and their reservation
+                invariants asserted in tests/layout.test.ts. Distinct from
+                `apps/terminal/src/ui/layout.ts` despite the shared filename (the same pattern
+                already exists for `theme.ts`, one per app): the terminal's `layout.ts` is unrelated
+                grid geometry — it re-exports `@tock/core`'s board2d and adds
+                Highlight/movePreviewCells/marbleCellsAfter for the character-grid board — while this
+                one is iOS safe-area/viewport arithmetic for the SVG web UI)
+                · format.ts   — all pure
 apps/web/src/pwa/   platform.ts (isStandalone/isIosSafari/isInAppBrowser) ·
                     useInstallPrompt (beforeinstallprompt, holds the deferred event until
                     userChoice resolves, exposes installed) · useInstallOffer (combines
