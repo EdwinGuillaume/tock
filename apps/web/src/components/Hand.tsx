@@ -1,5 +1,6 @@
 import type { Card, Suit } from '@tock/core'
 import { theme } from '../theme'
+import { rankGlyph } from '../format'
 import { CARD_HEIGHT, CARD_SELECTED_LIFT, CARD_SELECTED_SCALE, HAND_BOTTOM_GAP, HAND_HEIGHT, safeBottom } from '../layout'
 
 type HandProps = {
@@ -40,7 +41,7 @@ export const Hand = ({ hand, playableList, selectedIndex, discardMode, onSelect 
               transition: `transform 0.16s ${theme.ease.spring}, box-shadow 0.16s ease`, zIndex: selected ? 5 : 1
             }}
           >
-            <span style={{ position: 'absolute', top: 6, left: 7, fontSize: 16, lineHeight: 0.85 }}>{card.rank}<br />{suitGlyph[card.suit]}</span>
+            <span style={{ position: 'absolute', top: 6, left: 7, fontSize: 16, lineHeight: 0.85 }}>{rankGlyph[card.rank]}<br />{suitGlyph[card.suit]}</span>
             <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34 }}>{suitGlyph[card.suit]}</span>
           </button>
         )

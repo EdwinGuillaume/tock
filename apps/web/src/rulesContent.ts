@@ -1,8 +1,11 @@
+import type { Rank } from '@tock/core'
+
 // Copy for the rules page, kept as pure data so it is testable in isolation and
-// the overlay stays presentational. Ranks match the engine's rank letters and
-// what Hand.tsx renders on the cards (A K Q J, not R D V). Effects are verified
-// against packages/core/src/engine/{cards,moves}.ts.
-export type CardRule = { ranks: string[], effect: string }
+// the overlay stays presentational. Ranks are the engine's rank letters
+// (A/J/Q/K); the overlay maps them to their French glyph (V/D/R) at display time
+// via `rankGlyph`, exactly like Hand.tsx does on the card faces. Effects are
+// verified against packages/core/src/engine/{cards,moves}.ts.
+export type CardRule = { ranks: Rank[], effect: string }
 export type SpecialMove = { title: string, text: string }
 
 export const rulesGoal = 'Ramène tes quatre billes dans ta maison avant les autres.'

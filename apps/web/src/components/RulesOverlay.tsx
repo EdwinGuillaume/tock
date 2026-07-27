@@ -1,14 +1,16 @@
 import { useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import type { Rank } from '@tock/core'
 import { theme } from '../theme'
+import { rankGlyph } from '../format'
 import { duration, easeSpring, prefersReducedMotion } from '../motion'
 import { safeBottom, safeTop } from '../layout'
 import { cardRuleList, rulesGoal, specialMoveList } from '../rulesContent'
 
 type RulesOverlayProps = { open: boolean, onClose: () => void }
 
-const MiniCard = ({ rank }: { rank: string }) => (
-  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 34, borderRadius: 6, background: theme.cardFace, color: theme.cardInk, fontFamily: theme.fontDisplay, fontWeight: 700, fontSize: 13, boxShadow: theme.shadowCard, flex: 'none' }}>{rank}</span>
+const MiniCard = ({ rank }: { rank: Rank }) => (
+  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 34, borderRadius: 6, background: theme.cardFace, color: theme.cardInk, fontFamily: theme.fontDisplay, fontWeight: 700, fontSize: 13, boxShadow: theme.shadowCard, flex: 'none' }}>{rankGlyph[rank]}</span>
 )
 
 const sectionLabel = { fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', color: theme.goldDim, opacity: 0.85, margin: '22px 2px 12px' } as const

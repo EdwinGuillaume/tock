@@ -13,6 +13,16 @@ describe('RulesOverlay', () => {
     expect(screen.getByText('Capture')).toBeInTheDocument()
   })
 
+  it('renders the face-card mini-cards with their French letters', () => {
+    render(<RulesOverlay open onClose={() => {}} />)
+    expect(screen.getByText('R')).toBeInTheDocument()
+    expect(screen.getByText('D')).toBeInTheDocument()
+    expect(screen.getByText('V')).toBeInTheDocument()
+    expect(screen.queryByText('K')).toBeNull()
+    expect(screen.queryByText('Q')).toBeNull()
+    expect(screen.queryByText('J')).toBeNull()
+  })
+
   it('renders nothing when closed', () => {
     render(<RulesOverlay open={false} onClose={() => {}} />)
     expect(screen.queryByRole('dialog')).toBeNull()

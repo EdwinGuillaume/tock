@@ -2,7 +2,21 @@ import { describe, expect, it } from 'vitest'
 import type { Move } from '@tock/core'
 import { applyMove, createGame, getLegalMoves } from '@tock/core'
 import { card, findMarble, place, setHand } from './support'
-import { moveLabel } from '../src/format'
+import { moveLabel, rankGlyph } from '../src/format'
+
+describe('rankGlyph', () => {
+  it('renders the face cards with their French letters', () => {
+    expect(rankGlyph.K).toBe('R')
+    expect(rankGlyph.Q).toBe('D')
+    expect(rankGlyph.J).toBe('V')
+  })
+
+  it('leaves the ace and number cards unchanged', () => {
+    expect(rankGlyph.A).toBe('A')
+    expect(rankGlyph['7']).toBe('7')
+    expect(rankGlyph['10']).toBe('10')
+  })
+})
 
 describe('moveLabel', () => {
   it('appends the captured opponent, in its own colour, when a move sends it home', () => {

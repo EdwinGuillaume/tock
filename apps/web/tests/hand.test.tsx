@@ -30,6 +30,22 @@ describe('Hand', () => {
     expect(card).toHaveTextContent('♥')
   })
 
+  it('renders face cards with their French letters (K->R, Q->D, J->V)', () => {
+    render(
+      <Hand
+        hand={[{ rank: 'K', suit: 'spades' }, { rank: 'Q', suit: 'hearts' }, { rank: 'J', suit: 'clubs' }]}
+        playableList={[true, true, true]}
+        selectedIndex={-1}
+        onSelect={() => {}}
+      />
+    )
+    const king = screen.getByLabelText('card-K-spades')
+    expect(king).toHaveTextContent('R')
+    expect(king).not.toHaveTextContent('K')
+    expect(screen.getByLabelText('card-Q-hearts')).toHaveTextContent('D')
+    expect(screen.getByLabelText('card-J-clubs')).toHaveTextContent('V')
+  })
+
   it('dims a playable card but keeps it enabled when discardMode is on', () => {
     render(
       <Hand
