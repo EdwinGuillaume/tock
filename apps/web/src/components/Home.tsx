@@ -1,9 +1,10 @@
 import type { Color } from '@tock/core'
 import { seatColor, theme } from '../theme'
 import { InstallButton } from './InstallButton'
+import { RulesButton } from './RulesButton'
 import { useInstallOffer } from '../pwa/useInstallOffer'
 
-type HomeProps = { onPlay: () => void }
+type HomeProps = { onPlay: () => void, onOpenRules: () => void }
 
 const marbleColorList: Color[] = ['red', 'green', 'purple', 'blue']
 
@@ -22,7 +23,7 @@ const InstalledNote = () => (
   </p>
 )
 
-export const Home = ({ onPlay }: HomeProps) => {
+export const Home = ({ onPlay, onOpenRules }: HomeProps) => {
   const offer = useInstallOffer()
   return (
     <div style={{ maxWidth: 360, margin: '0 auto', padding: '26px 20px 22px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', color: theme.ink, textAlign: 'center' }}>
@@ -62,6 +63,10 @@ export const Home = ({ onPlay }: HomeProps) => {
               )}
             </>
           )}
+
+      <div style={{ marginTop: 22 }}>
+        <RulesButton onClick={onOpenRules} variant="text" />
+      </div>
     </div>
   )
 }

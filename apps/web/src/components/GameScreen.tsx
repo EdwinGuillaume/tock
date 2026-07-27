@@ -20,7 +20,7 @@ import { GameLog } from './GameLog'
 import { SplitControls } from './SplitControls'
 import { Hint } from './Hint'
 
-type GameScreenProps = { state: GameState, logList: LogEntry[], humanSeatIds: PlayerId[], commitMove: (move: Move) => void }
+type GameScreenProps = { state: GameState, logList: LogEntry[], humanSeatIds: PlayerId[], commitMove: (move: Move) => void, onOpenRules: () => void }
 
 type Interaction =
   | { phase: 'pickCard' }
@@ -28,7 +28,7 @@ type Interaction =
   | { phase: 'swapTarget', cardIndex: number, marbleId: MarbleId | null }
   | { phase: 'split', cardIndex: number, draft: SplitDraft, focusMarbleId: MarbleId | null }
 
-export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScreenProps) => {
+export const GameScreen = ({ state, logList, humanSeatIds, commitMove, onOpenRules }: GameScreenProps) => {
   const [interaction, setInteraction] = useState<Interaction>({ phase: 'pickCard' })
 
   const legalMoves = useMemo(
@@ -134,7 +134,7 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
 
   return (
     <div data-testid="game-column" style={{ maxWidth: 460, margin: '0 auto', display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden', paddingTop: safeTop(0) }}>
-      <StatusBar turnColor={colorOf(state.currentPlayer)} drawCount={state.drawPile.length} discardCount={state.discardPile.length} prompt={turnLine} />
+      <StatusBar turnColor={colorOf(state.currentPlayer)} drawCount={state.drawPile.length} discardCount={state.discardPile.length} prompt={turnLine} onOpenRules={onOpenRules} />
       <GameLog logList={logList} />
       <div data-testid="board-stage" style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingBottom: BOARD_BOTTOM_CLEARANCE }}>
         <Board

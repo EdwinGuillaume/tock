@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 web UI are all built, tested, and merged.** The repo is a **pnpm workspace**:
 `packages/core` (`@tock/core` — engine + ai + shared 2D grid geometry),
 `apps/terminal` (`@tock/terminal` — the Ink TUI), `apps/web` (`@tock/web` — the
-mobile web app). **383 passing tests** across the workspace (core 132,
-terminal 65, web 186), `pnpm -r typecheck` clean. Both apps are **playable
+mobile web app). **397 passing tests** across the workspace (core 132,
+terminal 65, web 200), `pnpm -r typecheck` clean. Both apps are **playable
 end-to-end** — `pnpm dev:terminal` launches the terminal game, `pnpm dev`
 launches the web app. Toolchain in place: TypeScript + Vitest + pnpm + tsx +
 Vite + React + Ink.
@@ -20,9 +20,9 @@ rendered as a cross, and smart forced-discard in the bot. On top of that, the
 web app ships M1 (solo vs. bots) and M2 (local pass-and-play): a welcome screen
 with a floating card, a chairs-based setup, a card-first ghost-destination touch
 interaction, a progressive 7-split control (the marble is chosen by tapping it
-on the board), per-seat human/bot/inactive setup, and a "pass the phone"
-interstitial between different humans' turns, deployable as a static shareable
-link.
+on the board), per-seat human/bot/inactive setup, a "pass the phone"
+interstitial between different humans' turns, a card-first rules panel reachable
+from Home/Setup/in-game, and deployment as a static shareable link.
 
 The web UI has been through a full **"Feutrine & or"** (warm felt & gold)
 visual + UX redesign (Balatro-inspired: colourful yet elegant, adult, dosed
@@ -222,8 +222,9 @@ apps/terminal/src/index.tsx   renders <App /> into the terminal
 
 apps/web/src/components/   Vite + React 19 web UI (SVG board, touch), "Feutrine & or" theme
 ├── App.tsx           routing: Home → Setup → GameScreen → GameOver, plus the pass-and-play
-│                     handoff gate (PassInterstitial), each wrapped in ScreenTransition;
-│                     owns useTockGame + useBotAutoplay + awaitingHandoff + entered
+│                     handoff gate (PassInterstitial), each wrapped in ScreenTransition; renders
+│                     RulesOverlay + UpdateBanner as siblings; owns useTockGame + useBotAutoplay +
+│                     awaitingHandoff + entered; threads onOpenRules callback to screens
 ├── Home.tsx          welcome screen: TOCK logo, a floating card, marbles, "Nouvelle partie" CTA,
 │                     swapped for an install offer (useInstallOffer) or, once installed, a French
 │                     confirmation note
@@ -239,13 +240,16 @@ apps/web/src/components/   Vite + React 19 web UI (SVG board, touch), "Feutrine 
 ├── Hand.tsx           suited fanned cards; only the newly-drawn card deals in; dimmed when unplayable / discard-only
 ├── StatusBar.tsx       whose turn (bobbing colour dot), pile pills, prompt
 ├── GameLog.tsx         one-line ticker with an expandable overlay history (non-reflowing)
+├── RulesOverlay.tsx    rules dialog (scrim + felt panel; card-first reference: goal, 13 card ranks, special moves; role=dialog, ✕ / backdrop / Escape close; motion honours prefers-reduced-motion)
 ├── SplitControls.tsx   7-pip budget gauge + Undo/Play for the progressive 7-split
+├── RulesButton.tsx     shared gold "?"/"Règles" trigger pill (icon|text variant)
 ├── InstallButton.tsx  install affordance on Home (beforeinstallprompt; iOS Share-sheet hint fallback)
 └── UpdateBanner.tsx    "Nouvelle version — Recharger" toast (vite-plugin-pwa useRegisterSW, registerType 'prompt')
 apps/web/src/   svgGeometry.ts (SVG coordinates over board2d: ring channel, finish threads, homes) ·
                 moveSelection.ts (Ghost + legal-move → ghost mapping) · splitAllocation.ts (7-split draft state)
                 · passAndPlay.ts (humanSeatIds/activeHumanSeat/needsHandoff — handoff logic)
-                · theme.ts (design tokens) · motion.ts (durations/easings + prefersReducedMotion) ·
+                · rulesContent.ts (rules-page copy as pure data — goal, card ranks, special moves) ·
+                theme.ts (design tokens) · motion.ts (durations/easings + prefersReducedMotion) ·
                 layout.ts (layout tokens: the safe-area inset composers `safeTop`/`safeBottom` over
                 index.css's `--safe-top`/`--safe-bottom` custom properties, plus the bottom-chrome
                 constants — CARD_HEIGHT, CARD_SELECTED_LIFT, CARD_SELECTED_SCALE, HAND_BOTTOM_GAP,

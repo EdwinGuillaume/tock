@@ -8,7 +8,7 @@ import { safeBottom, safeTop } from '../src/layout'
 describe('Setup', () => {
   it('defaults to one bot opponent (seats 2 and 3 absent) and starts with that kindList', async () => {
     const onStart = vi.fn()
-    render(<Setup onStart={onStart} />)
+    render(<Setup onStart={onStart} onOpenRules={vi.fn()} />)
     // Seat 1 present as a bot; seats 2 and 3 are empty chairs to add.
     expect(screen.getByRole('button', { name: 'bot' })).toBeInTheDocument()
     expect(screen.getByLabelText('ajouter le joueur 2')).toBeInTheDocument()
@@ -20,7 +20,7 @@ describe('Setup', () => {
 
   it('adds seat 2 as a bot and includes it', async () => {
     const onStart = vi.fn()
-    render(<Setup onStart={onStart} />)
+    render(<Setup onStart={onStart} onOpenRules={vi.fn()} />)
     await userEvent.click(screen.getByLabelText('ajouter le joueur 2'))
     await userEvent.click(screen.getByRole('button', { name: 'Lancer la partie' }))
     expect(onStart).toHaveBeenCalledWith(['human', 'bot', 'bot', 'inactive'], DEFAULT_RING_SIZE)
@@ -28,7 +28,7 @@ describe('Setup', () => {
 
   it('switches an added seat to human via the segmented control', async () => {
     const onStart = vi.fn()
-    render(<Setup onStart={onStart} />)
+    render(<Setup onStart={onStart} onOpenRules={vi.fn()} />)
     // Seat 1 is present; set its role to human. Scope the query to seat 1's row.
     const seatOne = screen.getByTestId('seat-1')
     await userEvent.click(within(seatOne).getByRole('button', { name: 'humain' }))
@@ -38,14 +38,14 @@ describe('Setup', () => {
 
   it('removes a seat back to absent', async () => {
     const onStart = vi.fn()
-    render(<Setup onStart={onStart} />)
+    render(<Setup onStart={onStart} onOpenRules={vi.fn()} />)
     await userEvent.click(screen.getByLabelText('retirer le joueur 1'))
     await userEvent.click(screen.getByRole('button', { name: 'Lancer la partie' }))
     expect(onStart).toHaveBeenCalledWith(['human', 'inactive', 'inactive', 'inactive'], DEFAULT_RING_SIZE)
   })
 
   it('insets both edges: the header clears the status bar, the CTA clears the home indicator', () => {
-    const { container } = render(<Setup onStart={vi.fn()} />)
+    const { container } = render(<Setup onStart={vi.fn()} onOpenRules={vi.fn()} />)
     const root = container.firstElementChild as HTMLElement
     expect(root.style.paddingTop).toBe(safeTop(26))
     // "Lancer la partie" is pushed to the bottom by a flex spacer, so without the
