@@ -9,6 +9,18 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ---- no text selection anywhere: this is a game, never a document ---- */
+html, body, #root, * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+img, svg, a { -webkit-user-drag: none; }
+::selection { background: transparent; }
+::-moz-selection { background: transparent; }
+
 /* ---- ambient keyframes (disabled under reduced motion, see below) ---- */
 @keyframes tock-echo { 0% { transform: scale(.9); opacity: .6 } 100% { transform: scale(1.8); opacity: 0 } }
 @keyframes tock-deal { 0% { transform: translateY(-44px) scale(.9); opacity: 0 } 100% { transform: none; opacity: 1 } }
