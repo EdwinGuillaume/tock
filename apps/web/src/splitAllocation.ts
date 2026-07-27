@@ -20,6 +20,12 @@ export const allocate = (draft: SplitDraft, part: SplitPart): SplitDraft =>
 export const undoLast = (draft: SplitDraft): SplitDraft =>
   ({ card: draft.card, assigned: draft.assigned.slice(0, -1) })
 
+// Drops whatever was allocated to one marble, refunding its steps to the budget.
+// Tapping an already-allocated marble resets it rather than stacking a second
+// part on top of it (which would spend its steps twice).
+export const clearMarble = (draft: SplitDraft, marbleId: MarbleId): SplitDraft =>
+  ({ card: draft.card, assigned: draft.assigned.filter(part => part.marbleId !== marbleId) })
+
 const splitPartLists = (card: Card, legalMoves: Move[]): SplitPart[][] =>
   legalMoves.flatMap(move => (move.type === 'split7' && sameCard(move.card, card) ? [move.partList] : []))
 

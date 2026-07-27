@@ -8,7 +8,7 @@ import { activeHumanSeat } from '../passAndPlay'
 import type { Ghost as GhostType } from '../moveSelection'
 import { ghostsForCard, handIsPlayable, isDiscardOnly, isSplitCard, movesForCard, ownSwapMarbleIds, swapTargetsFor } from '../moveSelection'
 import type { SplitDraft } from '../splitAllocation'
-import { allocate, completedSplitMove, splitCandidateIds, splitGhostsForMarble, splitRemaining, startSplit, undoLast } from '../splitAllocation'
+import { allocate, clearMarble, completedSplitMove, splitCandidateIds, splitGhostsForMarble, splitRemaining, startSplit, undoLast } from '../splitAllocation'
 import { marbleCenter } from '../svgGeometry'
 import type { HintContext } from '../hint'
 import { useHint } from '../hooks/useHint'
@@ -148,7 +148,10 @@ export const GameScreen = ({ state, logList, humanSeatIds, commitMove }: GameScr
           selectedMarbleId={selectedMarbleId}
           selectableMarbleIds={interaction.phase === 'split' ? splitCandidates : interaction.phase === 'swapTarget' ? swapSourceIds : undefined}
           onSelectMarble={interaction.phase === 'split'
-            ? (id: MarbleId) => setInteraction({ phase: 'split', cardIndex: interaction.cardIndex, draft: interaction.draft, focusMarbleId: id })
+            // Focusing a marble first clears any part it already holds, so the
+            // ghosts offer its full range again and the tap re-sets it instead
+            // of adding a second part for the same marble.
+            ? (id: MarbleId) => setInteraction({ phase: 'split', cardIndex: interaction.cardIndex, draft: clearMarble(interaction.draft, id), focusMarbleId: id })
             : interaction.phase === 'swapTarget'
               ? (id: MarbleId) => setInteraction({ phase: 'swapTarget', cardIndex: interaction.cardIndex, marbleId: id })
               : undefined}

@@ -96,6 +96,27 @@ describe('GameScreen (human turn interaction)', () => {
     expect(commitMove.mock.calls[0]?.[0]).toMatchObject({ type: 'split7' })
   })
 
+  it('re-tapping an already-allocated marble clears its part instead of double-counting it', async () => {
+    let rigged = place(createGame(['human', 'bot'], 48), 'p0m0', { zone: 'track', index: 10 })
+    rigged = place(rigged, 'p0m1', { zone: 'track', index: 30 })
+    const state = setHand(rigged, 0, [card('7', 'clubs')])
+    render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)
+
+    await userEvent.click(screen.getByLabelText('card-7-clubs'))
+    await userEvent.click(screen.getByLabelText('select-marble-p0m0'))
+    await userEvent.click(screen.getByLabelText('ghost-3'))
+    expect(screen.getByText('Reste 4')).toBeInTheDocument()
+
+    // Tapping the same marble again resets ITS part: the 3 steps go back to the
+    // budget and every landing is offered again (it used to re-allocate on top,
+    // spending 3 twice for one marble).
+    await userEvent.click(screen.getByLabelText('select-marble-p0m0'))
+    expect(screen.getByText('Reste 7')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByLabelText('ghost-5'))
+    expect(screen.getByText('Reste 2')).toBeInTheDocument()
+  })
+
   it('deselects a card when it is tapped again, hiding its ghost destinations', async () => {
     const state = setHand(createGame(['human', 'bot'], 48), 0, [card('A', 'clubs')])
     render(<GameScreen state={state} logList={[]} humanSeatIds={[0]} commitMove={vi.fn()} />)

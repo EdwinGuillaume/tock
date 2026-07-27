@@ -3,6 +3,7 @@ import type { Move } from '@tock/core'
 import { createGame, getLegalMoves } from '@tock/core'
 import {
   allocate,
+  clearMarble,
   completedSplitMove,
   splitGhostsForMarble,
   splitRemaining,
@@ -33,6 +34,22 @@ describe('splitAllocation', () => {
   it('undo restores the previous budget', () => {
     const draft = allocate(startSplit(sevenOfHearts), { marbleId: 'p0m0', steps: 3 })
     expect(splitRemaining(undoLast(draft))).toBe(7)
+  })
+
+  it('clears one marble allocation and refunds its steps, leaving the others', () => {
+    const draft = allocate(
+      allocate(startSplit(sevenOfHearts), { marbleId: 'p0m0', steps: 3 }),
+      { marbleId: 'p0m1', steps: 4 }
+    )
+    const reset = clearMarble(draft, 'p0m0')
+    expect(reset.assigned).toEqual([{ marbleId: 'p0m1', steps: 4 }])
+    expect(splitRemaining(reset)).toBe(3)
+  })
+
+  it('clearMarble is a no-op for a marble that has nothing allocated', () => {
+    const draft = allocate(startSplit(sevenOfHearts), { marbleId: 'p0m0', steps: 3 })
+    expect(clearMarble(draft, 'p0m1').assigned).toEqual(draft.assigned)
+    expect(splitRemaining(clearMarble(draft, 'p0m1'))).toBe(4)
   })
 
   it('yields no completed move until the budget hits 0', () => {
