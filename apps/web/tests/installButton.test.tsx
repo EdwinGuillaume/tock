@@ -7,6 +7,7 @@ import type { InstallOffer } from '../src/pwa/useInstallOffer'
 const makeOffer = (over: Partial<InstallOffer>): InstallOffer => ({
   canOfferInstall: false,
   canInstall: false,
+  installed: false,
   iosEligible: false,
   inAppBrowser: false,
   promptInstall: vi.fn(),

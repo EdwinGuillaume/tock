@@ -13,6 +13,15 @@ const Marble = ({ color }: { color: Color }) => (
   </span>
 )
 
+// Shown in place of the CTA once the app is installed: the browser tab's job is
+// then to point at the installed app, not to start another game here.
+const InstalledNote = () => (
+  <p role="note" aria-live="polite" style={{ fontFamily: theme.fontUi, fontSize: 13, color: theme.inkDim, maxWidth: 260, lineHeight: 1.5, margin: '18px 0 0' }}>
+    <strong style={{ display: 'block', marginBottom: 4, color: theme.goldDim, fontSize: 15 }}>Installée !</strong>
+    Retrouve Tock dans la liste des applications de ton téléphone.
+  </p>
+)
+
 export const Home = ({ onPlay }: HomeProps) => {
   const offer = useInstallOffer()
   return (
@@ -36,21 +45,23 @@ export const Home = ({ onPlay }: HomeProps) => {
         {marbleColorList.map(color => <Marble key={color} color={color} />)}
       </div>
 
-      {offer.canOfferInstall
-        ? <InstallButton offer={offer} />
-        : (
-          <>
-            <button onClick={onPlay}
-              style={{ fontFamily: theme.fontDisplay, fontWeight: 700, fontSize: 19, color: '#4a2f0c', background: `linear-gradient(${theme.goldButtonTop}, ${theme.goldButtonBottom})`, border: 'none', borderRadius: theme.radius.lg, padding: '16px 34px', boxShadow: `0 6px 0 ${theme.goldButtonLip}, 0 12px 20px rgba(0,0,0,.45)`, cursor: 'pointer' }}>
-              Nouvelle partie
-            </button>
-            {offer.inAppBrowser && (
-              <p role="note" style={{ fontFamily: theme.fontUi, fontSize: 12, color: theme.inkDim, marginTop: 16, maxWidth: 260, lineHeight: 1.4 }}>
-                Pour installer l'app, ouvre cette page dans ton navigateur.
-              </p>
-            )}
-          </>
-        )}
+      {offer.installed
+        ? <InstalledNote />
+        : offer.canOfferInstall
+          ? <InstallButton offer={offer} />
+          : (
+            <>
+              <button onClick={onPlay}
+                style={{ fontFamily: theme.fontDisplay, fontWeight: 700, fontSize: 19, color: '#4a2f0c', background: `linear-gradient(${theme.goldButtonTop}, ${theme.goldButtonBottom})`, border: 'none', borderRadius: theme.radius.lg, padding: '16px 34px', boxShadow: `0 6px 0 ${theme.goldButtonLip}, 0 12px 20px rgba(0,0,0,.45)`, cursor: 'pointer' }}>
+                Nouvelle partie
+              </button>
+              {offer.inAppBrowser && (
+                <p role="note" style={{ fontFamily: theme.fontUi, fontSize: 12, color: theme.inkDim, marginTop: 16, maxWidth: 260, lineHeight: 1.4 }}>
+                  Pour installer l'app, ouvre cette page dans ton navigateur.
+                </p>
+              )}
+            </>
+          )}
     </div>
   )
 }

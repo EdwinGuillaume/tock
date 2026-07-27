@@ -15,14 +15,14 @@ afterEach(() => {
 
 describe('useInstallOffer', () => {
   it('offers install when the Chromium prompt is available', () => {
-    vi.spyOn(installHook, 'useInstallPrompt').mockReturnValue({ canInstall: true, promptInstall: vi.fn() })
+    vi.spyOn(installHook, 'useInstallPrompt').mockReturnValue({ canInstall: true, installed: false, promptInstall: vi.fn() })
     const { result } = renderHook(() => useInstallOffer())
     expect(result.current.canOfferInstall).toBe(true)
     expect(result.current.canInstall).toBe(true)
   })
 
   it('offers install on iOS Safari even without a prompt', () => {
-    vi.spyOn(installHook, 'useInstallPrompt').mockReturnValue({ canInstall: false, promptInstall: vi.fn() })
+    vi.spyOn(installHook, 'useInstallPrompt').mockReturnValue({ canInstall: false, installed: false, promptInstall: vi.fn() })
     setUserAgent(IPHONE_UA)
     const { result } = renderHook(() => useInstallOffer())
     expect(result.current.canOfferInstall).toBe(true)
@@ -30,17 +30,24 @@ describe('useInstallOffer', () => {
   })
 
   it('does not offer install in a plain desktop browser', () => {
-    vi.spyOn(installHook, 'useInstallPrompt').mockReturnValue({ canInstall: false, promptInstall: vi.fn() })
+    vi.spyOn(installHook, 'useInstallPrompt').mockReturnValue({ canInstall: false, installed: false, promptInstall: vi.fn() })
     setUserAgent('Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0')
     const { result } = renderHook(() => useInstallOffer())
     expect(result.current.canOfferInstall).toBe(false)
   })
 
   it('flags an in-app browser and offers no install there', () => {
-    vi.spyOn(installHook, 'useInstallPrompt').mockReturnValue({ canInstall: false, promptInstall: vi.fn() })
+    vi.spyOn(installHook, 'useInstallPrompt').mockReturnValue({ canInstall: false, installed: false, promptInstall: vi.fn() })
     setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [FBAN/MessengerForiOS;FBAV/430.0.0.0.0;]')
     const { result } = renderHook(() => useInstallOffer())
     expect(result.current.inAppBrowser).toBe(true)
+    expect(result.current.canOfferInstall).toBe(false)
+  })
+
+  it('relays the installed flag and offers no further install', () => {
+    vi.spyOn(installHook, 'useInstallPrompt').mockReturnValue({ canInstall: false, installed: true, promptInstall: vi.fn() })
+    const { result } = renderHook(() => useInstallOffer())
+    expect(result.current.installed).toBe(true)
     expect(result.current.canOfferInstall).toBe(false)
   })
 })

@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 web UI are all built, tested, and merged.** The repo is a **pnpm workspace**:
 `packages/core` (`@tock/core` — engine + ai + shared 2D grid geometry),
 `apps/terminal` (`@tock/terminal` — the Ink TUI), `apps/web` (`@tock/web` — the
-mobile web app). **299 passing tests** across the workspace (core 132,
-terminal 65, web 102), `pnpm -r typecheck` clean. Both apps are **playable
+mobile web app). **364 passing tests** across the workspace (core 132,
+terminal 65, web 167), `pnpm -r typecheck` clean. Both apps are **playable
 end-to-end** — `pnpm dev:terminal` launches the terminal game, `pnpm dev`
 launches the web app. Toolchain in place: TypeScript + Vitest + pnpm + tsx +
 Vite + React + Ink.
@@ -224,7 +224,9 @@ apps/web/src/components/   Vite + React 19 web UI (SVG board, touch), "Feutrine 
 ├── App.tsx           routing: Home → Setup → GameScreen → GameOver, plus the pass-and-play
 │                     handoff gate (PassInterstitial), each wrapped in ScreenTransition;
 │                     owns useTockGame + useBotAutoplay + awaitingHandoff + entered
-├── Home.tsx          welcome screen: TOCK logo, a floating card, marbles, "Nouvelle partie" CTA
+├── Home.tsx          welcome screen: TOCK logo, a floating card, marbles, "Nouvelle partie" CTA,
+│                     swapped for an install offer (useInstallOffer) or, once installed, a French
+│                     confirmation note
 ├── GameScreen.tsx    the interaction state machine (pickCard | ghosts | swapTarget | split
 │                     phases), wires Board/Hand/SplitControls together for one turn; the
 │                     discreet hint chip is an absolute (non-reflowing) overlay
@@ -244,7 +246,10 @@ apps/web/src/   svgGeometry.ts (SVG coordinates over board2d: ring channel, fini
                 moveSelection.ts (Ghost + legal-move → ghost mapping) · splitAllocation.ts (7-split draft state)
                 · passAndPlay.ts (humanSeatIds/activeHumanSeat/needsHandoff — handoff logic)
                 · theme.ts (design tokens) · motion.ts (durations/easings + prefersReducedMotion) · format.ts   — all pure
-apps/web/src/pwa/   platform.ts (isStandalone/isIosSafari) · useInstallPrompt (beforeinstallprompt) ·
+apps/web/src/pwa/   platform.ts (isStandalone/isIosSafari/isInAppBrowser) ·
+                    useInstallPrompt (beforeinstallprompt, holds the deferred event until
+                    userChoice resolves, exposes installed) · useInstallOffer (combines
+                    useInstallPrompt with iOS eligibility into one canOfferInstall flag for Home) ·
                     useServiceWorkerUpdate (wraps virtual:pwa-register/react)
 apps/web/src/hooks/   useTockGame (owns GameState + commitMove, continuous draw is automatic
                       via applyMove) · useBotAutoplay (drives bot seats on a timer, isHumanSeat)

@@ -4,6 +4,7 @@ import { isInAppBrowser, isIosSafari, isStandalone } from './platform'
 export type InstallOffer = {
   canOfferInstall: boolean
   canInstall: boolean
+  installed: boolean
   iosEligible: boolean
   inAppBrowser: boolean
   promptInstall: () => void
@@ -11,12 +12,12 @@ export type InstallOffer = {
 
 // Single source of truth for "can we offer an install right now": the Chromium
 // prompt (canInstall) or the iOS Safari add-to-home-screen path (iosEligible).
-// Home keys the play/install buttons off canOfferInstall so exactly one shows.
-// inAppBrowser marks embedded web views (Messenger, etc.) where installing is
-// impossible — Home nudges the user to reopen the link in the system browser.
+// Also relays `installed` and `inAppBrowser` (embedded web views, e.g.
+// Messenger, where installing is impossible) unchanged from their sources.
+// See Home.tsx for how it prioritizes installed / canOfferInstall / inAppBrowser.
 export const useInstallOffer = (): InstallOffer => {
-  const { canInstall, promptInstall } = useInstallPrompt()
+  const { canInstall, installed, promptInstall } = useInstallPrompt()
   const iosEligible = isIosSafari() && !isStandalone()
   const inAppBrowser = isInAppBrowser()
-  return { canOfferInstall: canInstall || iosEligible, canInstall, iosEligible, inAppBrowser, promptInstall }
+  return { canOfferInstall: canInstall || iosEligible, canInstall, installed, iosEligible, inAppBrowser, promptInstall }
 }
