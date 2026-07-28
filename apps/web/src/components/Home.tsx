@@ -52,21 +52,21 @@ export const Home = ({ onPlay, onOpenRules }: HomeProps) => {
           ? <InstallButton offer={offer} />
           : (
             <>
+              {offer.inAppBrowser && (
+                <p role="note" style={{ fontFamily: theme.fontUi, fontSize: 12, color: theme.inkDim, marginBottom: 16, maxWidth: 260, lineHeight: 1.4 }}>
+                  Pour installer l'app, ouvre cette page dans ton navigateur.
+                </p>
+              )}
               <button onClick={onPlay}
                 style={{ fontFamily: theme.fontDisplay, fontWeight: 700, fontSize: 19, color: '#4a2f0c', background: `linear-gradient(${theme.goldButtonTop}, ${theme.goldButtonBottom})`, border: 'none', borderRadius: theme.radius.lg, padding: '16px 34px', boxShadow: `0 6px 0 ${theme.goldButtonLip}, 0 12px 20px rgba(0,0,0,.45)`, cursor: 'pointer' }}>
                 Nouvelle partie
               </button>
-              {offer.inAppBrowser && (
-                <p role="note" style={{ fontFamily: theme.fontUi, fontSize: 12, color: theme.inkDim, marginTop: 16, maxWidth: 260, lineHeight: 1.4 }}>
-                  Pour installer l'app, ouvre cette page dans ton navigateur.
-                </p>
-              )}
+              <div style={{ marginTop: 22 }}>
+                <RulesButton onClick={onOpenRules} variant="text" />
+              </div>
+
             </>
           )}
-
-      <div style={{ marginTop: 22 }}>
-        <RulesButton onClick={onOpenRules} variant="text" />
-      </div>
     </div>
   )
 }
