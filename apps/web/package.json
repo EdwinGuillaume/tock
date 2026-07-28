@@ -1,6 +1,6 @@
 {
   "name": "@tock/web",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "author": "Edwin Guillaume (https://github.com/EdwinGuillaume)",
