@@ -240,7 +240,7 @@ apps/web/src/components/   Vite + React 19 web UI (SVG board, touch), "Feutrine 
 ├── Hand.tsx           suited fanned cards; only the newly-drawn card deals in; dimmed when unplayable / discard-only
 ├── StatusBar.tsx       whose turn (bobbing colour dot), pile pills, prompt
 ├── GameLog.tsx         one-line ticker with an expandable overlay history (non-reflowing)
-├── RulesOverlay.tsx    rules dialog (scrim + felt panel; card-first reference: goal, 13 card ranks, special moves; role=dialog, ✕ / backdrop / Escape close; motion honours prefers-reduced-motion)
+├── RulesOverlay.tsx    rules dialog (scrim + felt panel; card-first reference: goal, 13 card ranks, special moves, general rules; role=dialog, ✕ / backdrop / Escape close; motion honours prefers-reduced-motion)
 ├── SplitControls.tsx   7-pip budget gauge + Undo/Play for the progressive 7-split
 ├── RulesButton.tsx     shared gold "?"/"Règles" trigger pill (icon|text variant)
 ├── InstallButton.tsx  install affordance on Home (beforeinstallprompt; iOS Share-sheet hint fallback)
@@ -248,7 +248,7 @@ apps/web/src/components/   Vite + React 19 web UI (SVG board, touch), "Feutrine 
 apps/web/src/   svgGeometry.ts (SVG coordinates over board2d: ring channel, finish threads, homes) ·
                 moveSelection.ts (Ghost + legal-move → ghost mapping) · splitAllocation.ts (7-split draft state)
                 · passAndPlay.ts (humanSeatIds/activeHumanSeat/needsHandoff — handoff logic)
-                · rulesContent.ts (rules-page copy as pure data — goal, card ranks, special moves) ·
+                · rulesContent.ts (rules-page copy as pure data — goal, card ranks, special moves, general rules) ·
                 theme.ts (design tokens) · motion.ts (durations/easings + prefersReducedMotion) ·
                 layout.ts (layout tokens: the safe-area inset composers `safeTop`/`safeBottom` over
                 index.css's `--safe-top`/`--safe-bottom` custom properties, plus the bottom-chrome

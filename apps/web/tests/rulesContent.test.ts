@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cardRuleList, rulesGoal, specialMoveList } from '../src/rulesContent'
+import { cardRuleList, generalRuleList, rulesGoal, specialMoveList } from '../src/rulesContent'
 
 const everyRank = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
 
@@ -25,6 +25,14 @@ describe('rulesContent', () => {
     for (const move of specialMoveList) {
       expect(move.title.length).toBeGreaterThan(0)
       expect(move.text.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('lists the two implicit general rules with non-empty text', () => {
+    expect(generalRuleList).toHaveLength(2)
+    for (const note of generalRuleList) {
+      expect(note.title.length).toBeGreaterThan(0)
+      expect(note.text.length).toBeGreaterThan(0)
     }
   })
 })

@@ -5,7 +5,8 @@ import { theme } from '../theme'
 import { rankGlyph } from '../format'
 import { duration, easeSpring, prefersReducedMotion } from '../motion'
 import { safeBottom, safeTop } from '../layout'
-import { cardRuleList, rulesGoal, specialMoveList } from '../rulesContent'
+import type { RuleNote } from '../rulesContent'
+import { cardRuleList, generalRuleList, rulesGoal, specialMoveList } from '../rulesContent'
 
 type RulesOverlayProps = { open: boolean, onClose: () => void }
 
@@ -14,6 +15,17 @@ const MiniCard = ({ rank }: { rank: Rank }) => (
 )
 
 const sectionLabel = { fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', color: theme.goldDim, opacity: 0.85, margin: '22px 2px 12px' } as const
+
+const NoteList = ({ noteList }: { noteList: RuleNote[] }) => (
+  <>
+    {noteList.map(note => (
+      <div key={note.title} style={{ padding: '7px 2px' }}>
+        <div style={{ fontFamily: theme.fontDisplay, fontWeight: 600, fontSize: 14.5, color: theme.gold }}>{note.title}</div>
+        <div style={{ fontFamily: theme.fontUi, fontSize: 13.5, lineHeight: 1.4, color: theme.inkDim, marginTop: 2 }}>{note.text}</div>
+      </div>
+    ))}
+  </>
+)
 
 export const RulesOverlay = ({ open, onClose }: RulesOverlayProps) => {
   const reduced = prefersReducedMotion()
@@ -75,12 +87,10 @@ export const RulesOverlay = ({ open, onClose }: RulesOverlayProps) => {
               ))}
 
               <div style={sectionLabel}>Coups spéciaux</div>
-              {specialMoveList.map(move => (
-                <div key={move.title} style={{ padding: '7px 2px' }}>
-                  <div style={{ fontFamily: theme.fontDisplay, fontWeight: 600, fontSize: 14.5, color: theme.gold }}>{move.title}</div>
-                  <div style={{ fontFamily: theme.fontUi, fontSize: 13.5, lineHeight: 1.4, color: theme.inkDim, marginTop: 2 }}>{move.text}</div>
-                </div>
-              ))}
+              <NoteList noteList={specialMoveList} />
+
+              <div style={sectionLabel}>Bon à savoir</div>
+              <NoteList noteList={generalRuleList} />
             </div>
           </motion.div>
         </motion.div>

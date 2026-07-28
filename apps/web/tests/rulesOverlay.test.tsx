@@ -13,6 +13,12 @@ describe('RulesOverlay', () => {
     expect(screen.getByText('Capture')).toBeInTheDocument()
   })
 
+  it('renders the general rules section with the two implicit rules', () => {
+    render(<RulesOverlay open onClose={() => {}} />)
+    expect(screen.getByText('Obligation de jouer')).toBeInTheDocument()
+    expect(screen.getByText('Dans la maison')).toBeInTheDocument()
+  })
+
   it('renders the face-card mini-cards with their French letters', () => {
     render(<RulesOverlay open onClose={() => {}} />)
     expect(screen.getByText('R')).toBeInTheDocument()

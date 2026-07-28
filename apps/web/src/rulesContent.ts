@@ -6,7 +6,8 @@ import type { Rank } from '@tock/core'
 // via `rankGlyph`, exactly like Hand.tsx does on the card faces. Effects are
 // verified against packages/core/src/engine/{cards,moves}.ts.
 export type CardRule = { ranks: Rank[], effect: string }
-export type SpecialMove = { title: string, text: string }
+// A titled prose entry — shared by the special moves and the general rules.
+export type RuleNote = { title: string, text: string }
 
 export const rulesGoal = 'Ramène tes quatre billes dans ta maison avant les autres.'
 
@@ -21,8 +22,14 @@ export const cardRuleList: CardRule[] = [
   { ranks: ['2', '3', '6', '8', '9', '10'], effect: 'avancer du nombre indiqué' }
 ]
 
-export const specialMoveList: SpecialMove[] = [
+export const specialMoveList: RuleNote[] = [
   { title: 'Entrée dans la maison', text: "Une bille rejoint sa maison en franchissant l'entrée du couloir vers l'avant (donc derrière la case de départ), sans dépasser le bout du couloir de la maison." },
   { title: 'Capture', text: "Atterrir sur une bille adverse la renvoie à son nid. Tu ne peux pas atterrir sur tes propres billes." },
   { title: 'Protection', text: "Une bille posée sur sa case de départ ne peut être ni dépassée, ni capturée, ni échangée, ni poussée." }
+]
+
+// Rules the game already enforces but never spells out on screen.
+export const generalRuleList: RuleNote[] = [
+  { title: 'Obligation de jouer', text: "On ne passe jamais son tour : si un coup est possible, tu dois le jouer, même s'il te désavantage. Ce n'est que sans aucun coup possible que tu défausses une carte." },
+  { title: 'Dans la maison', text: 'Une fois dans la maison, tes billes ne peuvent plus se dépasser, mais tu peux toujours les avancer dans le couloir.' }
 ]
