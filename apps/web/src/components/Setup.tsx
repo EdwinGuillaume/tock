@@ -5,6 +5,8 @@ import { seatColor, theme } from '../theme'
 import { colorLabel } from '../format'
 import { safeBottom, safeTop } from '../layout'
 import { RulesButton } from './RulesButton'
+import { MuteButton } from './MuteButton'
+import {useAudio} from "../audio/useAudio";
 
 type SetupProps = { onStart: (kindList: PlayerKind[], ringSize: number) => void, onOpenRules: () => void }
 
@@ -19,6 +21,8 @@ export const Setup = ({ onStart, onOpenRules }: SetupProps) => {
   const [opponentKindList, setOpponentKindList] = useState<PlayerKind[]>(defaultOpponentKindList)
   const [ringSize, setRingSize] = useState<number>(DEFAULT_RING_SIZE)
 
+  const { play } = useAudio()
+
   const setKind = (seatIndex: number, kind: PlayerKind) =>
     setOpponentKindList(previous => previous.map((entry, index) => (index === seatIndex ? kind : entry)))
 
@@ -31,8 +35,9 @@ export const Setup = ({ onStart, onOpenRules }: SetupProps) => {
 
   return (
     <div style={{ position: 'relative', maxWidth: 360, margin: '0 auto', paddingTop: safeTop(26), paddingRight: 20, paddingBottom: safeBottom(22), paddingLeft: 20, display: 'flex', flexDirection: 'column', minHeight: '100dvh', color: theme.ink }}>
-      <div style={{ position: 'absolute', top: safeTop(12), right: 14 }}>
+      <div style={{ position: 'absolute', top: safeTop(12), right: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
         <RulesButton onClick={onOpenRules} />
+        <MuteButton />
       </div>
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontFamily: theme.fontDisplay, fontWeight: 700, fontSize: 46, letterSpacing: 3, color: theme.gold, textShadow: '0 2px 0 #7a4e12, 0 6px 14px rgba(0,0,0,.5)', lineHeight: 1 }}>TOCK</div>
@@ -53,8 +58,15 @@ export const Setup = ({ onStart, onOpenRules }: SetupProps) => {
         const color = colorOf(seat)
         if (kind === 'inactive') {
           return (
-            <button key={seat} aria-label={`ajouter le joueur ${seat}`} onClick={() => setKind(index, 'bot')}
-              style={{ ...rowBase, width: '100%', background: 'transparent', border: '1px dashed rgba(255,255,255,.16)', cursor: 'pointer', color: theme.inkDim }}>
+            <button
+              key={seat}
+              aria-label={`ajouter le joueur ${seat}`}
+              onClick={() => {
+                setKind(index, 'bot')
+                play('tap')
+              }}
+              style={{ ...rowBase, width: '100%', background: 'transparent', border: '1px dashed rgba(255,255,255,.16)', cursor: 'pointer', color: theme.inkDim }}
+            >
               <span style={{ width: 22, height: 22, borderRadius: '50%', border: `2px dashed ${seatColor[color].light}`, opacity: 0.55, flex: 'none' }} />
               <span style={{ fontSize: 13.5, fontWeight: 500 }}>Ajouter {colorLabel[color]}</span>
               <span style={{ marginLeft: 'auto', fontSize: 20, color: theme.gold, fontWeight: 700 }}>+</span>
@@ -80,8 +92,15 @@ export const Setup = ({ onStart, onOpenRules }: SetupProps) => {
         {RING_SIZE_OPTIONS.map(size => {
           const on = ringSize === size
           return (
-            <button key={size} aria-pressed={on} onClick={() => setRingSize(size)}
-              style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderRadius: 13, cursor: 'pointer', background: on ? 'rgba(255,216,115,.12)' : 'rgba(255,255,255,.045)', border: on ? '1px solid rgba(255,216,115,.55)' : '1px solid rgba(255,255,255,.08)' }}>
+            <button
+              key={size}
+              aria-pressed={on}
+              onClick={() => {
+                setRingSize(size)
+                play('tap')
+              }}
+              style={{ flex: 1, textAlign: 'center', padding: '12px 8px', borderRadius: 13, cursor: 'pointer', background: on ? 'rgba(255,216,115,.12)' : 'rgba(255,255,255,.045)', border: on ? '1px solid rgba(255,216,115,.55)' : '1px solid rgba(255,255,255,.08)' }}
+            >
               <div style={{ fontFamily: theme.fontDisplay, fontWeight: 600, fontSize: 15, color: on ? theme.gold : theme.ink }}>{size === RING_SIZE_OPTIONS[0] ? 'Standard' : 'Grand'}</div>
               <div style={{ fontSize: 11, color: theme.inkDim, marginTop: 2 }}>{size} cases · {size === RING_SIZE_OPTIONS[0] ? 'vif' : 'long'}</div>
             </button>

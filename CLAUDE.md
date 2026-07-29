@@ -261,6 +261,14 @@ apps/web/src/   svgGeometry.ts (SVG coordinates over board2d: ring channel, fini
                 Highlight/movePreviewCells/marbleCellsAfter for the character-grid board — while this
                 one is iOS safe-area/viewport arithmetic for the SVG web UI)
                 · format.ts   — all pure
+apps/web/src/audio/   sounds.ts (SoundId manifest + variety pool picker `pickSample`) ·
+                      gameEvents.ts (shared `capturedColorList`, diffed from state) ·
+                      soundForMove.ts (pure move→SoundId[] + human-only draw cue via `soundsForCommit`) ·
+                      AudioEngine.ts (Howler behind a swappable interface, lazy-loaded on first gesture) ·
+                      AudioProvider.tsx / useAudio.ts (install-gated via `isStandalone`, first-gesture
+                      unlock, mute persistence, tab-visibility pause; inert when unwrapped) ·
+                      enabled.ts (the gate predicate). MuteButton lives in the StatusBar in-game and
+                      fixed top-left off-game. `howler` is a dependency.
 apps/web/src/pwa/   platform.ts (isStandalone/isIosSafari/isInAppBrowser) ·
                     useInstallPrompt (beforeinstallprompt, holds the deferred event until
                     userChoice resolves, exposes installed) · useInstallOffer (combines

@@ -4,6 +4,8 @@ import { applyMove, colorOf } from '@tock/core'
 import { useTockGame } from '../hooks/useTockGame'
 import { useBotAutoplay } from '../hooks/useBotAutoplay'
 import { humanSeatIds, needsHandoff } from '../passAndPlay'
+import { useAudio } from '../audio/useAudio'
+import { soundsForCommit } from '../audio/soundForMove'
 import { Home } from './Home'
 import { GameScreen } from './GameScreen'
 import { Setup } from './Setup'
@@ -21,6 +23,7 @@ export const App = () => {
   const [awaitingHandoff, setAwaitingHandoff] = useState(false)
   const [entered, setEntered] = useState(false)
   const [rulesOpen, setRulesOpen] = useState(false)
+  const { play } = useAudio()
 
   // needsHandoff decides from the state AFTER the move, but commitMove updates
   // state asynchronously — so recompute the next state directly with applyMove
@@ -35,22 +38,31 @@ export const App = () => {
   // useBotAutoplay's effect should re-arm its timer, not on every render.
   const commitAndPass = useCallback((move: Move) => {
     if (!state) return
-    const previous = state.currentPlayer
+    const before = state
+    const previous = before.currentPlayer
     commitMove(move)
-    const next = applyMove(state, move)
+    const next = applyMove(before, move)
+    soundsForCommit(before, next, move, humanIdList.includes(previous)).forEach(id => play(id))
     if (needsHandoff(previous, next, humanSeatIds(next))) setAwaitingHandoff(true)
-  }, [state, humanIdList, commitMove])
+  }, [state, humanIdList, commitMove, play])
 
   useBotAutoplay({ state: awaitingHandoff ? null : state, humanSeatIds: humanIdList, delayMs: BOT_DELAY_MS, commitMove: commitAndPass })
 
   const handleRestart = () => {
+    play('tap')
     setAwaitingHandoff(false)
     restart()
   }
 
   const screen = (() => {
-    if (!entered && !state) return { key: 'home', cover: false, node: <Home onPlay={() => setEntered(true)} onOpenRules={() => setRulesOpen(true)} /> }
-    if (!state) return { key: 'setup', cover: false, node: <Setup onStart={(kindList, ringSize) => start(kindList, ringSize)} onOpenRules={() => setRulesOpen(true)} /> }
+    if (!entered && !state) return { key: 'home', cover: false, node: <Home onPlay={() => {
+      play('tap')
+      setEntered(true)
+    }} onOpenRules={() => setRulesOpen(true)} /> }
+    if (!state) return { key: 'setup', cover: false, node: <Setup onStart={(kindList, ringSize) => {
+      play('tap')
+      start(kindList, ringSize)
+    }} onOpenRules={() => setRulesOpen(true)} /> }
     if (state.winner !== null) return { key: 'over', cover: false, node: <GameOver winnerColor={colorOf(state.winner)} onRestart={handleRestart} /> }
     if (awaitingHandoff) return { key: `pass-${state.currentPlayer}`, cover: true, node: <PassInterstitial color={colorOf(state.currentPlayer)} onReveal={() => setAwaitingHandoff(false)} /> }
     return { key: 'game', cover: false, node: <GameScreen state={state} logList={logList} humanSeatIds={humanIdList} commitMove={commitAndPass} onOpenRules={() => setRulesOpen(true)} /> }

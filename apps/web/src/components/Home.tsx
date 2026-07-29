@@ -2,6 +2,8 @@ import type { Color } from '@tock/core'
 import { seatColor, theme } from '../theme'
 import { InstallButton } from './InstallButton'
 import { RulesButton } from './RulesButton'
+import { MuteButton } from './MuteButton'
+import { safeTop } from '../layout'
 import { useInstallOffer } from '../pwa/useInstallOffer'
 
 type HomeProps = { onPlay: () => void, onOpenRules: () => void }
@@ -26,7 +28,7 @@ const InstalledNote = () => (
 export const Home = ({ onPlay, onOpenRules }: HomeProps) => {
   const offer = useInstallOffer()
   return (
-    <div style={{ maxWidth: 360, margin: '0 auto', padding: '26px 20px 22px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', color: theme.ink, textAlign: 'center' }}>
+    <div style={{ position: 'relative', maxWidth: 360, margin: '0 auto', padding: '26px 20px 22px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100dvh', color: theme.ink, textAlign: 'center' }}>
       <div style={{ fontFamily: theme.fontDisplay, fontWeight: 700, fontSize: 54, letterSpacing: 3, color: theme.gold, textShadow: '0 2px 0 #7a4e12, 0 6px 14px rgba(0,0,0,.5)', lineHeight: 1 }}>TOCK</div>
       <div style={{ fontSize: 11, letterSpacing: 4, textTransform: 'uppercase', color: '#cdb277', marginTop: 6, opacity: 0.8 }}>course de billes</div>
 

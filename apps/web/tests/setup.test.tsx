@@ -3,7 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { DEFAULT_RING_SIZE } from '@tock/core'
 import { Setup } from '../src/components/Setup'
+import { AudioProvider } from '../src/audio/AudioProvider'
 import { safeBottom, safeTop } from '../src/layout'
+import { createFakeEngine } from './audioFake'
 
 describe('Setup', () => {
   it('defaults to one bot opponent (seats 2 and 3 absent) and starts with that kindList', async () => {
@@ -42,6 +44,18 @@ describe('Setup', () => {
     await userEvent.click(screen.getByLabelText('retirer le joueur 1'))
     await userEvent.click(screen.getByRole('button', { name: 'Lancer la partie' }))
     expect(onStart).toHaveBeenCalledWith(['human', 'inactive', 'inactive', 'inactive'], DEFAULT_RING_SIZE)
+  })
+
+  it('shows the mute button beside the rules button when audio is enabled', () => {
+    render(
+      <AudioProvider engine={createFakeEngine()} enabled>
+        <Setup onStart={vi.fn()} onOpenRules={vi.fn()} />
+      </AudioProvider>
+    )
+    // The mute control sits in the same top-right cluster as the rules button
+    // (no longer a fixed, screen-independent overlay).
+    expect(screen.getByRole('button', { name: /couper le son/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ouvrir les règles/i })).toBeInTheDocument()
   })
 
   it('insets both edges: the header clears the status bar, the CTA clears the home indicator', () => {

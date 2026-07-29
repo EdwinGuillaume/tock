@@ -1,0 +1,386 @@
+<title>Tock — Icône du bouton son</title>
+<style>
+  :root {
+    --felt: radial-gradient(130% 90% at 50% 45%, #1f5147 0%, #0c211d 72%);
+    --felt-panel: #173e35;
+    --socket-dark: #05100d;
+    --gold: #ffd873;
+    --gold-dim: #d8b871;
+    --gold-top: #ffcf5f;
+    --gold-bottom: #e6a636;
+    --gold-lip: #9c6b1e;
+    --ink: #e8eaf0;
+    --ink-dim: #9aa2b4;
+    --hairline: rgba(255, 216, 115, .14);
+    --socket-border: rgba(255, 216, 115, .35);
+    --socket-bg: rgba(0, 0, 0, .25);
+    --card-red-light: #ff8a8f;
+    --card-red-dark: #c02b31;
+  }
+
+  * { box-sizing: border-box; }
+
+  .page {
+    min-height: 100vh;
+    background: var(--felt);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 40px 20px 64px;
+  }
+
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    font-family: 'Fredoka', ui-rounded, 'Segoe UI', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 1.1;
+    letter-spacing: -.01em;
+    margin: 0 0 12px;
+    color: #ffe6a6;
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+  }
+
+  .section-label {
+    font-family: 'Fredoka', ui-rounded, system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 14px;
+  }
+
+  /* Master toggle (raised gold button, matches theme.goldButton*) */
+  .master {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    align-self: flex-start;
+    margin-top: 4px;
+    font-family: 'Fredoka', ui-rounded, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: #2a2320;
+    background: linear-gradient(var(--gold-top), var(--gold-bottom));
+    border: none;
+    border-bottom: 2px solid var(--gold-lip);
+    border-radius: 20px;
+    padding: 10px 20px 8px;
+    cursor: pointer;
+  }
+  .master:active { transform: translateY(1px); border-bottom-width: 1px; }
+  .master .state-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #2a7d4f;
+  }
+  .master[data-muted="true"] .state-dot { background: #9c3a2e; }
+
+  /* Socket button — mirrors RulesButton's iconStyle (the "?") exactly */
+  .socket {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--socket-border);
+    background: var(--socket-bg);
+    color: var(--gold);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    flex: none;
+    cursor: pointer;
+    font-family: 'Fredoka', ui-rounded, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .socket-lg {
+    width: 60px; height: 60px;
+    padding: 14px;
+    cursor: pointer;
+  }
+  .socket svg { display: block; width: 100%; height: 100%; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .socket-lg { transition: transform .16s cubic-bezier(.34, 1.56, .64, 1); }
+    .socket-lg.pulse { transform: scale(1.12); }
+  }
+
+  /* In-context StatusBar mock */
+  .statusbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: var(--felt-panel);
+    border: 1px solid var(--hairline);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04), 0 8px 20px rgba(0, 0, 0, .3);
+  }
+  .turn {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Fredoka', ui-rounded, system-ui, sans-serif;
+    font-weight: 600; font-size: 15px; color: #ffe6a6;
+    white-space: nowrap;
+  }
+  .bob {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--card-red-light), var(--card-red-dark));
+    box-shadow: 0 0 10px rgba(229, 72, 77, .8);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .bob { animation: bob 1.8s ease-in-out infinite; }
+    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+  }
+  .cluster { display: flex; align-items: center; gap: 7px; }
+  .pill {
+    font-size: 11px;
+    color: var(--gold-dim);
+    background: rgba(0, 0, 0, .25);
+    border: 1px solid rgba(255, 216, 115, .18);
+    border-radius: 20px;
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+  .pill b { color: #ffe6a6; }
+  .ctx-note { margin: 10px 2px 0; font-size: 13px; color: var(--ink-dim); }
+  .ctx-note b { color: var(--gold-dim); font-weight: 600; }
+
+  /* Variant grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid var(--hairline);
+    border-radius: 16px;
+    padding: 20px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+  .card[data-selected="true"] {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px var(--gold), 0 0 24px rgba(255, 216, 115, .22);
+  }
+  .card h3 {
+    font-family: 'Fredoka', ui-rounded, system-ui, sans-serif;
+    font-weight: 600; font-size: 16px; margin: 0; color: var(--ink);
+  }
+  .states {
+    display: flex; gap: 16px; align-items: center;
+  }
+  .state-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .state-cell .tag {
+    font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim);
+  }
+  .card .note {
+    font-size: 12.5px; line-height: 1.5; color: var(--ink-dim); margin: 0;
+    min-height: 3.6em;
+  }
+  .choose {
+    margin-top: 2px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 12px; font-weight: 600;
+    color: var(--gold-dim);
+    background: transparent;
+    border: 1px solid rgba(255, 216, 115, .3);
+    border-radius: 20px;
+    padding: 7px 16px;
+    cursor: pointer;
+  }
+  .card[data-selected="true"] .choose {
+    color: #2a2320;
+    background: linear-gradient(var(--gold-top), var(--gold-bottom));
+    border-color: transparent;
+  }
+
+  .rec {
+    border-left: 2px solid var(--gold);
+    padding: 4px 0 4px 16px;
+    font-size: 14px; line-height: 1.65; color: var(--ink-dim);
+  }
+  .rec b { color: #ffe6a6; font-weight: 600; }
+
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 25px; }
+    .statusbar { flex-direction: column; align-items: stretch; }
+    .cluster { justify-content: flex-end; }
+  }
+</style>
+
+<div class="page">
+  <div class="wrap">
+    <header>
+      <p class="eyebrow">Tock · Feutrine &amp; or</p>
+      <h1>Bouton son — quelle icône ?</h1>
+      <p class="lede">Le bouton mute vit dans l'amas haut-droit de la StatusBar, juste à côté du
+        <b style="color:var(--gold-dim)">?</b>. Voici quatre traits de haut-parleur, chacun rendu à la taille réelle
+        du bouton (22&nbsp;px, style « socket ») et en grand pour juger la forme. Bascule le son pour voir la transition,
+        puis choisis&nbsp;— l'aperçu en contexte se met à jour.</p>
+      <button class="master" id="master" type="button" aria-pressed="false" data-muted="false">
+        <span class="state-dot"></span>
+        <span id="master-label">Son actif — couper</span>
+      </button>
+    </header>
+
+    <section>
+      <p class="section-label">En contexte — StatusBar</p>
+      <div class="statusbar">
+        <span class="turn"><span class="bob"></span> À toi de jouer</span>
+        <span class="cluster">
+          <span class="pill">Pioche <b>12</b></span>
+          <span class="pill">Défausse <b>3</b></span>
+          <span class="socket" aria-hidden="true">?</span>
+          <span class="socket" id="ctx-icon" title="Icône choisie"></span>
+        </span>
+      </div>
+      <p class="ctx-note">Icône retenue&nbsp;: <b id="ctx-name">Barré</b> — c'est ce que verra le joueur en partie.</p>
+    </section>
+
+    <section>
+      <p class="section-label">Les variantes</p>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <p class="rec">Ma reco&nbsp;: <b>Barré</b> ou <b>Croix</b>. Un haut-parleur nu (« Atténué ») est ambigu — il peut se
+      lire « son faible » plutôt que « coupé ». Un trait ou une croix disent sans équivoque que le son est <b>off</b>, ce
+      que renforce l'<code>aria-pressed</code>. La <b>Note ♪</b> est charmante et colle au côté « musique », mais évoque
+      moins bien la coupure des bruitages de jeu.</p>
+  </div>
+</div>
+
+<script>
+  const C = 'currentColor'
+  const svgWrap = inner => '<svg viewBox="0 0 24 24" width="100%" height="100%" aria-hidden="true">' + inner + '</svg>'
+
+  const speakerBody = '<path d="M4 9H7.6L12 5V19L7.6 15H4Z" fill="' + C + '"/>'
+  const waves =
+    '<path d="M15 9.4Q17.3 12 15 14.6" fill="none" stroke="' + C + '" stroke-width="1.7" stroke-linecap="round"/>' +
+    '<path d="M17.2 7.3Q20.7 12 17.2 16.7" fill="none" stroke="' + C + '" stroke-width="1.7" stroke-linecap="round"/>'
+  const slash =
+    '<line x1="4.5" y1="4" x2="19.5" y2="20" stroke="var(--socket-dark)" stroke-width="4" stroke-linecap="round"/>' +
+    '<line x1="4.5" y1="4" x2="19.5" y2="20" stroke="' + C + '" stroke-width="1.9" stroke-linecap="round"/>'
+  const cross =
+    '<g stroke="' + C + '" stroke-width="1.8" stroke-linecap="round">' +
+    '<line x1="15.6" y1="9.6" x2="20.4" y2="14.4"/><line x1="20.4" y1="9.6" x2="15.6" y2="14.4"/></g>'
+  const noteGlyph =
+    '<ellipse cx="8.6" cy="16.8" rx="3.1" ry="2.3" fill="' + C + '"/>' +
+    '<path d="M11.5 16.6V6.1" stroke="' + C + '" stroke-width="1.7" stroke-linecap="round"/>' +
+    '<path d="M11.5 6.1Q15.6 6.9 15.3 11" fill="none" stroke="' + C + '" stroke-width="1.7" stroke-linecap="round"/>'
+
+  const icon = (variant, muted) => {
+    if (variant === 'note') return svgWrap(noteGlyph + (muted ? slash : ''))
+    if (!muted) return svgWrap(speakerBody + waves)
+    if (variant === 'slash') return svgWrap(speakerBody + slash)
+    if (variant === 'cross') return svgWrap(speakerBody + cross)
+    return svgWrap(speakerBody) /* fade: bare speaker */
+  }
+
+  const VARIANTS = [
+    { id: 'slash', name: 'Barré', note: 'Trait diagonal sur le haut-parleur. Le plus universel — lecture immédiate « coupé ».' },
+    { id: 'cross', name: 'Croix', note: 'Les ondes deviennent une petite croix (style iOS). Clair sans masquer le haut-parleur.' },
+    { id: 'fade', name: 'Atténué', note: 'Les ondes disparaissent, haut-parleur nu. Le plus discret — mais l\'état « off » est ambigu.' },
+    { id: 'note', name: 'Note ♪', note: 'Note de musique barrée. Ludique et « musique », moins parlant pour les bruitages.' }
+  ]
+
+  let muted = false
+  let chosen = 'slash'
+
+  const grid = document.getElementById('grid')
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  VARIANTS.forEach(v => {
+    const card = document.createElement('div')
+    card.className = 'card'
+    card.dataset.variant = v.id
+    card.innerHTML =
+      '<div class="socket socket-lg" data-role="big"></div>' +
+      '<h3>' + v.name + '</h3>' +
+      '<div class="states">' +
+        '<div class="state-cell"><span class="socket" data-role="on"></span><span class="tag">Actif</span></div>' +
+        '<div class="state-cell"><span class="socket" data-role="off"></span><span class="tag">Coupé</span></div>' +
+      '</div>' +
+      '<p class="note">' + v.note + '</p>' +
+      '<button class="choose" type="button">Choisir</button>'
+    grid.appendChild(card)
+
+    card.querySelector('[data-role="on"]').innerHTML = icon(v.id, false)
+    card.querySelector('[data-role="off"]').innerHTML = icon(v.id, true)
+    card.querySelector('[data-role="big"]').addEventListener('click', () => setMuted(!muted))
+    card.querySelector('.choose').addEventListener('click', () => setChosen(v.id))
+  })
+
+  const ctxIcon = document.getElementById('ctx-icon')
+  const ctxName = document.getElementById('ctx-name')
+  const master = document.getElementById('master')
+  const masterLabel = document.getElementById('master-label')
+
+  const renderBig = () => {
+    document.querySelectorAll('[data-role="big"]').forEach(el => {
+      const variant = el.closest('.card').dataset.variant
+      el.innerHTML = icon(variant, muted)
+      if (!reduce) {
+        el.classList.remove('pulse')
+        void el.offsetWidth
+        el.classList.add('pulse')
+      }
+    })
+  }
+  const renderCtx = () => {
+    ctxIcon.innerHTML = icon(chosen, muted)
+    ctxName.textContent = VARIANTS.find(v => v.id === chosen).name
+  }
+  const renderSelected = () => {
+    document.querySelectorAll('.card').forEach(c => {
+      c.dataset.selected = String(c.dataset.variant === chosen)
+    })
+  }
+
+  const setMuted = value => {
+    muted = value
+    master.dataset.muted = String(muted)
+    master.setAttribute('aria-pressed', String(muted))
+    masterLabel.textContent = muted ? 'Son coupé — activer' : 'Son actif — couper'
+    renderBig()
+    renderCtx()
+  }
+  const setChosen = id => {
+    chosen = id
+    renderSelected()
+    renderCtx()
+  }
+
+  master.addEventListener('click', () => setMuted(!muted))
+
+  setMuted(false)
+  setChosen('slash')
+</script>

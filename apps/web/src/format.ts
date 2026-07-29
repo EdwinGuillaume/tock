@@ -1,5 +1,6 @@
 import type { Color, GameState, MarbleId, Move, Rank } from '@tock/core'
 import { colorOf } from '@tock/core'
+import { capturedColorList } from './audio/gameEvents'
 
 export const colorLabel: Record<Color, string> = { red: 'Rouge', green: 'Vert', purple: 'Violet', blue: 'Bleu' }
 
@@ -26,20 +27,6 @@ export type LogEntry = LogSegment[]
 const ownerColor = (state: GameState, id: MarbleId): Color => {
   const marble = state.marbleList.find(candidate => candidate.id === id)
   return colorOf(marble ? marble.owner : state.currentPlayer)
-}
-
-// Captures are detected by diffing states rather than by move type: any marble
-// that was off its home nest before the move and is back home after was sent
-// there by a capture — true for a plain move, a 7-split, an exit, and the push
-// (which can even send a third player's or the mover's own marble home).
-const capturedColorList = (before: GameState, after: GameState): Color[] => {
-  const result: Color[] = []
-  for (const marble of before.marbleList) {
-    if (marble.position.zone === 'home') continue
-    const post = after.marbleList.find(candidate => candidate.id === marble.id)
-    if (post && post.position.zone === 'home') result.push(colorOf(marble.owner))
-  }
-  return result
 }
 
 const baseLine = (before: GameState, move: Move): LogEntry => {

@@ -41,7 +41,8 @@ export default defineConfig({
               categories: ['games']
             },
             workbox: {
-              globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
+              globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2,mp3,webm}'],
+              maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
               navigateFallback: ghPages ? '/tock/index.html' : 'index.html'
             }
           })

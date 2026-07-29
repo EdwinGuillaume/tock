@@ -1,7 +1,9 @@
 import type { Color } from '@tock/core'
 import { seatColor, theme } from '../theme'
 import { colorLabel } from '../format'
+import { safeTop } from '../layout'
 import { Confetti } from './Confetti'
+import { MuteButton } from './MuteButton'
 
 type GameOverProps = { winnerColor: Color, onRestart: () => void }
 

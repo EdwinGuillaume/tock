@@ -1,6 +1,7 @@
 import type { Color } from '@tock/core'
 import { seatColor, theme } from '../theme'
 import { RulesButton } from './RulesButton'
+import { MuteButton } from './MuteButton'
 
 type StatusBarProps = { turnColor: Color, drawCount: number, discardCount: number, prompt: string, onOpenRules: () => void }
 
@@ -16,6 +17,7 @@ export const StatusBar = ({ turnColor, drawCount, discardCount, prompt, onOpenRu
       <span style={pill}>Pioche <b style={{ color: '#ffe6a6' }}>{drawCount}</b></span>
       <span style={pill}>Défausse <b style={{ color: '#ffe6a6' }}>{discardCount}</b></span>
       <RulesButton onClick={onOpenRules} />
+      <MuteButton />
     </span>
   </div>
 )
