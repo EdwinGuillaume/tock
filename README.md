@@ -374,3 +374,22 @@ Networked multiplayer (only same-device play — solo vs. bots or local
 pass-and-play), team play (2v2), a "Hard" multi-ply bot, an "Easy" bot in the
 menu, more than four players, undo/history, and animations beyond the
 between-turn pause.
+
+---
+
+## License
+
+The original source code, design, and artwork in this repository are licensed
+under the **[PolyForm Noncommercial License 1.0.0](./LICENSE)**. You are free to
+use, copy, modify, and share them for any **noncommercial** purpose (personal
+play, learning, hobby forks). **Commercial use — selling the game or otherwise
+using it to generate revenue — is not permitted** without a separate written
+license from the copyright holder.
+
+Bundled third-party components keep their own licenses and are not covered by
+the above: the sound effects under [`apps/web/public/audio/`](./apps/web/public/audio/README.md)
+are Kenney clips in the **CC0 1.0** public domain, and the bundled fonts
+(`@fontsource/fredoka`, `@fontsource/inter`) and all npm dependencies remain
+under their respective upstream licenses.
+
+Copyright © 2026 Edwin Guillaume.

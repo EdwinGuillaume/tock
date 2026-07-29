@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "author": "Edwin Guillaume (https://github.com/EdwinGuillaume)",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "scripts": {
     "dev": "tsx src/index.tsx",
     "dev:watch": "tsx watch src/index.tsx",
